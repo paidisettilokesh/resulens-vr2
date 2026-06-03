@@ -1,0 +1,72 @@
+# ── Environment & Secrets ─────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ── Build Outputs ─────────────────────────────────────────────────────────────
+dist/
+build/
+.vite/
+out/
+
+# ── Uploads & Temp Files ──────────────────────────────────────────────────────
+backend/uploads/
+backend/temp/
+*.pdf
+*.docx
+*.doc
+
+# ── Dev/Test Scratch Files ────────────────────────────────────────────────────
+test-*.js
+test-*.ts
+scratch/
+debug/
+color-preview.html
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── Database ──────────────────────────────────────────────────────────────────
+*.sqlite
+*.db
+backend/data/*.json
+
+# ── OS Files ──────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*~
+desktop.ini
+
+# ── Editor & IDE ──────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.user
+
+# ── Testing Outputs ───────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+.cache/
+.eslintcache
+*.tsbuildinfo
+.turbo/

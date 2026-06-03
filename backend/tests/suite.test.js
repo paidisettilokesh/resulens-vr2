@@ -1,0 +1,224 @@
+import { authMiddleware, requireAuth } from '../middleware/auth.js';
+import { fileFilter } from '../utils/upload.js';
+import { calculateAtsScore } from '../utils/atsScoringEngine.js';
+import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
+
+const mockRequest = (headers = {}) => ({
+    headers,
+    user: null,
+    userId: null
+});
+
+describe('🔐 Security: JWT Authentication Middleware', () => {
+    const JWT_SECRET = 'test_secret';
+
+    beforeAll(() => {
+        process.env.JWT_SECRET = JWT_SECRET;
+    });
+
+    afterAll(() => {
+        delete process.env.JWT_SECRET;
+    });
+
+    test('should allow public access and set userId to null when no authorization header is present', () => {
+        const req = mockRequest();
+        let nextCalled = false;
+        const next = () => { nextCalled = true; };
+
+        authMiddleware(req, {}, next);
+
+        expect(req.userId).toBeNull();
+        expect(req.user).toBeNull();
+        expect(nextCalled).toBe(true);
+    });
+
+    test('should verify and extract userId from a valid JWT token', () => {
+        const payload = { id: 'user_123_abc', email: 'test@resulens.com' };
+        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+
+        const req = mockRequest({ authorization: `Bearer ${token}` });
+        let nextCalled = false;
+        const next = () => { nextCalled = true; };
+
+        authMiddleware(req, {}, next);
+
+        expect(req.userId).toBe(payload.id);
+        expect(req.user).toBeDefined();
+        expect(req.user.email).toBe(payload.email);
+        expect(nextCalled).toBe(true);
+    });
+
+    test('should verify and allow access for generated guest tokens', () => {
+        const payload = { id: 'guest_98765', email: 'guest@resulens.ai', name: 'Guest User' };
+        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '30d' });
+
+        const req = mockRequest({ authorization: `Bearer ${token}` });
+        let nextCalled = false;
+        const next = () => { nextCalled = true; };
+
+        authMiddleware(req, {}, next);
+
+        expect(req.userId).toBe(payload.id);
+        expect(req.userId.startsWith('guest_')).toBe(true);
+        expect(req.user.name).toBe('Guest User');
+        expect(nextCalled).toBe(true);
+    });
+
+    test('should reject invalid or expired tokens immediately with 401 status', () => {
+        const req = mockRequest({ authorization: 'Bearer invalid_or_expired_token' });
+        let statusSet = null;
+        let jsonSent = null;
+        const res = {
+            status: (code) => { statusSet = code; return res; },
+            json: (body) => { jsonSent = body; return res; }
+        };
+        let nextCalled = false;
+        const next = () => { nextCalled = true; };
+
+        authMiddleware(req, res, next);
+
+        expect(statusSet).toBe(401);
+        expect(jsonSent.error).toContain('Authentication failed');
+        expect(nextCalled).toBe(false);
+    });
+
+    test('requireAuth should block guest accesses immediately', () => {
+        const req = mockRequest(); // guest
+        let statusSet = null;
+        let jsonSent = null;
+        const res = {
+            status: (code) => { statusSet = code; return res; },
+            json: (body) => { jsonSent = body; return res; }
+        };
+        let nextCalled = false;
+        const next = () => { nextCalled = true; };
+
+        requireAuth(req, res, next);
+
+        expect(statusSet).toBe(401);
+        expect(jsonSent.error).toBe('Authentication required');
+        expect(nextCalled).toBe(false);
+    });
+});
+
+describe('📂 Security: File Upload Filters', () => {
+    test('should hash prompts correctly for cache queries', () => {
+        const prompt = 'Analyze resume vs Backend Developer role';
+        const hash1 = crypto.createHash('sha256').update(prompt).digest('hex');
+        const hash2 = crypto.createHash('sha256').update(prompt).digest('hex');
+        
+        expect(hash1).toBe(hash2);
+        expect(hash1).toHaveLength(64);
+    });
+
+    test('should accept valid PDF and DOCX files', () => {
+        const pdfFile = { originalname: 'resume.pdf', mimetype: 'application/pdf' };
+        const docxFile = { originalname: 'resume.docx', mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' };
+        
+        let pdfResult = null;
+        let pdfError = null;
+        fileFilter({}, pdfFile, (err, accept) => {
+            pdfError = err;
+            pdfResult = accept;
+        });
+
+        let docxResult = null;
+        let docxError = null;
+        fileFilter({}, docxFile, (err, accept) => {
+            docxError = err;
+            docxResult = accept;
+        });
+
+        expect(pdfError).toBeNull();
+        expect(pdfResult).toBe(true);
+        expect(docxError).toBeNull();
+        expect(docxResult).toBe(true);
+    });
+
+    test('should reject invalid extensions or MIME types', () => {
+        const zipFile = { originalname: 'malicious.zip', mimetype: 'application/zip' };
+        const mismatchedFile = { originalname: 'malicious.pdf', mimetype: 'application/zip' };
+        const exeFile = { originalname: 'malicious.exe', mimetype: 'application/octet-stream' };
+
+        let zipError = null;
+        let zipResult = null;
+        fileFilter({}, zipFile, (err, accept) => {
+            zipError = err;
+            zipResult = accept;
+        });
+
+        let mismatchedError = null;
+        let mismatchedResult = null;
+        fileFilter({}, mismatchedFile, (err, accept) => {
+            mismatchedError = err;
+            mismatchedResult = accept;
+        });
+
+        let exeError = null;
+        let exeResult = null;
+        fileFilter({}, exeFile, (err, accept) => {
+            exeError = err;
+            exeResult = accept;
+        });
+
+        expect(zipError).toBeDefined();
+        expect(zipError.message).toContain('Invalid file type');
+        expect(zipResult).toBe(false);
+
+        expect(mismatchedError).toBeDefined();
+        expect(mismatchedError.message).toContain('Invalid file type');
+        expect(mismatchedResult).toBe(false);
+
+        expect(exeError).toBeDefined();
+        expect(exeError.message).toContain('Invalid file type');
+        expect(exeResult).toBe(false);
+    });
+});
+
+describe('⚙️ Programmatic ATS Scoring Engine', () => {
+    test('should calculate deterministic score for the same inputs', () => {
+        const resumeText = "John Doe\nBackend Developer\nSkills: Node.js, Spring Boot, Git, Docker, Postgres\nEducation: Bachelor of Computer Science\nExperience: 5 years as a Software Engineer\nSummary: Passionate developer.";
+        const role = "Backend Developer";
+
+        const result1 = calculateAtsScore(resumeText, role);
+        const result2 = calculateAtsScore(resumeText, role);
+
+        expect(result1.atsScore).toBe(result2.atsScore);
+        expect(result1.jobMatchScore).toBe(result2.jobMatchScore);
+        expect(result1.atsScoreBreakdown).toEqual(result2.atsScoreBreakdown);
+    });
+
+    test('should calculate scores mathematically correct (total matches breakdown.total)', () => {
+        const resumeText = "Jane Doe\nFrontend Developer\nSkills: React, HTML, CSS, JavaScript\nEducation: Master of Science\nExperience: 3 years of experience as a developer.\nSummary: Building web interfaces.";
+        const result = calculateAtsScore(resumeText, "Frontend Developer");
+        
+        const breakdown = result.atsScoreBreakdown;
+        const sum = breakdown.skillsMatch + breakdown.keywordMatch + breakdown.experienceMatch + breakdown.educationMatch + breakdown.formattingMatch;
+        expect(sum).toBe(result.atsScore);
+        expect(breakdown.total).toBe(result.atsScore);
+    });
+
+    test('should increase skills match score when relevant skills are added', () => {
+        const resumeBase = "Developer\nExperience: 2 years\nSummary: standard developer profile.";
+        
+        const scoreBefore = calculateAtsScore(resumeBase, "Backend Developer");
+        
+        // Add backend developer skills to the resume text
+        const resumeWithSkills = resumeBase + "\nSkills: Node.js, Spring Boot, SQL, Docker, Redis";
+        const scoreAfter = calculateAtsScore(resumeWithSkills, "Backend Developer");
+
+        expect(scoreAfter.atsScoreBreakdown.skillsMatch).toBeGreaterThan(scoreBefore.atsScoreBreakdown.skillsMatch);
+    });
+
+    test('should identify section completeness and formatting sections correctly', () => {
+        const resumeComplete = "Summary: Professional statement.\nExperience: 3 years of work history.\nEducation: B.Tech.\nSkills: Java.\nProjects: ResuLens App.";
+        const resumeIncomplete = "Summary: Only a summary is here.";
+
+        const scoreComplete = calculateAtsScore(resumeComplete, "Software Engineer");
+        const scoreIncomplete = calculateAtsScore(resumeIncomplete, "Software Engineer");
+
+        expect(scoreComplete.atsScoreBreakdown.formattingMatch).toBe(10); // All 5 sections found (5 * 2 = 10)
+        expect(scoreIncomplete.atsScoreBreakdown.formattingMatch).toBe(2);  // Only 1 section found (1 * 2 = 2)
+    });
+});

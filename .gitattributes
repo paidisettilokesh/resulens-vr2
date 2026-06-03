@@ -1,0 +1,23 @@
+# ── Line Endings ─────────────────────────────────────────────────────────────
+# Normalize line endings to LF on commit, checkout as-is on Windows
+* text=auto
+
+# Explicitly LF for code files
+*.js    text eol=lf
+*.jsx   text eol=lf
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.css   text eol=lf
+*.html  text eol=lf
+*.json  text eol=lf
+*.md    text eol=lf
+*.env*  text eol=lf
+
+# Binary files — never diff or convert
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.docx  binary

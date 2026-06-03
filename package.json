@@ -1,0 +1,30 @@
+{
+    "name": "resulens",
+    "version": "2.0.0",
+    "description": "ResuLens — AI-powered resume intelligence platform",
+    "private": true,
+    "scripts": {
+        "dev:backend": "cd backend && npm run dev",
+        "dev:frontend": "cd frontend && npm run dev",
+        "install:all": "cd backend && npm install && cd ../frontend && npm install",
+        "start": "cd backend && npm start"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/YOUR_USERNAME/resulens.git"
+    },
+    "keywords": [
+        "resume",
+        "AI",
+        "ATS",
+        "career",
+        "job-search",
+        "react",
+        "nodejs",
+        "mongodb"
+    ],
+    "license": "MIT"
+}
