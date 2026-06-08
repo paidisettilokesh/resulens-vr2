@@ -51,58 +51,7 @@ const PORT = process.env.PORT || 5000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ── Security Headers (Helmet & CSP) ───────────────────────────────────────────
-app.use(helmet());
-app.use(helmet.contentSecurityPolicy({
-    directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        connectSrc: ["'self'", "https://api.groq.com", "https://openrouter.ai", "http://localhost:5000", "ws://localhost:5173", "http://localhost:5173"],
-        imgSrc: ["'self'", "data:", "blob:", "https://*"],
-        objectSrc: ["'none'"]
-    }
-}));
-
-// ── Rate Limiting ─────────────────────────────────────────────────────────────
-const globalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per window
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { error: 'Too many requests from this IP, please try again after 15 minutes.' }
-});
-
-const aiLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 25, // Limit each IP to 25 AI analyses/evaluations per hour
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { error: 'Too many AI requests from this IP, please try again after an hour.' }
-});
-
-// Strict limiter for auth endpoints — prevents brute force attacks
-const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10, // Only 10 login/signup attempts per IP per window
-    standardHeaders: true,
-    legacyHeaders: false,
-    skipSuccessfulRequests: true, // Only count failed attempts
-    message: { error: 'Too many authentication attempts from this IP. Please wait 15 minutes before trying again.' }
-});
-
-app.use('/api/', globalLimiter);
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/signup', authLimiter);
-app.use('/api/analyze', aiLimiter);
-app.use('/api/rewrite', aiLimiter);
-app.use('/api/interview', aiLimiter);
-app.use('/api/cover-letter', aiLimiter);
-app.use('/api/tailor', aiLimiter);
-app.use('/api/roast', aiLimiter);
-
-// ── Core Middleware ───────────────────────────────────────────────────────────
+// ── Core Middleware (CORS & Body Parsing) ─────────────────────────────────────
 const allowedOrigins = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',')
     : [
@@ -137,6 +86,57 @@ app.use((req, res, next) => {
     logger.info(`${req.method} ${req.originalUrl} - IP: ${req.ip}`);
     next();
 });
+
+// ── Security Headers (Helmet & CSP) ───────────────────────────────────────────
+app.use(helmet());
+app.use(helmet.contentSecurityPolicy({
+    directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        connectSrc: ["'self'", "https://api.groq.com", "https://openrouter.ai", "http://localhost:5000", "ws://localhost:5173", "http://localhost:5173"],
+        imgSrc: ["'self'", "data:", "blob:", "https://*"],
+        objectSrc: ["'none'"]
+    }
+}));
+
+// ── Rate Limiting ─────────────────────────────────────────────────────────────
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per window
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests from this IP, please try again after 15 minutes.' }
+});
+
+const aiLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 25, // Limit each IP to 25 AI analyses/evaluations per hour
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many AI requests from this IP, please try again after an hour.' }
+});
+
+// Strict limiter for auth endpoints — prevents brute force attacks
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: process.env.NODE_ENV === 'production' ? 10 : 100, // 10 in prod, 100 in dev
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: true, // Only count failed attempts
+    message: { error: 'Too many authentication attempts from this IP. Please wait 15 minutes before trying again.' }
+});
+
+app.use('/api/', globalLimiter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/signup', authLimiter);
+app.use('/api/analyze', aiLimiter);
+app.use('/api/rewrite', aiLimiter);
+app.use('/api/interview', aiLimiter);
+app.use('/api/cover-letter', aiLimiter);
+app.use('/api/tailor', aiLimiter);
+app.use('/api/roast', aiLimiter);
 
 // ── Health Check ──────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
