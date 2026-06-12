@@ -80,7 +80,14 @@ export const clearHistory = async (userId = 'guest') => {
         if (global.isMongoConnected && isValidObjectId) {
             await Analysis.deleteMany({ userId });
         } else {
-            await fs.writeFile(FALLBACK_FILE, '[]');
+            try {
+                const fileData = await fs.readFile(FALLBACK_FILE, 'utf8');
+                const history = JSON.parse(fileData);
+                const filteredHistory = history.filter(h => h.userId !== userId);
+                await fs.writeFile(FALLBACK_FILE, JSON.stringify(filteredHistory, null, 2));
+            } catch (e) {
+                await fs.writeFile(FALLBACK_FILE, '[]');
+            }
         }
         return true;
     } catch (e) {

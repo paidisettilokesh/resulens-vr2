@@ -10,7 +10,7 @@ import rateLimit from 'express-rate-limit';
 dotenv.config();
 
 // ── Environment Guard ─────────────────────────────────────────────────────────
-const REQUIRED_ENV = ['JWT_SECRET', 'GROQ_API_KEY', 'OPENROUTER_API_KEY', 'MONGODB_URI'];
+const REQUIRED_ENV = ['JWT_SECRET', 'GROQ_API_KEY', 'OPENROUTER_API_KEY'];
 const missingEnv = REQUIRED_ENV.filter(key => !process.env[key]);
 if (missingEnv.length > 0) {
     console.error(`❌ CRITICAL CONFIG ERROR: Missing required environment variables: ${missingEnv.join(', ')}`);
@@ -41,6 +41,7 @@ import roastRoute from './routes/roast.js';
 import salaryRoute from './routes/salary.js';
 import savedResumesRoute from './routes/savedResumes.js';
 import userResumesRoute from './routes/userResumes.js';
+import adminRoute from './routes/admin.js';
 
 // Connect to MongoDB
 connectDB();
@@ -128,15 +129,31 @@ const authLimiter = rateLimit({
     message: { error: 'Too many authentication attempts from this IP. Please wait 15 minutes before trying again.' }
 });
 
+const adminLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    max: 50, // Limit each IP to 50 requests per window
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests to admin panel. Please try again after 5 minutes.' }
+});
+
 app.use('/api/', globalLimiter);
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/signup', authLimiter);
+app.use('/api/auth/google', authLimiter);
+app.use('/api/auth/guest', authLimiter);
+app.use('/api/admin', adminLimiter);
 app.use('/api/analyze', aiLimiter);
 app.use('/api/rewrite', aiLimiter);
 app.use('/api/interview', aiLimiter);
 app.use('/api/cover-letter', aiLimiter);
 app.use('/api/tailor', aiLimiter);
 app.use('/api/roast', aiLimiter);
+app.use('/api/skills', aiLimiter);
+app.use('/api/market', aiLimiter);
+app.use('/api/linkedin', aiLimiter);
+app.use('/api/email', aiLimiter);
+app.use('/api/salary', aiLimiter);
 
 // ── Health Check ──────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
@@ -154,6 +171,7 @@ app.get('/', (req, res) => {
 
 // ── API Routes ────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoute);
+app.use('/api/admin', requireAuth, adminRoute);
 app.use('/api/analyze', requireAuth, analyzeRoute);
 app.use('/api/rewrite', requireAuth, rewriteRoute);
 app.use('/api/cover-letter', requireAuth, coverLetterRoute);
@@ -200,8 +218,16 @@ app.use((req, res) => {
 // ── Global Error Handler (must be LAST) ──────────────────────────────────────
 app.use((err, req, res, next) => {
     logger.error('[Global Error] %O', err);
-    res.status(err.status || 500).json({
-        error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message
+    
+    // Check if it's a validation error or Multer-specific limits error
+    const isClientError = (err.status >= 400 && err.status < 500) || 
+                          err.name === 'MulterError' || 
+                          (err.message && err.message.includes('Only PDF and DOCX files are allowed'));
+                          
+    res.status(err.status || (isClientError ? 400 : 500)).json({
+        error: (process.env.NODE_ENV === 'production' && !isClientError) 
+            ? 'Internal server error' 
+            : err.message
     });
 });
 

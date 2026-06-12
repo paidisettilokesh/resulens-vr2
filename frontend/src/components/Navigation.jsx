@@ -1,7 +1,10 @@
 import React from 'react';
-import { Home, Zap, BookOpen, Briefcase, TrendingUp, CheckCircle, FilePlus, Flame, Clock } from 'lucide-react';
+import { Home, Zap, BookOpen, Briefcase, TrendingUp, CheckCircle, FilePlus, Flame, Clock, Shield } from 'lucide-react';
+import { useUser } from '../context/UserContext';
 
 const Navigation = ({ activeTab, setActiveTab }) => {
+    const { user } = useUser();
+
     // 100% Success: Consolidated Tabs Lists
     const tabs = [
         { id: 'home', label: 'Dashboard', icon: Home },
@@ -12,6 +15,10 @@ const Navigation = ({ activeTab, setActiveTab }) => {
         { id: 'roast', label: 'Resume Roast', icon: Flame },
         { id: 'history', label: 'Insight Vault', icon: Clock }
     ];
+
+    if (user && (user.role === 'admin' || user.role === 'founder')) {
+        tabs.push({ id: 'admin', label: 'Admin Panel', icon: Shield });
+    }
 
     return (
         <div className="mb-8 overflow-x-auto pb-4 scrollbar-hide">

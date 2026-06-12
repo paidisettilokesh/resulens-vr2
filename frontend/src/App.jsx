@@ -23,6 +23,7 @@ const InterviewCoach = React.lazy(() => import('./components/InterviewCoach.jsx'
 const RoastTab = React.lazy(() => import('./components/RoastTab.jsx'));
 const SkillsTab = React.lazy(() => import('./components/SkillsTab.jsx'));
 const HistoryTab = React.lazy(() => import('./components/HistoryTab.jsx'));
+const AdminDashboard = React.lazy(() => import('./components/AdminDashboard.jsx'));
 
 // Icons
 import { AlertTriangle, CheckCircle } from 'lucide-react';
@@ -112,6 +113,13 @@ function App() {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    // Role-based Access Control Guard for Admin Panel
+    useEffect(() => {
+        if (activeTab === 'admin' && user && user.role !== 'admin' && user.role !== 'founder') {
+            setActiveTab('home');
+        }
+    }, [activeTab, user]);
 
     // Handlers
     const handleFileUpload = (event) => {
@@ -289,6 +297,7 @@ function App() {
                                 <InterviewCoach
                                     runFeature={runFeature} interviewPrep={results.interview} loading={loading}
                                     jobDescription={jobDescription} setJobDescription={setJobDescription}
+                                    selectedRole={selectedRole === 'Other' ? customRole : selectedRole}
                                 />
                             )}
 
@@ -315,6 +324,13 @@ function App() {
                                     user={user} backendUrl={backendUrl} setActiveTab={setActiveTab}
                                     setAnalysis={setAnalysis} setCandidateName={setCandidateName}
                                     setIsHistoryView={setIsHistoryView}
+                                />
+                            )}
+
+                            {activeTab === 'admin' && (user?.role === 'admin' || user?.role === 'founder') && (
+                                <AdminDashboard
+                                    user={user}
+                                    backendUrl={backendUrl}
                                 />
                             )}
                         </Suspense>

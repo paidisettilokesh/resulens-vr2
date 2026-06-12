@@ -37,6 +37,20 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['free', 'pro', 'enterprise'],
         default: 'free'
+    },
+    role: {
+        type: String,
+        enum: ['user', 'admin', 'founder'],
+        default: 'user'
+    },
+    loginCount: {
+        type: Number,
+        default: 0
+    },
+    status: {
+        type: String,
+        enum: ['active', 'inactive', 'suspended'],
+        default: 'active'
     }
 }, {
     timestamps: true

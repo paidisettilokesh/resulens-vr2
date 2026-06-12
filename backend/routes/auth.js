@@ -6,6 +6,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
 import bcrypt from 'bcryptjs';
+import { logAudit } from '../utils/auditLogger.js';
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -42,12 +43,12 @@ const saveLocalUsers = async (users) => {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const generateToken = (userId, email, name) => {
+const generateToken = (userId, email, name, role = 'user') => {
     if (!process.env.JWT_SECRET) {
         throw new Error('JWT_SECRET is missing from environment variables');
     }
     return jwt.sign(
-        { id: userId, email, name },
+        { id: userId, email, name, role },
         process.env.JWT_SECRET,
         { expiresIn: '7d' }
     );
@@ -73,35 +74,51 @@ router.post('/signup', async (req, res) => {
             return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
         }
 
+        const emailClean = email.toLowerCase().trim();
+        const isFounder = process.env.FOUNDER_EMAIL && emailClean === process.env.FOUNDER_EMAIL.toLowerCase().trim();
+
         if (global.isMongoConnected) {
             // Duplicate account check
-            const existing = await User.findOne({ email: email.toLowerCase().trim() });
+            const existing = await User.findOne({ email: emailClean });
             if (existing) {
                 return res.status(409).json({ error: 'An account with this email already exists.' });
             }
 
             // Create user — password is hashed by the pre-save hook in User.js
             const user = new User({
-                email: email.toLowerCase().trim(),
+                email: emailClean,
                 password,
-                name: String(name).trim()
+                name: String(name).trim(),
+                role: isFounder ? 'founder' : 'user',
+                loginCount: 1,
+                lastLoginAt: new Date(),
+                status: 'active'
             });
             await user.save();
 
-            const token = generateToken(user._id, user.email, user.name);
+            // Log Audit Entry
+            await logAudit({
+                userId: user._id,
+                userEmail: user.email,
+                action: 'SIGNUP_SUCCESS',
+                ipAddress: req.ip,
+                userAgent: req.headers['user-agent']
+            });
+
+            const token = generateToken(user._id, user.email, user.name, user.role);
 
             return res.status(201).json({
                 token,
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                plan: user.plan
+                plan: user.plan,
+                role: user.role
             });
         } else {
             // FALLBACK TO JSON USER STORAGE
             const users = await getLocalUsers();
-            const emailLower = email.toLowerCase().trim();
-            const existing = users.find(u => u.email === emailLower);
+            const existing = users.find(u => u.email === emailClean);
             if (existing) {
                 return res.status(409).json({ error: 'An account with this email already exists.' });
             }
@@ -114,23 +131,37 @@ router.post('/signup', async (req, res) => {
             const newUser = {
                 _id: mockId,
                 name: String(name).trim(),
-                email: emailLower,
+                email: emailClean,
                 password: hashedPassword,
                 plan: 'free',
-                createdAt: new Date().toISOString()
+                role: isFounder ? 'founder' : 'user',
+                loginCount: 1,
+                lastLoginAt: new Date().toISOString(),
+                createdAt: new Date().toISOString(),
+                status: 'active'
             };
 
             users.push(newUser);
             await saveLocalUsers(users);
 
-            const token = generateToken(mockId, newUser.email, newUser.name);
+            // Log Audit Entry
+            await logAudit({
+                userId: mockId,
+                userEmail: newUser.email,
+                action: 'SIGNUP_SUCCESS',
+                ipAddress: req.ip,
+                userAgent: req.headers['user-agent']
+            });
+
+            const token = generateToken(mockId, newUser.email, newUser.name, newUser.role);
 
             return res.status(201).json({
                 token,
                 id: mockId,
                 name: newUser.name,
                 email: newUser.email,
-                plan: newUser.plan
+                plan: newUser.plan,
+                role: newUser.role
             });
         }
     } catch (error) {
@@ -154,24 +185,80 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ error: 'Password is required.' });
         }
 
+        const emailClean = email.toLowerCase().trim();
+        const isFounder = process.env.FOUNDER_EMAIL && emailClean === process.env.FOUNDER_EMAIL.toLowerCase().trim();
+
         if (global.isMongoConnected) {
             // Explicitly select password back (schema has select: false)
-            const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
+            const user = await User.findOne({ email: emailClean }).select('+password');
             if (!user) {
-                // Generic message to prevent user enumeration
+                // Log failed login
+                await logAudit({
+                    userEmail: emailClean,
+                    action: 'LOGIN_FAILED',
+                    ipAddress: req.ip,
+                    userAgent: req.headers['user-agent'],
+                    details: { reason: 'User not found' }
+                });
                 return res.status(401).json({ error: 'Invalid email or password.' });
+            }
+
+            // Check account status
+            if (user.status === 'suspended') {
+                await logAudit({
+                    userId: user._id,
+                    userEmail: user.email,
+                    action: 'LOGIN_SUSPENDED',
+                    ipAddress: req.ip,
+                    userAgent: req.headers['user-agent']
+                });
+                return res.status(403).json({ error: 'Your account has been suspended. Please contact the administrator.' });
+            }
+            if (user.status === 'inactive') {
+                await logAudit({
+                    userId: user._id,
+                    userEmail: user.email,
+                    action: 'LOGIN_INACTIVE',
+                    ipAddress: req.ip,
+                    userAgent: req.headers['user-agent']
+                });
+                return res.status(403).json({ error: 'Your account is currently inactive.' });
             }
 
             const isMatch = await user.matchPassword(password);
             if (!isMatch) {
+                // Log failed login
+                await logAudit({
+                    userId: user._id,
+                    userEmail: user.email,
+                    action: 'LOGIN_FAILED',
+                    ipAddress: req.ip,
+                    userAgent: req.headers['user-agent'],
+                    details: { reason: 'Invalid password' }
+                });
                 return res.status(401).json({ error: 'Invalid email or password.' });
             }
 
-            // Update last login timestamp (save without triggering password re-hash)
+            // Auto-bootstrap founder role if email matches
+            if (isFounder && user.role !== 'founder') {
+                user.role = 'founder';
+            }
+
+            // Update last login timestamp and increment loginCount
             user.lastLoginAt = new Date();
+            user.loginCount = (user.loginCount || 0) + 1;
             await user.save();
 
-            const token = generateToken(user._id, user.email, user.name);
+            // Log successful login
+            await logAudit({
+                userId: user._id,
+                userEmail: user.email,
+                action: 'LOGIN_SUCCESS',
+                ipAddress: req.ip,
+                userAgent: req.headers['user-agent']
+            });
+
+            const token = generateToken(user._id, user.email, user.name, user.role);
 
             return res.json({
                 token,
@@ -179,27 +266,81 @@ router.post('/login', async (req, res) => {
                 name: user.name,
                 email: user.email,
                 plan: user.plan,
+                role: user.role,
                 picture: user.picture || ''
             });
         } else {
             // FALLBACK TO JSON USER STORAGE
             const users = await getLocalUsers();
-            const emailLower = email.toLowerCase().trim();
-            const user = users.find(u => u.email === emailLower);
+            const user = users.find(u => u.email === emailClean);
             if (!user) {
+                // Log failed login
+                await logAudit({
+                    userEmail: emailClean,
+                    action: 'LOGIN_FAILED',
+                    ipAddress: req.ip,
+                    userAgent: req.headers['user-agent'],
+                    details: { reason: 'User not found' }
+                });
                 return res.status(401).json({ error: 'Invalid email or password.' });
+            }
+
+            // Check account status
+            if (user.status === 'suspended') {
+                await logAudit({
+                    userId: user._id,
+                    userEmail: user.email,
+                    action: 'LOGIN_SUSPENDED',
+                    ipAddress: req.ip,
+                    userAgent: req.headers['user-agent']
+                });
+                return res.status(403).json({ error: 'Your account has been suspended. Please contact the administrator.' });
+            }
+            if (user.status === 'inactive') {
+                await logAudit({
+                    userId: user._id,
+                    userEmail: user.email,
+                    action: 'LOGIN_INACTIVE',
+                    ipAddress: req.ip,
+                    userAgent: req.headers['user-agent']
+                });
+                return res.status(403).json({ error: 'Your account is currently inactive.' });
             }
 
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) {
+                // Log failed login
+                await logAudit({
+                    userId: user._id,
+                    userEmail: user.email,
+                    action: 'LOGIN_FAILED',
+                    ipAddress: req.ip,
+                    userAgent: req.headers['user-agent'],
+                    details: { reason: 'Invalid password' }
+                });
                 return res.status(401).json({ error: 'Invalid email or password.' });
             }
 
-            // Update last login timestamp in local storage
+            // Auto-bootstrap founder role in JSON fallback
+            if (isFounder && user.role !== 'founder') {
+                user.role = 'founder';
+            }
+
+            // Update last login timestamp and login count in local storage
             user.lastLoginAt = new Date().toISOString();
+            user.loginCount = (user.loginCount || 0) + 1;
             await saveLocalUsers(users);
 
-            const token = generateToken(user._id, user.email, user.name);
+            // Log successful login
+            await logAudit({
+                userId: user._id,
+                userEmail: user.email,
+                action: 'LOGIN_SUCCESS',
+                ipAddress: req.ip,
+                userAgent: req.headers['user-agent']
+            });
+
+            const token = generateToken(user._id, user.email, user.name, user.role || 'user');
 
             return res.json({
                 token,
@@ -207,6 +348,7 @@ router.post('/login', async (req, res) => {
                 name: user.name,
                 email: user.email,
                 plan: user.plan,
+                role: user.role || 'user',
                 picture: user.picture || ''
             });
         }
@@ -258,28 +400,67 @@ router.post('/google', async (req, res) => {
             return res.status(400).json({ error: 'Google account must have a visible email address.' });
         }
 
+        const emailClean = email.toLowerCase().trim();
+        const isFounder = process.env.FOUNDER_EMAIL && emailClean === process.env.FOUNDER_EMAIL.toLowerCase().trim();
+
         if (global.isMongoConnected) {
             // Find or create the user record
-            let user = await User.findOne({ $or: [{ googleId }, { email: email.toLowerCase() }] });
+            let user = await User.findOne({ $or: [{ googleId }, { email: emailClean }] });
 
             if (user) {
+                // Check account status
+                if (user.status === 'suspended') {
+                    await logAudit({
+                        userId: user._id,
+                        userEmail: user.email,
+                        action: 'LOGIN_SUSPENDED_GOOGLE',
+                        ipAddress: req.ip,
+                        userAgent: req.headers['user-agent']
+                    });
+                    return res.status(403).json({ error: 'Your account has been suspended. Please contact the administrator.' });
+                }
+                if (user.status === 'inactive') {
+                    await logAudit({
+                        userId: user._id,
+                        userEmail: user.email,
+                        action: 'LOGIN_INACTIVE_GOOGLE',
+                        ipAddress: req.ip,
+                        userAgent: req.headers['user-agent']
+                    });
+                    return res.status(403).json({ error: 'Your account is currently inactive.' });
+                }
+
                 user.lastLoginAt = new Date();
+                user.loginCount = (user.loginCount || 0) + 1;
                 if (!user.googleId) user.googleId = googleId;
                 if (picture && user.picture !== picture) user.picture = picture;
                 if (name && user.name !== name) user.name = name;
+                if (isFounder && user.role !== 'founder') user.role = 'founder';
                 await user.save();
             } else {
                 user = new User({
                     name: name || email.split('@')[0],
-                    email: email.toLowerCase(),
+                    email: emailClean,
                     googleId,
                     picture,
-                    lastLoginAt: new Date()
+                    role: isFounder ? 'founder' : 'user',
+                    loginCount: 1,
+                    lastLoginAt: new Date(),
+                    status: 'active'
                 });
                 await user.save();
             }
 
-            const token = generateToken(user._id, user.email, user.name);
+            // Log Audit Entry
+            await logAudit({
+                userId: user._id,
+                userEmail: user.email,
+                action: 'LOGIN_SUCCESS_GOOGLE',
+                ipAddress: req.ip,
+                userAgent: req.headers['user-agent']
+            });
+
+            const token = generateToken(user._id, user.email, user.name, user.role);
 
             return res.json({
                 token,
@@ -287,34 +468,70 @@ router.post('/google', async (req, res) => {
                 name: user.name,
                 email: user.email,
                 picture: user.picture || '',
-                plan: user.plan
+                plan: user.plan,
+                role: user.role
             });
         } else {
             // FALLBACK TO JSON USER STORAGE
             const users = await getLocalUsers();
-            const emailLower = email.toLowerCase().trim();
-            let user = users.find(u => u.googleId === googleId || u.email === emailLower);
+            let user = users.find(u => u.googleId === googleId || u.email === emailClean);
 
             if (user) {
+                // Check account status
+                if (user.status === 'suspended') {
+                    await logAudit({
+                        userId: user._id,
+                        userEmail: user.email,
+                        action: 'LOGIN_SUSPENDED_GOOGLE',
+                        ipAddress: req.ip,
+                        userAgent: req.headers['user-agent']
+                    });
+                    return res.status(403).json({ error: 'Your account has been suspended. Please contact the administrator.' });
+                }
+                if (user.status === 'inactive') {
+                    await logAudit({
+                        userId: user._id,
+                        userEmail: user.email,
+                        action: 'LOGIN_INACTIVE_GOOGLE',
+                        ipAddress: req.ip,
+                        userAgent: req.headers['user-agent']
+                    });
+                    return res.status(403).json({ error: 'Your account is currently inactive.' });
+                }
+
                 user.lastLoginAt = new Date().toISOString();
+                user.loginCount = (user.loginCount || 0) + 1;
                 if (!user.googleId) user.googleId = googleId;
                 if (picture && user.picture !== picture) user.picture = picture;
                 if (name && user.name !== name) user.name = name;
+                if (isFounder && user.role !== 'founder') user.role = 'founder';
             } else {
                 user = {
                     _id: 'local_user_' + Math.random().toString(36).substr(2, 9),
                     name: name || email.split('@')[0],
-                    email: emailLower,
+                    email: emailClean,
                     googleId,
                     picture,
                     plan: 'free',
-                    lastLoginAt: new Date().toISOString()
+                    role: isFounder ? 'founder' : 'user',
+                    loginCount: 1,
+                    lastLoginAt: new Date().toISOString(),
+                    status: 'active'
                 };
                 users.push(user);
             }
             await saveLocalUsers(users);
 
-            const token = generateToken(user._id, user.email, user.name);
+            // Log Audit Entry
+            await logAudit({
+                userId: user._id,
+                userEmail: user.email,
+                action: 'LOGIN_SUCCESS_GOOGLE',
+                ipAddress: req.ip,
+                userAgent: req.headers['user-agent']
+            });
+
+            const token = generateToken(user._id, user.email, user.name, user.role || 'user');
 
             return res.json({
                 token,
@@ -322,7 +539,8 @@ router.post('/google', async (req, res) => {
                 name: user.name,
                 email: user.email,
                 picture: user.picture || '',
-                plan: user.plan
+                plan: user.plan,
+                role: user.role || 'user'
             });
         }
     } catch (error) {
@@ -335,13 +553,24 @@ router.post('/google', async (req, res) => {
 router.post('/guest', async (req, res) => {
     try {
         const mockId = 'guest_' + Date.now();
-        const token = generateToken(mockId, 'guest@resulens.ai', 'Guest User');
+        const token = generateToken(mockId, 'guest@resulens.ai', 'Guest User', 'user');
+
+        // Log Audit Entry
+        await logAudit({
+            userId: mockId,
+            userEmail: 'guest@resulens.ai',
+            action: 'LOGIN_GUEST',
+            ipAddress: req.ip,
+            userAgent: req.headers['user-agent']
+        });
+
         res.json({
             token,
             id: mockId,
             name: 'Guest User',
             email: 'guest@resulens.ai',
-            plan: 'free'
+            plan: 'free',
+            role: 'user'
         });
     } catch (error) {
         res.status(500).json({ error: 'Failed to initialize guest session.' });
