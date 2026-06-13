@@ -54,7 +54,7 @@ const __dirname = path.dirname(__filename);
 
 // ── Core Middleware (CORS & Body Parsing) ─────────────────────────────────────
 const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',')
+    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
     : [
         'http://localhost:5173', 'http://127.0.0.1:5173',
         'http://localhost:5174', 'http://127.0.0.1:5174',
@@ -62,13 +62,15 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
         'http://localhost:3000', 'http://127.0.0.1:3000',
         'https://mellow-donut-7a1825.netlify.app',
         'https://resulens.netlify.app',
-        'https://agent-6a23b7a4e482b8eeb408e324--resulens.netlify.app'
+        'https://agent-6a23b7a4e482b8eeb408e324--resulens.netlify.app',
+        'https://resulens-vr2-yeti.vercel.app'
       ];
 
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin) return callback(null, true);
         const isAllowed = allowedOrigins.includes(origin) || 
+                          allowedOrigins.includes('*') ||
                           (process.env.NODE_ENV !== 'production' && /^http:\/\/localhost:\d+$/.test(origin)) ||
                           (process.env.NODE_ENV !== 'production' && /^http:\/\/127\.0\.0\.1:\d+$/.test(origin));
         if (isAllowed) {
