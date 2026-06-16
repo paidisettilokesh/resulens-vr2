@@ -8,11 +8,15 @@ const RETRY_DELAY_MS = 3000;
 
 const connectDB = async (retryCount = 0) => {
     try {
+        if (!process.env.MONGODB_URI) {
+            throw new Error("MONGODB_URI environment variable is missing");
+        }
         const conn = await mongoose.connect(process.env.MONGODB_URI, {
             serverSelectionTimeoutMS: 5000,
         });
         console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
         global.isMongoConnected = true;
+        global.mongoError = null;
 
         // Handle unexpected disconnections
         mongoose.connection.on('disconnected', () => {
@@ -27,6 +31,7 @@ const connectDB = async (retryCount = 0) => {
 
     } catch (error) {
         global.isMongoConnected = false;
+        global.mongoError = error.message;
         console.error(`❌ MongoDB Connection Error: ${error.message}`);
 
         if (retryCount < MAX_RETRIES) {
