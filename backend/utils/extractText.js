@@ -61,3 +61,13 @@ async function getRawText(file) {
     // Default fallback for unknown or text files
     return buffer.toString('utf8').substring(0, 3000);
 }
+
+// Run a one-time warm-up call to initialize the pdf-parse fake worker and bypass the first-call race condition bug
+(async () => {
+    try {
+        await pdf(Buffer.from('%PDF-1.4'));
+    } catch (e) {
+        // Expected fallback initialization failure, safe to ignore
+    }
+})();
+
