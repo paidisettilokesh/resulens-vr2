@@ -63,7 +63,8 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
         'https://mellow-donut-7a1825.netlify.app',
         'https://resulens.netlify.app',
         'https://agent-6a23b7a4e482b8eeb408e324--resulens.netlify.app',
-        'https://resulens-vr2-yeti.vercel.app'
+        'https://resulens-vr2-yeti.vercel.app',
+        'https://resulens-vr2-1btg.vercel.app'
       ];
 
 app.use(cors({
@@ -71,6 +72,7 @@ app.use(cors({
         if (!origin) return callback(null, true);
         const isAllowed = allowedOrigins.includes(origin) || 
                           allowedOrigins.includes('*') ||
+                          /\.vercel\.app$/i.test(origin) ||
                           (process.env.NODE_ENV !== 'production' && /^http:\/\/localhost:\d+$/.test(origin)) ||
                           (process.env.NODE_ENV !== 'production' && /^http:\/\/127\.0\.0\.1:\d+$/.test(origin));
         if (isAllowed) {
