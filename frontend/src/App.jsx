@@ -11,10 +11,11 @@ import { useResume } from './context/ResumeContext';
 
 // --- COMPONENTS ---
 import Auth from './components/Auth.jsx';
-import Header from './components/Header.jsx';
 import Navigation from './components/Navigation.jsx';
 import HomeTab from './components/HomeTab.jsx';
 import MainLayout from './layouts/MainLayout.jsx';
+import UserGuideModal from './components/UserGuideModal.jsx';
+import LandingPage from './components/LandingPage.jsx';
 
 // Lazy-loaded sub-engines for optimized bundle delivery
 const AnalysisView = React.lazy(() => import('./components/AnalysisView.jsx'));
@@ -45,6 +46,10 @@ function App() {
     const [isHistoryView, setIsHistoryView] = useState(false);
     const [copyStatus, setCopyStatus] = useState(false);
     const fileInputRef = useRef(null);
+    const [showOnboarding, setShowOnboarding] = useState(false);
+    const [authModalOpen, setAuthModalOpen] = useState(false);
+    const [authInitialMode, setAuthInitialMode] = useState('login');
+    const [pendingResumeFile, setPendingResumeFile] = useState(null);
 
     // Resume Builder State (Moved to local or could be a separate Context later)
     const [builderData, setBuilderData] = useState({
@@ -113,6 +118,25 @@ function App() {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    // Auto-open Onboarding for new users/sessions
+    useEffect(() => {
+        if (user) {
+            const completed = localStorage.getItem(`resulens_onboarding_completed_${user.id || 'guest'}`);
+            if (completed !== 'true') {
+                setShowOnboarding(true);
+            }
+        }
+    }, [user]);
+
+    // Auto-consume pending file when user logs in
+    useEffect(() => {
+        if (user && pendingResumeFile) {
+            setFile(pendingResumeFile);
+            setPendingResumeFile(null);
+            setActiveTab('home');
+        }
+    }, [user, pendingResumeFile, setFile]);
 
     // Role-based Access Control Guard for Admin Panel
     useEffect(() => {
@@ -213,7 +237,29 @@ function App() {
     };
 
     if (userLoading) return null; // Or a splash screen
-    if (!user) return <Auth onLogin={handleLogin} backendUrl={backendUrl} />;
+    if (!user) {
+        return (
+            <>
+                <LandingPage
+                    onOpenAuth={(mode, file) => {
+                        setAuthInitialMode(mode);
+                        if (file) {
+                            setPendingResumeFile(file);
+                        }
+                        setAuthModalOpen(true);
+                    }}
+                />
+                <Auth
+                    isOpen={authModalOpen}
+                    onClose={() => setAuthModalOpen(false)}
+                    onLogin={handleLogin}
+                    backendUrl={backendUrl}
+                    initialMode={authInitialMode}
+                    pendingFile={pendingResumeFile}
+                />
+            </>
+        );
+    }
 
     const loading = resumeLoading;
 
@@ -230,6 +276,7 @@ function App() {
                 resetAnalysis={resetResume}
                 triggerNewUpload={triggerNewUpload}
                 handleLogout={handleLogout}
+                onOpenOnboarding={() => setShowOnboarding(true)}
             >
                 {analysis?.atsScore > 75 && <Confetti width={windowSize.width} height={windowSize.height} recycle={false} numberOfPieces={200} />}
 
@@ -265,6 +312,7 @@ function App() {
                                     file={file} handleFileUpload={handleFileUpload}
                                     analyzeResume={analyzeResume} error={error} setActiveTab={setActiveTab}
                                     loading={loading}
+                                    onOpenOnboarding={() => setShowOnboarding(true)}
                                 />
                             )}
 
@@ -365,6 +413,12 @@ function App() {
                     </motion.div>
                 )}
             </AnimatePresence>
+            {/* Onboarding Tour Modal */}
+            <UserGuideModal
+                isOpen={showOnboarding}
+                onClose={() => setShowOnboarding(false)}
+                user={user}
+            />
         </div>
     );
 }

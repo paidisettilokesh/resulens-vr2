@@ -42,6 +42,9 @@ pnpm-debug.log*
 *.sqlite
 *.db
 backend/data/*.json
+backend/backups/
+backups/
+
 
 # ── OS Files ──────────────────────────────────────────────────────────────────
 .DS_Store

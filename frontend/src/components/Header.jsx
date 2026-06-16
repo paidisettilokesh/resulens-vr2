@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, RotateCcw, User, LogOut, ChevronDown, Sparkles, LayoutDashboard, Target, BarChart3, Rocket, Sun, Moon } from 'lucide-react';
+import { Zap, RotateCcw, User, LogOut, ChevronDown, Sparkles, LayoutDashboard, Target, BarChart3, Rocket, Sun, Moon, BookOpen } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { SOCIAL_LINKS } from '../constants/socialLinks';
 
@@ -19,7 +19,7 @@ const LinkedInIcon = ({ size = 20 }) => (
 );
 
 
-const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysis, triggerNewUpload, user, handleLogout }) => {
+const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysis, triggerNewUpload, user, handleLogout, onOpenOnboarding }) => {
     const { theme, toggleTheme } = useTheme();
     const [scrolled, setScrolled] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -151,8 +151,17 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
                                             <p className="text-sm font-bold text-[var(--text-primary)] truncate">{user?.email || 'Guest Explorer'}</p>
                                         </div>
                                         <button
+                                            onClick={() => {
+                                                onOpenOnboarding();
+                                                setShowProfileMenu(false);
+                                            }}
+                                            className="w-full flex items-center gap-3 p-4 rounded-2xl text-[var(--text-primary)] hover:bg-[var(--bg-surface-secondary)] transition-all font-bold text-xs"
+                                        >
+                                            <BookOpen size={16} className="text-cyan-600 dark:text-cyan-400" /> User Guide & Tour
+                                        </button>
+                                        <button
                                             onClick={handleLogout}
-                                            className="w-full flex items-center gap-3 p-4 rounded-2xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all font-bold text-xs"
+                                            className="w-full flex items-center gap-3 p-4 rounded-2xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all font-bold text-xs border-t border-[var(--border-primary)] mt-1 pt-4"
                                         >
                                             <LogOut size={16} /> Sign Out of Portal
                                         </button>

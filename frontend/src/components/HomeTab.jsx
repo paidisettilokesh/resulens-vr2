@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Zap, Briefcase, AlertTriangle, CheckCircle, Download, CheckCircle as CheckIcon, Globe, Shield, Sparkles } from 'lucide-react';
+import { Zap, Briefcase, AlertTriangle, CheckCircle, Download, CheckCircle as CheckIcon, Globe, Shield, Sparkles, Rocket } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useResume } from '../context/ResumeContext';
 
-const HomeTab = ({ commonRoles, analyzeResume, setActiveTab }) => {
+const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding }) => {
     const {
         file, setFile, selectedRole, setSelectedRole,
         customRole, setCustomRole, error, loading
@@ -29,6 +29,14 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab }) => {
                 <p className="text-[var(--text-secondary)] text-xl font-medium max-w-2xl mx-auto leading-relaxed">
                     A senior-grade diagnostic engine designed to optimize your resume for the world's most competitive roles.
                 </p>
+                <div className="pt-2 flex justify-center">
+                    <button 
+                        onClick={onOpenOnboarding}
+                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white rounded-full text-xs font-bold transition-all shadow-sm active:scale-95 border border-slate-200/50 dark:border-slate-700/50"
+                    >
+                        <Rocket size={14} className="text-cyan-500 animate-pulse" /> Take the Feature Tour
+                    </button>
+                </div>
             </div>
 
             {/* PORTAL CORE */}

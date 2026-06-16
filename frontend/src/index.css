@@ -12,7 +12,7 @@
         --bg-surface-secondary: #E0F2FE;
         --text-primary: #0C1A2E;
         --text-secondary: #334155;
-        --text-muted: #64748b;
+        --text-muted: #475569;
         --border-primary: #BAE6FD;
         --border-secondary: #7DD3FC;
         --accent-primary: #0891B2;
@@ -29,7 +29,7 @@
         --bg-surface-secondary: #1e293b;
         --text-primary: #f8fafc;
         --text-secondary: #cbd5e1;
-        --text-muted: #94a3b8;
+        --text-muted: #cbd5e1;
         --border-primary: #1e293b;
         --border-secondary: #334155;
         --accent-primary: #22D3EE;
@@ -57,6 +57,11 @@
     h6 {
         @apply font-display tracking-tight font-bold;
         color: var(--text-primary);
+    }
+
+    /* Accessibility focus rings */
+    *:focus-visible {
+        @apply outline-none ring-4 ring-cyan-500/40 dark:ring-cyan-400/40 transition-shadow duration-150;
     }
 }
 

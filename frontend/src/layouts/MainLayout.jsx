@@ -1,9 +1,8 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import Header from '../components/Header';
 import { SOCIAL_LINKS } from '../constants/socialLinks';
 
-const MainLayout = ({ children, user, activeTab, setActiveTab, candidateName, analysis, resetAnalysis, triggerNewUpload, handleLogout }) => {
+const MainLayout = ({ children, user, activeTab, setActiveTab, candidateName, analysis, resetAnalysis, triggerNewUpload, handleLogout, onOpenOnboarding }) => {
     return (
         <div className="min-h-screen bg-[var(--bg-app)] font-sans text-[var(--text-primary)] selection:bg-cyan-100 selection:text-cyan-900 relative overflow-x-hidden transition-colors duration-300">
 
@@ -24,6 +23,7 @@ const MainLayout = ({ children, user, activeTab, setActiveTab, candidateName, an
                 triggerNewUpload={triggerNewUpload}
                 user={user}
                 handleLogout={handleLogout}
+                onOpenOnboarding={onOpenOnboarding}
             />
 
             <motion.div
