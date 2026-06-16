@@ -166,6 +166,7 @@ app.get('/', (req, res) => {
         service: 'ResuLens API',
         version: '2.0.0',
         timestamp: new Date().toISOString(),
+        databaseConnected: !!global.isMongoConnected,
         providers: {
             groq: !!process.env.GROQ_API_KEY,
             openRouter: !!process.env.OPENROUTER_API_KEY
