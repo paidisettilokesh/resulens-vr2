@@ -68,6 +68,11 @@ userSchema.pre('save', async function () {
         return;
     }
 
+    // Safeguard: do not re-hash if it is already a bcrypt hash
+    if (/^\$2[ayb]\$/.test(this.password)) {
+        return;
+    }
+
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 });

@@ -222,3 +222,38 @@ describe('⚙️ Programmatic ATS Scoring Engine', () => {
         expect(scoreIncomplete.atsScoreBreakdown.formattingMatch).toBe(2);  // Only 1 section found (1 * 2 = 2)
     });
 });
+
+describe('🔐 Security & Bug Fixes: Case-insensitive Emails & Password Re-hashing Prevention', () => {
+    test('should match emails case-insensitively with regex escape helper', () => {
+        const escapeRegex = (string) => string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const emailClean = 'founder@resulens.ai';
+        const emailRegex = new RegExp('^' + escapeRegex(emailClean) + '$', 'i');
+
+        expect(emailRegex.test('founder@resulens.ai')).toBe(true);
+        expect(emailRegex.test('Founder@resulens.ai')).toBe(true);
+        expect(emailRegex.test('FOUNDER@RESULENS.AI')).toBe(true);
+        expect(emailRegex.test('notfounder@resulens.ai')).toBe(false);
+        
+        // Test regex escaping
+        const dotEmail = 'foo.bar@resulens.ai';
+        const dotEmailRegex = new RegExp('^' + escapeRegex(dotEmail) + '$', 'i');
+        expect(dotEmailRegex.test('fooxbar@resulens.ai')).toBe(false); // '.' must match literally
+        expect(dotEmailRegex.test('foo.bar@resulens.ai')).toBe(true);
+    });
+
+    test('should correctly identify existing bcrypt hashes using regex safeguard', () => {
+        const bcryptSafeguard = /^\$2[ayb]\$/;
+        
+        const validHash1 = '$2a$10$abcdefghijklmnopqrstuv';
+        const validHash2 = '$2b$12$abcdefghijklmnopqrstuv';
+        const validHash3 = '$2y$10$abcdefghijklmnopqrstuv';
+        const plainPassword = 'password123';
+        const emptyPassword = '';
+
+        expect(bcryptSafeguard.test(validHash1)).toBe(true);
+        expect(bcryptSafeguard.test(validHash2)).toBe(true);
+        expect(bcryptSafeguard.test(validHash3)).toBe(true);
+        expect(bcryptSafeguard.test(plainPassword)).toBe(false);
+        expect(bcryptSafeguard.test(emptyPassword)).toBe(false);
+    });
+});

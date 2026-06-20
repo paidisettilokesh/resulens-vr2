@@ -57,6 +57,7 @@ const generateToken = (userId, email, name, role = 'user') => {
 // Simple field-level validation — no third-party lib required
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const validatePassword = (pw) => typeof pw === 'string' && pw.length >= 8;
+const escapeRegex = (string) => string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
 // ── POST /api/auth/signup ─────────────────────────────────────────────────────
 router.post('/signup', async (req, res) => {
@@ -79,7 +80,8 @@ router.post('/signup', async (req, res) => {
 
         if (global.isMongoConnected) {
             // Duplicate account check
-            const existing = await User.findOne({ email: emailClean });
+            const emailRegex = new RegExp('^' + escapeRegex(emailClean) + '$', 'i');
+            const existing = await User.findOne({ email: emailRegex });
             if (existing) {
                 return res.status(409).json({ error: 'An account with this email already exists.' });
             }
@@ -118,7 +120,7 @@ router.post('/signup', async (req, res) => {
         } else {
             // FALLBACK TO JSON USER STORAGE
             const users = await getLocalUsers();
-            const existing = users.find(u => u.email === emailClean);
+            const existing = users.find(u => u.email && u.email.toLowerCase().trim() === emailClean);
             if (existing) {
                 return res.status(409).json({ error: 'An account with this email already exists.' });
             }
@@ -189,8 +191,9 @@ router.post('/login', async (req, res) => {
         const isFounder = process.env.FOUNDER_EMAIL && emailClean === process.env.FOUNDER_EMAIL.toLowerCase().trim();
 
         if (global.isMongoConnected) {
-            // Explicitly select password back (schema has select: false)
-            const user = await User.findOne({ email: emailClean }).select('+password');
+            // Explicitly select password back (schema has select: false) (case-insensitive query)
+            const emailRegex = new RegExp('^' + escapeRegex(emailClean) + '$', 'i');
+            const user = await User.findOne({ email: emailRegex }).select('+password');
             if (!user) {
                 // Log failed login
                 await logAudit({
@@ -240,14 +243,22 @@ router.post('/login', async (req, res) => {
             }
 
             // Auto-bootstrap founder role if email matches
+            const updateFields = {
+                lastLoginAt: new Date()
+            };
             if (isFounder && user.role !== 'founder') {
                 user.role = 'founder';
+                updateFields.role = 'founder';
             }
 
-            // Update last login timestamp and increment loginCount
-            user.lastLoginAt = new Date();
-            user.loginCount = (user.loginCount || 0) + 1;
-            await user.save();
+            // Update last login timestamp and increment loginCount in DB without saving/triggering pre-save hook
+            await User.updateOne(
+                { _id: user._id },
+                {
+                    $set: updateFields,
+                    $inc: { loginCount: 1 }
+                }
+            );
 
             // Log successful login
             await logAudit({
@@ -272,7 +283,7 @@ router.post('/login', async (req, res) => {
         } else {
             // FALLBACK TO JSON USER STORAGE
             const users = await getLocalUsers();
-            const user = users.find(u => u.email === emailClean);
+            const user = users.find(u => u.email && u.email.toLowerCase().trim() === emailClean);
             if (!user) {
                 // Log failed login
                 await logAudit({
@@ -404,8 +415,9 @@ router.post('/google', async (req, res) => {
         const isFounder = process.env.FOUNDER_EMAIL && emailClean === process.env.FOUNDER_EMAIL.toLowerCase().trim();
 
         if (global.isMongoConnected) {
-            // Find or create the user record
-            let user = await User.findOne({ $or: [{ googleId }, { email: emailClean }] });
+            // Find or create the user record (case-insensitive email lookup)
+            const emailRegex = new RegExp('^' + escapeRegex(emailClean) + '$', 'i');
+            let user = await User.findOne({ $or: [{ googleId }, { email: emailRegex }] });
 
             if (user) {
                 // Check account status
@@ -474,7 +486,7 @@ router.post('/google', async (req, res) => {
         } else {
             // FALLBACK TO JSON USER STORAGE
             const users = await getLocalUsers();
-            let user = users.find(u => u.googleId === googleId || u.email === emailClean);
+            let user = users.find(u => u.googleId === googleId || (u.email && u.email.toLowerCase().trim() === emailClean));
 
             if (user) {
                 // Check account status

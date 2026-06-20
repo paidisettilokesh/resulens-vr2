@@ -340,8 +340,8 @@ export default function AdminDashboard({ user, backendUrl }) {
     const growthTrend = analytics?.users?.growthTrend || [];
     const maxGrowth = Math.max(...growthTrend.map(d => d.registrations), 5);
 
-    const activityTrend = analytics?.usage?.activityTrend || [];
-    const maxActivity = Math.max(...activityTrend.map(d => d.actions), 5);
+    const loginTrend = analytics?.users?.loginTrend || [];
+    const maxLogin = Math.max(...loginTrend.map(d => d.logins), 5);
 
     const featureUsage = analytics?.usage?.featureUsage || {};
     const totalFeatureActions = Object.values(featureUsage).reduce((a, b) => a + b, 0) || 1;
@@ -514,7 +514,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                 {growthTrend.map((d, i) => {
                                     const heightPercent = `${Math.max(5, (d.registrations / maxGrowth) * 100)}%`;
                                     return (
-                                        <div key={i} className="flex flex-col items-center flex-1 z-10 group">
+                                        <div key={i} className="flex flex-col items-center justify-end h-full flex-1 z-10 group">
                                             <div className="text-[10px] font-bold text-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-1.5">
                                                 {d.registrations}
                                             </div>
@@ -531,10 +531,10 @@ export default function AdminDashboard({ user, backendUrl }) {
                             </div>
                         </div>
 
-                        {/* 2. Platform Actions Volume */}
+                        {/* 2. User Login Activity */}
                         <div className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-3xl p-6 shadow-sm">
                             <h3 className="text-sm font-bold text-[var(--text-primary)] mb-6 flex items-center gap-2">
-                                <Activity size={16} className="text-purple-500" /> User Activity Volume (Last 7 Days)
+                                <Activity size={16} className="text-purple-500" /> User Login Activity (Last 7 Days)
                             </h3>
                             <div className="h-56 w-full flex items-end justify-between relative pt-6 px-4">
                                 <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-8 pt-4">
@@ -543,12 +543,12 @@ export default function AdminDashboard({ user, backendUrl }) {
                                     <div className="w-full border-t border-[var(--border-primary)] opacity-40" />
                                 </div>
                                 
-                                {activityTrend.map((d, i) => {
-                                    const heightPercent = `${Math.max(5, (d.actions / maxActivity) * 100)}%`;
+                                {loginTrend.map((d, i) => {
+                                    const heightPercent = `${Math.max(5, (d.logins / maxLogin) * 100)}%`;
                                     return (
-                                        <div key={i} className="flex flex-col items-center flex-1 z-10 group">
+                                        <div key={i} className="flex flex-col items-center justify-end h-full flex-1 z-10 group">
                                             <div className="text-[10px] font-bold text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-1.5">
-                                                {d.actions}
+                                                {d.logins}
                                             </div>
                                             <div
                                                 style={{ height: heightPercent }}

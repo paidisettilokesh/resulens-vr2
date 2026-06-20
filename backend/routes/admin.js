@@ -156,6 +156,7 @@ router.get('/analytics', requireAdmin, async (req, res) => {
         let totalLogins = 0;
         let recentLogins = [];
         let growthTrend = [];
+        let loginTrend = [];
         let featureUsage = {
             atsAnalysis: 0,
             rewrite: 0,
@@ -240,6 +241,24 @@ router.get('/analytics', requireAdmin, async (req, res) => {
                     actions: count
                 });
             }
+
+            // Generate login trend (last 7 days)
+            for (let i = 6; i >= 0; i--) {
+                const start = new Date();
+                start.setHours(0, 0, 0, 0);
+                start.setDate(start.getDate() - i);
+                const end = new Date(start);
+                end.setDate(end.getDate() + 1);
+
+                const count = await AuditLog.countDocuments({
+                    action: { $in: ['LOGIN_SUCCESS', 'LOGIN_SUCCESS_GOOGLE', 'LOGIN_GUEST'] },
+                    timestamp: { $gte: start, $lt: end }
+                });
+                loginTrend.push({
+                    date: start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                    logins: count
+                });
+            }
         } else {
             // JSON Fallback calculation
             const users = await readFallbackFile(USERS_FALLBACK_FILE);
@@ -322,6 +341,27 @@ router.get('/analytics', requireAdmin, async (req, res) => {
                     actions: count
                 });
             }
+
+            // Generate login trend (last 7 days)
+            const auditLogsLocal = await readFallbackFile(AUDIT_FALLBACK_FILE);
+            for (let i = 6; i >= 0; i--) {
+                const start = new Date();
+                start.setHours(0, 0, 0, 0);
+                start.setDate(start.getDate() - i);
+                const end = new Date(start);
+                end.setDate(end.getDate() + 1);
+
+                const count = auditLogsLocal.filter(log => {
+                    const date = log.timestamp ? new Date(log.timestamp) : new Date();
+                    const isLogin = ['LOGIN_SUCCESS', 'LOGIN_SUCCESS_GOOGLE', 'LOGIN_GUEST'].includes(log.action);
+                    return isLogin && date >= start && date < end;
+                }).length;
+
+                loginTrend.push({
+                    date: start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                    logins: count
+                });
+            }
         }
 
         res.json({
@@ -332,7 +372,8 @@ router.get('/analytics', requireAdmin, async (req, res) => {
                 active90,
                 totalLogins,
                 growthTrend,
-                recentLogins
+                recentLogins,
+                loginTrend
             },
             usage: {
                 featureUsage,
