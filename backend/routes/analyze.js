@@ -35,6 +35,18 @@ ANALYZE this resume vs the target role. Return ONLY this JSON (no preamble, mark
     "issues": ["issue1", "issue2"],
     "suggestions": ["suggestion1", "suggestion2"]
   },
+  "atsScoreBreakdown": {
+    "educationMatch": 80,
+    "educationMatchMax": 100,
+    "experienceMatch": 75,
+    "experienceMatchMax": 100,
+    "skillsMatch": 85,
+    "skillsMatchMax": 100,
+    "keywordMatch": 70,
+    "keywordMatchMax": 100,
+    "formattingMatch": 90,
+    "formattingMatchMax": 100
+  },
   "competencyMatrix": [
     { "skill": "Skill Name", "level": 8, "benchmark": "Senior/Mid/Junior", "category": "Technical/Soft", "gap": "brief gap explanation" }
   ],

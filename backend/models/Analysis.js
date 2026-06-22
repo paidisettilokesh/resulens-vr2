@@ -7,6 +7,7 @@ const analysisSchema = new mongoose.Schema({
         required: true
     },
     jobRole: String,
+    type: { type: String, default: 'analysis' },
     candidateName: String,
     atsScore: Number,
     jobMatchScore: Number,

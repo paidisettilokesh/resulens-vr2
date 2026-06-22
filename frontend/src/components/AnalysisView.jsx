@@ -89,10 +89,10 @@ const AnalysisView = ({
     const atsScore = analysis.atsScore || 0;
     const jobMatchScore = analysis.jobMatchScore || 0;
     
-    const recruiterInterest = analysis.recruiterInterest || Math.round((atsScore * 0.4) + (jobMatchScore * 0.6));
-    const educationScore = analysis.educationScore || (analysis.atsScoreBreakdown?.educationMatch ? Math.round((analysis.atsScoreBreakdown.educationMatch / analysis.atsScoreBreakdown.educationMatchMax) * 100) : 75);
-    const experienceScore = analysis.experienceScore || (analysis.atsScoreBreakdown?.experienceMatch ? Math.round((analysis.atsScoreBreakdown.experienceMatch / analysis.atsScoreBreakdown.experienceMatchMax) * 100) : 70);
-    const skillsMatchScore = analysis.skillsMatch || (analysis.atsScoreBreakdown?.skillsMatch ? Math.round((analysis.atsScoreBreakdown.skillsMatch / analysis.atsScoreBreakdown.skillsMatchMax) * 100) : 75);
+    const recruiterInterest = analysis.recruiterInterest ?? Math.round((atsScore * 0.4) + (jobMatchScore * 0.6));
+    const educationScore = analysis.educationScore ?? (analysis.atsScoreBreakdown?.educationMatch != null ? Math.round((analysis.atsScoreBreakdown.educationMatch / analysis.atsScoreBreakdown.educationMatchMax) * 100) : 0);
+    const experienceScore = analysis.experienceScore ?? (analysis.atsScoreBreakdown?.experienceMatch != null ? Math.round((analysis.atsScoreBreakdown.experienceMatch / analysis.atsScoreBreakdown.experienceMatchMax) * 100) : 0);
+    const skillsMatchScore = analysis.skillsMatch ?? (analysis.atsScoreBreakdown?.skillsMatch != null ? Math.round((analysis.atsScoreBreakdown.skillsMatch / analysis.atsScoreBreakdown.skillsMatchMax) * 100) : 0);
     
     // Recruiter Interest Category
     let interestCategory = 'Moderate';

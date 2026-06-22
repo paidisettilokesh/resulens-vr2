@@ -220,17 +220,17 @@ router.get('/analytics', requireAdmin, async (req, res) => {
             }
 
             // Feature usage counts
-            const knownFeatureRoles = ['rewrite', 'interview', 'coverLetter', 'roast', 'skills', 'market', 'linkedin', 'email', 'tailor'];
-            featureUsage.atsAnalysis = await Analysis.countDocuments({ jobRole: { $nin: knownFeatureRoles } });
-            featureUsage.rewrite = await Analysis.countDocuments({ jobRole: 'rewrite' });
-            featureUsage.interview = await Analysis.countDocuments({ jobRole: 'interview' });
-            featureUsage.coverLetter = await Analysis.countDocuments({ jobRole: 'coverLetter' });
-            featureUsage.roast = await Analysis.countDocuments({ jobRole: 'roast' });
-            featureUsage.skills = await Analysis.countDocuments({ jobRole: 'skills' });
-            featureUsage.market = await Analysis.countDocuments({ jobRole: 'market' });
-            featureUsage.linkedin = await Analysis.countDocuments({ jobRole: 'linkedin' });
-            featureUsage.email = await Analysis.countDocuments({ jobRole: 'email' });
-            featureUsage.tailor = await Analysis.countDocuments({ jobRole: 'tailor' });
+            const knownFeatureTypes = ['analysis', 'rewrite', 'interview', 'coverLetter', 'roast', 'skills', 'market', 'linkedin', 'email', 'tailor'];
+            featureUsage.atsAnalysis = await Analysis.countDocuments({ type: 'analysis' });
+            featureUsage.rewrite = await Analysis.countDocuments({ type: 'rewrite' });
+            featureUsage.interview = await Analysis.countDocuments({ type: 'interview' });
+            featureUsage.coverLetter = await Analysis.countDocuments({ type: 'coverLetter' });
+            featureUsage.roast = await Analysis.countDocuments({ type: 'roast' });
+            featureUsage.skills = await Analysis.countDocuments({ type: 'skills' });
+            featureUsage.market = await Analysis.countDocuments({ type: 'market' });
+            featureUsage.linkedin = await Analysis.countDocuments({ type: 'linkedin' });
+            featureUsage.email = await Analysis.countDocuments({ type: 'email' });
+            featureUsage.tailor = await Analysis.countDocuments({ type: 'tailor' });
 
             const totalActions = await Analysis.countDocuments();
             const knownCount = Object.values(featureUsage).reduce((a, b) => a + b, 0);
@@ -320,15 +320,15 @@ router.get('/analytics', requireAdmin, async (req, res) => {
             }
 
             // Feature usage calculation from history fallback JSON
-            const knownFeatureRoles = ['rewrite', 'interview', 'coverLetter', 'roast', 'skills', 'market', 'linkedin', 'email', 'tailor'];
+            const knownFeatureTypes = ['analysis', 'rewrite', 'interview', 'coverLetter', 'roast', 'skills', 'market', 'linkedin', 'email', 'tailor'];
             history.forEach(h => {
-                const role = h.jobRole || h.role;
-                if (!role) {
+                const type = h.type || 'analysis';
+                if (!knownFeatureTypes.includes(type)) {
                     featureUsage.other++;
-                } else if (!knownFeatureRoles.includes(role)) {
+                } else if (type === 'analysis') {
                     featureUsage.atsAnalysis++;
                 } else {
-                    featureUsage[role] = (featureUsage[role] || 0) + 1;
+                    featureUsage[type] = (featureUsage[type] || 0) + 1;
                 }
             });
 

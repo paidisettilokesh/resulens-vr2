@@ -30,19 +30,19 @@ const ResumeStudio = (props) => {
     return (
         <div className="space-y-8 min-h-[800px]">
             {/* Studio Control Center */}
-            <div className="bg-[var(--bg-surface)] rounded-[3rem] border border-[var(--border-primary)] p-2 shadow-2xl relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/[0.02] to-emerald-500/[0.02] pointer-events-none" />
+            <div className="bg-[var(--bg-surface)]/80 backdrop-blur-xl rounded-[3rem] border border-[var(--border-primary)] p-2 shadow-2xl relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/[0.05] to-emerald-500/[0.05] pointer-events-none" />
 
-                <div className="flex flex-col md:flex-row items-center gap-2 p-1">
+                <div className="flex flex-col md:flex-row items-center gap-2 p-1 relative z-10">
                     {sections.map(section => (
                         <button
                             key={section.id}
                             onClick={() => setActiveSection(section.id)}
                             className={`
-                                relative flex-1 flex items-center gap-4 px-8 py-5 rounded-[2rem] transition-all duration-500 group/btn
+                                relative flex-1 flex items-center gap-4 px-8 py-5 rounded-[2rem] transition-all duration-500 group/btn overflow-hidden
                                 ${activeSection === section.id
-                                    ? 'bg-[var(--bg-app)] shadow-xl ring-1 ring-[var(--border-secondary)]'
-                                    : 'hover:bg-[var(--bg-surface-secondary)] opacity-60 hover:opacity-100'
+                                    ? 'bg-[var(--bg-app)] shadow-xl ring-1 ring-[var(--border-secondary)] scale-[1.02]'
+                                    : 'hover:bg-[var(--bg-surface-secondary)] opacity-60 hover:opacity-100 hover:scale-[1.01]'
                                 }
                             `}
                         >
@@ -109,18 +109,6 @@ const ResumeStudio = (props) => {
                 </motion.div>
             </AnimatePresence>
 
-            {/* Strategic Footer Context */}
-            <div className="flex flex-wrap items-center justify-center gap-8 py-6 opacity-40 grayscale hover:grayscale-0 transition-all duration-1000">
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
-                    <ShieldCheck size={14} className="text-emerald-500" /> ATS Compliant
-                </div>
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
-                    <Zap size={14} className="text-amber-500" /> Real-time Sync
-                </div>
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
-                    <FileText size={14} className="text-blue-500" /> Export Ready
-                </div>
-            </div>
         </div>
     );
 };

@@ -3,7 +3,6 @@ import fs from "fs";
 import crypto from "crypto";
 import { extractText } from "./extractText.js";
 import AICache from "../models/AICache.js";
-import { calculateAtsScore } from "./atsScoringEngine.js";
 
 // --- GROQ PROVIDER (Primary: Free, No Daily Limit, Ultra-Fast) ---
 const callGroq = async (prompt) => {
@@ -237,6 +236,11 @@ const normalizeAnalysis = (data) => {
         location: data.location || 'N/A',
         atsScore: parseScore(data.atsScore || data.score),
         jobMatchScore: parseScore(data.jobMatchScore || data.matchScore),
+        recruiterInterest: parseScore(data.recruiterInterest),
+        educationScore: parseScore(data.educationScore),
+        experienceScore: parseScore(data.experienceScore),
+        skillsMatch: parseScore(data.skillsMatch),
+        atsScoreBreakdown: data.atsScoreBreakdown || null,
         summary: data.summary || '',
         competencyMatrix: ensureArray(data.competencyMatrix).map(c => ({
             skill: c.skill || "Core Competency",
@@ -371,10 +375,6 @@ export const handleResumeRequest = async (req, res, promptBuilder, onSuccess) =>
 
         if (url.includes('analyze')) {
             result = normalizeAnalysis(result);
-            const scoring = calculateAtsScore(resumeText, req.body.jobRole);
-            result.atsScore = scoring.atsScore;
-            result.jobMatchScore = scoring.jobMatchScore;
-            result.atsScoreBreakdown = scoring.atsScoreBreakdown;
         } else if (url.includes('roast')) {
             result = normalizeRoast(result);
         } else if (url.includes('rewrite') || url.includes('linkedin') || url.includes('tailor') || url.includes('cover-letter') || url.includes('coverletter')) {

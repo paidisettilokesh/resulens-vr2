@@ -24,6 +24,7 @@ export const saveHistory = async (data, userId = 'guest') => {
             const newEntry = new Analysis({
                 userId,
                 jobRole: data.role || data.jobRole,
+                type: data.type || 'analysis',
                 candidateName: data.candidateName || data.analysis?.candidateName,
                 atsScore: data.atsScore || data.analysis?.atsScore,
                 jobMatchScore: data.jobMatchScore || data.analysis?.jobMatchScore,

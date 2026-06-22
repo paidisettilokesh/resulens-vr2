@@ -100,14 +100,14 @@ router.post('/signup', async (req, res) => {
             });
             await user.save();
 
-            // Log Audit Entry
-            await logAudit({
+            // Log Audit Entry (fire-and-forget)
+            logAudit({
                 userId: user._id,
                 userEmail: user.email,
                 action: 'SIGNUP_SUCCESS',
                 ipAddress: req.ip,
                 userAgent: req.headers['user-agent']
-            });
+            }).catch(err => console.error("Audit log error:", err));
 
             const token = generateToken(user._id, user.email, user.name, user.role);
 
@@ -148,14 +148,14 @@ router.post('/signup', async (req, res) => {
             users.push(newUser);
             await saveLocalUsers(users);
 
-            // Log Audit Entry
-            await logAudit({
+            // Log Audit Entry (fire-and-forget)
+            logAudit({
                 userId: mockId,
                 userEmail: newUser.email,
                 action: 'SIGNUP_SUCCESS',
                 ipAddress: req.ip,
                 userAgent: req.headers['user-agent']
-            });
+            }).catch(err => console.error("Audit log error:", err));
 
             const token = generateToken(mockId, newUser.email, newUser.name, newUser.role);
 
@@ -254,22 +254,22 @@ router.post('/login', async (req, res) => {
             }
 
             // Update last login timestamp and increment loginCount in DB without saving/triggering pre-save hook
-            await User.updateOne(
+            User.updateOne(
                 { _id: user._id },
                 {
                     $set: updateFields,
                     $inc: { loginCount: 1 }
                 }
-            );
+            ).catch(err => console.error("Update login error:", err));
 
-            // Log successful login
-            await logAudit({
+            // Log successful login (fire-and-forget)
+            logAudit({
                 userId: user._id,
                 userEmail: user.email,
                 action: 'LOGIN_SUCCESS',
                 ipAddress: req.ip,
                 userAgent: req.headers['user-agent']
-            });
+            }).catch(err => console.error("Audit log error:", err));
 
             const token = generateToken(user._id, user.email, user.name, user.role);
 
@@ -344,14 +344,14 @@ router.post('/login', async (req, res) => {
             user.loginCount = (user.loginCount || 0) + 1;
             await saveLocalUsers(users);
 
-            // Log successful login
-            await logAudit({
+            // Log successful login (fire-and-forget)
+            logAudit({
                 userId: user._id,
                 userEmail: user.email,
                 action: 'LOGIN_SUCCESS',
                 ipAddress: req.ip,
                 userAgent: req.headers['user-agent']
-            });
+            }).catch(err => console.error("Audit log error:", err));
 
             const token = generateToken(user._id, user.email, user.name, user.role || 'user');
 
@@ -465,14 +465,14 @@ router.post('/google', async (req, res) => {
                 await user.save();
             }
 
-            // Log Audit Entry
-            await logAudit({
+            // Log Audit Entry (fire-and-forget)
+            logAudit({
                 userId: user._id,
                 userEmail: user.email,
                 action: 'LOGIN_SUCCESS_GOOGLE',
                 ipAddress: req.ip,
                 userAgent: req.headers['user-agent']
-            });
+            }).catch(err => console.error("Audit log error:", err));
 
             const token = generateToken(user._id, user.email, user.name, user.role);
 
@@ -536,14 +536,14 @@ router.post('/google', async (req, res) => {
             }
             await saveLocalUsers(users);
 
-            // Log Audit Entry
-            await logAudit({
+            // Log Audit Entry (fire-and-forget)
+            logAudit({
                 userId: user._id,
                 userEmail: user.email,
                 action: 'LOGIN_SUCCESS_GOOGLE',
                 ipAddress: req.ip,
                 userAgent: req.headers['user-agent']
-            });
+            }).catch(err => console.error("Audit log error:", err));
 
             const token = generateToken(user._id, user.email, user.name, user.role || 'user');
 
@@ -569,14 +569,14 @@ router.post('/guest', async (req, res) => {
         const mockId = 'guest_' + Date.now();
         const token = generateToken(mockId, 'guest@resulens.ai', 'Guest User', 'user');
 
-        // Log Audit Entry
-        await logAudit({
+        // Log Audit Entry (fire-and-forget)
+        logAudit({
             userId: mockId,
             userEmail: 'guest@resulens.ai',
             action: 'LOGIN_GUEST',
             ipAddress: req.ip,
             userAgent: req.headers['user-agent']
-        });
+        }).catch(err => console.error("Audit log error:", err));
 
         res.json({
             token,
