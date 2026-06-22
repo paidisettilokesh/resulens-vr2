@@ -2,14 +2,14 @@ import Analysis from '../models/Analysis.js';
 import fs from 'fs/promises';
 import mongoose from 'mongoose';
 import path from 'path';
-import os from 'os';
 import { fileURLToPath } from 'url';
+import { getSecureStorageDir } from './storage.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Move fallback and uploads outside project to prevent watch-mode restarts
-const FALLBACK_DIR = path.join(os.tmpdir(), 'talentsync-v2-data');
+const FALLBACK_DIR = path.join(getSecureStorageDir(), 'talentsync-v2-data');
 const FALLBACK_FILE = path.join(FALLBACK_DIR, 'history_fallback.json');
 
 // Ensure fallback directory exists

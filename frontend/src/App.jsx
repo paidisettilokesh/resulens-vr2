@@ -49,7 +49,21 @@ function App() {
     const [showOnboarding, setShowOnboarding] = useState(false);
     const [authModalOpen, setAuthModalOpen] = useState(false);
     const [authInitialMode, setAuthInitialMode] = useState('login');
+    const [resetToken, setResetToken] = useState(null);
     const [pendingResumeFile, setPendingResumeFile] = useState(null);
+
+    // Parse URL parameters on load
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('resetToken');
+        if (token) {
+            setResetToken(token);
+            setAuthInitialMode('reset-password');
+            setAuthModalOpen(true);
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }, []);
 
     // Resume Builder State (Moved to local or could be a separate Context later)
     const [builderData, setBuilderData] = useState({
@@ -129,14 +143,35 @@ function App() {
         }
     }, [user]);
 
-    // Auto-consume pending file when user logs in
+    // Auto-consume pending file and run analysis when user logs in
     useEffect(() => {
         if (user && pendingResumeFile) {
-            setFile(pendingResumeFile);
+            const uploaded = pendingResumeFile;
+            setFile(uploaded);
             setPendingResumeFile(null);
-            setActiveTab('home');
+            setActiveTab('analyzer');
+            
+            // Execute automated analysis if a target role was already chosen
+            const autoAnalyze = async () => {
+                const targetRole = selectedRole === 'Other' ? customRole : selectedRole;
+                if (!targetRole) {
+                    // Fallback to home if no role was chosen
+                    setActiveTab('home');
+                    return;
+                }
+                const fd = new FormData();
+                fd.append('resume', uploaded);
+                fd.append('jobRole', targetRole);
+                try {
+                    const data = await callApi('analyze', fd);
+                    setAnalysis(data);
+                } catch (err) {
+                    console.error("Auto analysis failed:", err);
+                }
+            };
+            autoAnalyze();
         }
-    }, [user, pendingResumeFile, setFile]);
+    }, [user, pendingResumeFile, selectedRole, customRole, setFile, setAnalysis, callApi, setActiveTab]);
 
     // Role-based Access Control Guard for Admin Panel
     useEffect(() => {
@@ -251,11 +286,12 @@ function App() {
                 />
                 <Auth
                     isOpen={authModalOpen}
-                    onClose={() => setAuthModalOpen(false)}
+                    onClose={() => { setAuthModalOpen(false); setResetToken(null); }}
                     onLogin={handleLogin}
                     backendUrl={backendUrl}
                     initialMode={authInitialMode}
                     pendingFile={pendingResumeFile}
+                    resetToken={resetToken}
                 />
             </>
         );

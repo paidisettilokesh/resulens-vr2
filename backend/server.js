@@ -24,6 +24,7 @@ import logger from './utils/logger.js';
 import connectDB from './config/db.js';
 import { getHistory, clearHistory } from './utils/historyManager.js';
 import { requireAuth } from './middleware/auth.js';
+import { timeoutMiddleware } from './middleware/timeout.js';
 
 // Route Imports
 import analyzeRoute from './routes/analyze.js';
@@ -109,7 +110,7 @@ app.use(helmet.contentSecurityPolicy({
 // ── Rate Limiting ─────────────────────────────────────────────────────────────
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per window
+    max: parseInt(process.env.API_LIMITS_GLOBAL || '100', 10), // Limit each IP to X requests per window
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many requests from this IP, please try again after 15 minutes.' }
@@ -126,7 +127,7 @@ const aiLimiter = rateLimit({
 // Strict limiter for auth endpoints — prevents brute force attacks
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: process.env.NODE_ENV === 'production' ? 10 : 100, // 10 in prod, 100 in dev
+    max: parseInt(process.env.API_LIMITS_AUTH || (process.env.NODE_ENV === 'production' ? '10' : '100'), 10),
     standardHeaders: true,
     legacyHeaders: false,
     skipSuccessfulRequests: true, // Only count failed attempts
@@ -176,20 +177,22 @@ app.get('/', (req, res) => {
 });
 
 // ── API Routes ────────────────────────────────────────────────────────────────
+const aiTimeout = timeoutMiddleware(120); // 120 seconds for AI endpoints
+
 app.use('/api/auth', authRoute);
 app.use('/api/admin', requireAuth, adminRoute);
-app.use('/api/analyze', requireAuth, analyzeRoute);
-app.use('/api/rewrite', requireAuth, rewriteRoute);
-app.use('/api/cover-letter', requireAuth, coverLetterRoute);
-app.use('/api/interview', requireAuth, interviewRoute);
-app.use('/api/tailor', requireAuth, tailorRoute);
-app.use('/api/skills', requireAuth, skillsRoute);
-app.use('/api/roast', requireAuth, roastRoute);
+app.use('/api/analyze', requireAuth, aiTimeout, analyzeRoute);
+app.use('/api/rewrite', requireAuth, aiTimeout, rewriteRoute);
+app.use('/api/cover-letter', requireAuth, aiTimeout, coverLetterRoute);
+app.use('/api/interview', requireAuth, aiTimeout, interviewRoute);
+app.use('/api/tailor', requireAuth, aiTimeout, tailorRoute);
+app.use('/api/skills', requireAuth, aiTimeout, skillsRoute);
+app.use('/api/roast', requireAuth, aiTimeout, roastRoute);
 app.use('/api/user-resumes', requireAuth, userResumesRoute);
-app.use('/api/salary', requireAuth, salaryRoute);
-app.use('/api/market', requireAuth, marketRoute);
-app.use('/api/linkedin', requireAuth, linkedinRoute);
-app.use('/api/email', requireAuth, emailRoute);
+app.use('/api/salary', requireAuth, aiTimeout, salaryRoute);
+app.use('/api/market', requireAuth, aiTimeout, marketRoute);
+app.use('/api/linkedin', requireAuth, aiTimeout, linkedinRoute);
+app.use('/api/email', requireAuth, aiTimeout, emailRoute);
 app.use('/api/builder', requireAuth, builderRoute);
 app.use('/api/resumes', requireAuth, savedResumesRoute);
 

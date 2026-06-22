@@ -1,6 +1,11 @@
-import fs from "fs";
-import mammoth from "mammoth";
-import pdf from "pdf-parse";
+import { Worker } from 'worker_threads';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const WORKER_PATH = path.join(__dirname, '../workers/parserWorker.js');
 
 /**
  * Normalizes text to ensure identical formatting, encoding, and whitespace
@@ -15,59 +20,58 @@ export function normalizeText(text) {
 }
 
 /**
- * Extracts raw text from file and normalizes it
+ * Extracts raw text from file and normalizes it using worker_threads
  */
 export async function extractText(file) {
     const rawText = await getRawText(file);
     return normalizeText(rawText);
 }
 
-async function getRawText(file) {
-    const buffer = fs.readFileSync(file.path);
-    console.log(`Extracting text from: ${file.originalname} (${file.mimetype}, ${buffer.length} bytes)`);
+function getRawText(file) {
+    return new Promise((resolve, reject) => {
+        const stats = fs.statSync(file.path);
+        console.log(`Extracting text from: ${file.originalname} (${file.mimetype}, ${stats.size} bytes)`);
 
-    if (file.mimetype === "application/pdf") {
-        try {
-            // Check PDF Magic Number
-            const signature = buffer.slice(0, 4).toString();
-            if (signature !== "%PDF") {
-                console.warn("File has .pdf extension but missing %PDF signature. Attempting raw text recovery.");
-                return buffer.toString('utf8', 0, 5000);
+        const worker = new Worker(WORKER_PATH);
+
+        // Timeout protection (180 seconds)
+        const timeout = setTimeout(() => {
+            worker.terminate();
+            reject(new Error('File parsing timed out after 180 seconds'));
+        }, 180000);
+
+        worker.on('message', (message) => {
+            // Ignore internal Node.js watch mode messages
+            if (message && message['watch:import']) return;
+            
+            clearTimeout(timeout);
+            if (message && message.success !== undefined) {
+                if (message.success) {
+                    resolve(message.text);
+                } else {
+                    reject(new Error(message.error || 'Worker parsing failed'));
+                }
+                worker.terminate();
             }
+        });
 
-            const data = await pdf(buffer);
-            if (!data.text || data.text.trim().length === 0) {
-                console.warn("PDF parsed but no text found. Might be a scanned image. Using metadata fallback.");
-                return "Scanned PDF Detected. Content extraction limited. " + (data.info ? JSON.stringify(data.info) : "");
+        worker.on('error', (err) => {
+            clearTimeout(timeout);
+            console.error('Worker thread error:', err);
+            reject(new Error('Parser worker thread crashed.'));
+        });
+
+        worker.on('exit', (code) => {
+            clearTimeout(timeout);
+            if (code !== 0) {
+                reject(new Error(`Worker stopped with exit code ${code}`));
             }
-            return data.text;
-        } catch (err) {
-            console.error("PDF Parsing failed. Falling back to string extraction.", err.message);
-            // Fallback: If it's a 'broken' PDF, sometimes we can still grab strings
-            return buffer.toString('utf8').replace(/[^\x20-\x7E\n\r\t]/g, ' ').substring(0, 5000);
-        }
-    }
+        });
 
-    if (file.mimetype === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
-        try {
-            const data = await mammoth.extractRawText({ buffer });
-            return data.value;
-        } catch (err) {
-            console.error("Word parsing failed:", err.message);
-            return buffer.toString('utf8').substring(0, 3000);
-        }
-    }
-
-    // Default fallback for unknown or text files
-    return buffer.toString('utf8').substring(0, 3000);
+        // Send job to worker
+        worker.postMessage({
+            filePath: file.path,
+            mimetype: file.mimetype
+        });
+    });
 }
-
-// Run a one-time warm-up call to initialize the pdf-parse fake worker and bypass the first-call race condition bug
-(async () => {
-    try {
-        await pdf(Buffer.from('%PDF-1.4'));
-    } catch (e) {
-        // Expected fallback initialization failure, safe to ignore
-    }
-})();
-

@@ -4,15 +4,17 @@ import { OAuth2Client } from 'google-auth-library';
 import User from '../models/User.js';
 import fs from 'fs/promises';
 import path from 'path';
-import os from 'os';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import { getSecureStorageDir } from '../utils/storage.js';
+import { sendEmail } from '../utils/email.js';
 import { logAudit } from '../utils/auditLogger.js';
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ── Fallback Storage Helpers ──────────────────────────────────────────────────
-const FALLBACK_DIR = path.join(os.tmpdir(), 'talentsync-v2-data');
+const FALLBACK_DIR = path.join(getSecureStorageDir(), 'talentsync-v2-data');
 const USERS_FALLBACK_FILE = path.join(FALLBACK_DIR, 'users_fallback.json');
 
 // Ensure fallback directory exists
@@ -50,7 +52,7 @@ const generateToken = (userId, email, name, role = 'user') => {
     return jwt.sign(
         { id: userId, email, name, role },
         process.env.JWT_SECRET,
-        { expiresIn: '7d' }
+        { expiresIn: process.env.JWT_EXPIRY || '7d' }
     );
 };
 
@@ -586,6 +588,127 @@ router.post('/guest', async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ error: 'Failed to initialize guest session.' });
+    }
+});
+
+// ── POST /api/auth/forgot-password ───────────────────────────────────────────
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email || !validateEmail(email)) {
+            return res.status(400).json({ error: 'A valid email address is required.' });
+        }
+
+        const emailClean = email.toLowerCase().trim();
+
+        if (global.isMongoConnected) {
+            const user = await User.findOne({ email: emailClean });
+            if (!user) {
+                return res.status(404).json({ error: 'No account with that email found.' });
+            }
+
+            const resetToken = crypto.randomBytes(20).toString('hex');
+            user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+            user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+            await user.save();
+
+            const resetUrl = `${process.env.APP_URL || 'http://localhost:5173'}?resetToken=${resetToken}`;
+            const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a POST request to: \n\n ${resetUrl}`;
+
+            try {
+                await sendEmail({
+                    email: user.email,
+                    subject: 'Password Reset Token',
+                    message
+                });
+                res.status(200).json({ success: true, message: 'Email sent' });
+            } catch (err) {
+                user.resetPasswordToken = undefined;
+                user.resetPasswordExpires = undefined;
+                await user.save();
+                return res.status(500).json({ error: 'Email could not be sent' });
+            }
+        } else {
+            // Local JSON fallback
+            const users = await getLocalUsers();
+            const user = users.find(u => u.email === emailClean);
+            if (!user) {
+                return res.status(404).json({ error: 'No account with that email found.' });
+            }
+
+            const resetToken = crypto.randomBytes(20).toString('hex');
+            user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+            user.resetPasswordExpires = new Date(Date.now() + 3600000).toISOString();
+            await saveLocalUsers(users);
+
+            const resetUrl = `${process.env.APP_URL || 'http://localhost:5173'}?resetToken=${resetToken}`;
+            const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a POST request to: \n\n ${resetUrl}`;
+
+            try {
+                await sendEmail({
+                    email: user.email,
+                    subject: 'Password Reset Token',
+                    message
+                });
+                res.status(200).json({ success: true, message: 'Email sent' });
+            } catch (err) {
+                user.resetPasswordToken = undefined;
+                user.resetPasswordExpires = undefined;
+                await saveLocalUsers(users);
+                return res.status(500).json({ error: 'Email could not be sent' });
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server Error' });
+    }
+});
+
+// ── POST /api/auth/reset-password ───────────────────────────────────────────
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { token, password } = req.body;
+        
+        if (!token) return res.status(400).json({ error: 'Token is required' });
+        if (!validatePassword(password)) return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+
+        const resetPasswordToken = crypto.createHash('sha256').update(token).digest('hex');
+
+        if (global.isMongoConnected) {
+            const user = await User.findOne({
+                resetPasswordToken,
+                resetPasswordExpires: { $gt: Date.now() }
+            });
+
+            if (!user) {
+                return res.status(400).json({ error: 'Invalid or expired token' });
+            }
+
+            user.password = password;
+            user.resetPasswordToken = undefined;
+            user.resetPasswordExpires = undefined;
+            await user.save();
+
+            res.status(200).json({ success: true, message: 'Password updated successfully' });
+        } else {
+            const users = await getLocalUsers();
+            const user = users.find(u => u.resetPasswordToken === resetPasswordToken && new Date(u.resetPasswordExpires) > new Date());
+            
+            if (!user) {
+                return res.status(400).json({ error: 'Invalid or expired token' });
+            }
+
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(password, salt);
+            user.resetPasswordToken = undefined;
+            user.resetPasswordExpires = undefined;
+            await saveLocalUsers(users);
+
+            res.status(200).json({ success: true, message: 'Password updated successfully' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server Error' });
     }
 });
 

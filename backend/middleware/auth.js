@@ -2,9 +2,9 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import fs from 'fs/promises';
 import path from 'path';
-import os from 'os';
+import { getSecureStorageDir } from '../utils/storage.js';
 
-const FALLBACK_DIR = path.join(os.tmpdir(), 'talentsync-v2-data');
+const FALLBACK_DIR = path.join(getSecureStorageDir(), 'talentsync-v2-data');
 const USERS_FALLBACK_FILE = path.join(FALLBACK_DIR, 'users_fallback.json');
 
 const getUserRole = async (userId) => {

@@ -3,11 +3,11 @@ import Resume from '../models/Resume.js';
 import mongoose from 'mongoose';
 import fs from 'fs/promises';
 import path from 'path';
-import os from 'os';
+import { getSecureStorageDir } from '../utils/storage.js';
 
 const router = express.Router();
 
-const FALLBACK_DIR = path.join(os.tmpdir(), 'talentsync-v2-data');
+const FALLBACK_DIR = path.join(getSecureStorageDir(), 'talentsync-v2-data');
 const RESUMES_FALLBACK_FILE = path.join(FALLBACK_DIR, 'resumes_fallback.json');
 
 // Ensure fallback directory exists

@@ -1,10 +1,10 @@
 import AuditLog from '../models/AuditLog.js';
 import fs from 'fs/promises';
 import path from 'path';
-import os from 'os';
 import mongoose from 'mongoose';
+import { getSecureStorageDir } from './storage.js';
 
-const FALLBACK_DIR = path.join(os.tmpdir(), 'talentsync-v2-data');
+const FALLBACK_DIR = path.join(getSecureStorageDir(), 'talentsync-v2-data');
 const AUDIT_FALLBACK_FILE = path.join(FALLBACK_DIR, 'audit_fallback.json');
 
 /**

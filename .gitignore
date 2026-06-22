@@ -41,7 +41,7 @@ pnpm-debug.log*
 # ── Database ──────────────────────────────────────────────────────────────────
 *.sqlite
 *.db
-backend/data/*.json
+backend/data/
 backend/backups/
 backups/
 

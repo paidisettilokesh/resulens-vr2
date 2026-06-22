@@ -6,8 +6,8 @@ import { requireAdmin, requireFounder } from '../middleware/auth.js';
 import { logAudit } from '../utils/auditLogger.js';
 import fs from 'fs/promises';
 import path from 'path';
-import os from 'os';
 import bcrypt from 'bcryptjs';
+import { getSecureStorageDir } from '../utils/storage.js';
 import { fileURLToPath } from 'url';
 
 const router = express.Router();
@@ -16,7 +16,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Fallback configuration paths
-const FALLBACK_DIR = path.join(os.tmpdir(), 'talentsync-v2-data');
+const FALLBACK_DIR = path.join(getSecureStorageDir(), 'talentsync-v2-data');
 const USERS_FALLBACK_FILE = path.join(FALLBACK_DIR, 'users_fallback.json');
 const HISTORY_FALLBACK_FILE = path.join(FALLBACK_DIR, 'history_fallback.json');
 const AUDIT_FALLBACK_FILE = path.join(FALLBACK_DIR, 'audit_fallback.json');
@@ -123,7 +123,16 @@ router.get('/system/logs', requireAdmin, async (req, res) => {
         }
         
         const lines = fileContent.trim().split('\n').filter(Boolean).slice(-50);
-        res.json({ logs: lines });
+        
+        // Sanitize sensitive information before sending logs to client
+        const sanitizedLines = lines.map(line => {
+            return line
+                .replace(/([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/g, '[REDACTED EMAIL]') // Redact plain emails
+                .replace(/(password|token|secret|key)["']?\s*[:=]\s*["']?[^"'\s,]+/gi, '$1: [REDACTED]') // Redact key-value secrets
+                .replace(/(Bearer\s+)[A-Za-z0-9-._~+/]+=*/gi, '$1[REDACTED TOKEN]'); // Redact Bearer tokens
+        });
+
+        res.json({ logs: sanitizedLines });
     } catch (error) {
         console.error("System Log Read Error:", error);
         res.status(500).json({ error: "Failed to read system logs" });

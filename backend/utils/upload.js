@@ -1,11 +1,11 @@
 import multer from 'multer';
-import os from 'os';
 import path from 'path';
+import { getSecureStorageDir } from './storage.js';
 
 // Use system temp directory to avoid triggering restarts when files are uploaded
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, os.tmpdir());
+        cb(null, getSecureStorageDir());
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -35,6 +35,6 @@ export const upload = multer({
     storage,
     fileFilter,
     limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB limit
+        fileSize: parseInt(process.env.UPLOAD_LIMIT_MB || '5', 10) * 1024 * 1024 // 5MB limit default
     }
 });

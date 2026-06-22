@@ -44,6 +44,10 @@ export default {
             backgroundImage: {
                 'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
             },
+            boxShadow: {
+                glow: '0 0 20px rgba(34, 211, 238, 0.15)',
+                premium: '0 10px 40px rgba(0, 0, 0, 0.4)',
+            },
             animation: {
                 'fade-in': 'fadeIn 0.3s ease-in-out',
                 'slide-up': 'slideUp 0.4s ease-out',
