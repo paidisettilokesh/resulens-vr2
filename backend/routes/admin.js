@@ -139,9 +139,16 @@ router.get('/system/logs', requireAdmin, async (req, res) => {
     }
 });
 
+let analyticsCache = null;
+let analyticsCacheTime = 0;
+
 // ── GET /api/admin/analytics ──────────────────────────────────────────────────
 router.get('/analytics', requireAdmin, async (req, res) => {
     try {
+        if (analyticsCache && Date.now() - analyticsCacheTime < 60000) {
+            return res.json(analyticsCache);
+        }
+
         // 1. Calculate System Health Stats
         const system = {
             status: 'healthy',
@@ -373,7 +380,7 @@ router.get('/analytics', requireAdmin, async (req, res) => {
             }
         }
 
-        res.json({
+        const result = {
             users: {
                 total: totalUsers,
                 active7,
@@ -389,7 +396,11 @@ router.get('/analytics', requireAdmin, async (req, res) => {
                 activityTrend
             },
             system
-        });
+        };
+
+        analyticsCache = result;
+        analyticsCacheTime = Date.now();
+        res.json(result);
 
     } catch (error) {
         console.error("Admin Analytics Error:", error);

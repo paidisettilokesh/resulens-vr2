@@ -90,7 +90,7 @@ const HistoryTab = ({ user, backendUrl, setActiveTab, setAnalysis, setCandidateN
                         <div className="p-3 bg-cyan-600 rounded-2xl text-white shadow-lg">
                             <Sparkles size={24} />
                         </div>
-                        Insight Vault
+                        History
                     </h2>
                     <p className="text-[var(--text-secondary)] font-medium mt-1">Archive of your professional milestones and AI-driven breakthroughs.</p>
                 </div>

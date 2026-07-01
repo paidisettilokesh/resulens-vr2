@@ -5,12 +5,13 @@ import {
     ArrowRight, Star, BarChart3, FileText, Mic, Users, Trophy, Sun, Moon 
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { validateResumeFile } from '../utils/fileValidation.js';
 
 const STAGES = [
     "Reading Manuscript...",
     "Evaluating ATS Compatibility...",
     "Identifying Key Skill Gaps...",
-    "Compiling Neural Assessment..."
+    "Compiling Resume Assessment..."
 ];
 
 export default function LandingPage({ onOpenAuth }) {
@@ -19,6 +20,7 @@ export default function LandingPage({ onOpenAuth }) {
     const [uploadingStage, setUploadingStage] = useState(0);
     const [uploadedFile, setUploadedFile] = useState(null);
     const [activeFaq, setActiveFaq] = useState(null);
+    const [error, setError] = useState('');
 
     useEffect(() => {
         if (!uploadedFile) return;
@@ -59,8 +61,12 @@ export default function LandingPage({ onOpenAuth }) {
         setDragActive(false);
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             const file = e.dataTransfer.files[0];
-            if (isValidFile(file)) {
+            const validation = validateResumeFile(file);
+            if (validation.isValid) {
                 setUploadedFile(file);
+                setError('');
+            } else {
+                setError(validation.error);
             }
         }
     };
@@ -68,16 +74,15 @@ export default function LandingPage({ onOpenAuth }) {
     const handleFileInput = (e) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            if (isValidFile(file)) {
+            const validation = validateResumeFile(file);
+            if (validation.isValid) {
                 setUploadedFile(file);
+                setError('');
+            } else {
+                setError(validation.error);
             }
+            e.target.value = null;
         }
-    };
-
-    const isValidFile = (file) => {
-        const allowedExtensions = ['.pdf', '.doc', '.docx'];
-        const name = file.name.toLowerCase();
-        return allowedExtensions.some(ext => name.endsWith(ext));
     };
 
     const features = [
@@ -252,7 +257,7 @@ export default function LandingPage({ onOpenAuth }) {
                                                 : 'border-[var(--border-secondary)] hover:border-cyan-500 hover:bg-cyan-500/5 hover:shadow-inner'
                                             }`}
                                         >
-                                            <input type="file" onChange={handleFileInput} accept=".pdf,.doc,.docx" className="hidden" />
+                                            <input type="file" onChange={handleFileInput} accept=".pdf,.docx" className="hidden" />
                                             <div className="flex flex-col items-center gap-4">
                                                 <div className="w-16 h-16 bg-cyan-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/10">
                                                     <Upload size={28} />
@@ -263,6 +268,7 @@ export default function LandingPage({ onOpenAuth }) {
                                                 </div>
                                             </div>
                                         </label>
+                                        {error && <p className="text-center text-rose-500 text-sm font-bold pt-2">{error}</p>}
                                     </motion.div>
                                 ) : (
                                     <motion.div
@@ -294,7 +300,7 @@ export default function LandingPage({ onOpenAuth }) {
                                                 />
                                             </div>
                                             <p className="text-[10px] font-bold text-cyan-600 uppercase tracking-widest">
-                                                Running Neural Pipeline
+                                                Analyzing Resume
                                             </p>
                                         </div>
                                     </motion.div>

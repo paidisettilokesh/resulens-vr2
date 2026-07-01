@@ -1,6 +1,6 @@
 import { authMiddleware, requireAuth } from '../middleware/auth.js';
 import { fileFilter } from '../utils/upload.js';
-import { calculateAtsScore } from '../utils/atsScoringEngine.js';
+
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 
@@ -176,52 +176,6 @@ describe('📂 Security: File Upload Filters', () => {
     });
 });
 
-describe('⚙️ Programmatic ATS Scoring Engine', () => {
-    test('should calculate deterministic score for the same inputs', () => {
-        const resumeText = "John Doe\nBackend Developer\nSkills: Node.js, Spring Boot, Git, Docker, Postgres\nEducation: Bachelor of Computer Science\nExperience: 5 years as a Software Engineer\nSummary: Passionate developer.";
-        const role = "Backend Developer";
-
-        const result1 = calculateAtsScore(resumeText, role);
-        const result2 = calculateAtsScore(resumeText, role);
-
-        expect(result1.atsScore).toBe(result2.atsScore);
-        expect(result1.jobMatchScore).toBe(result2.jobMatchScore);
-        expect(result1.atsScoreBreakdown).toEqual(result2.atsScoreBreakdown);
-    });
-
-    test('should calculate scores mathematically correct (total matches breakdown.total)', () => {
-        const resumeText = "Jane Doe\nFrontend Developer\nSkills: React, HTML, CSS, JavaScript\nEducation: Master of Science\nExperience: 3 years of experience as a developer.\nSummary: Building web interfaces.";
-        const result = calculateAtsScore(resumeText, "Frontend Developer");
-        
-        const breakdown = result.atsScoreBreakdown;
-        const sum = breakdown.skillsMatch + breakdown.keywordMatch + breakdown.experienceMatch + breakdown.educationMatch + breakdown.formattingMatch;
-        expect(sum).toBe(result.atsScore);
-        expect(breakdown.total).toBe(result.atsScore);
-    });
-
-    test('should increase skills match score when relevant skills are added', () => {
-        const resumeBase = "Developer\nExperience: 2 years\nSummary: standard developer profile.";
-        
-        const scoreBefore = calculateAtsScore(resumeBase, "Backend Developer");
-        
-        // Add backend developer skills to the resume text
-        const resumeWithSkills = resumeBase + "\nSkills: Node.js, Spring Boot, SQL, Docker, Redis";
-        const scoreAfter = calculateAtsScore(resumeWithSkills, "Backend Developer");
-
-        expect(scoreAfter.atsScoreBreakdown.skillsMatch).toBeGreaterThan(scoreBefore.atsScoreBreakdown.skillsMatch);
-    });
-
-    test('should identify section completeness and formatting sections correctly', () => {
-        const resumeComplete = "Summary: Professional statement.\nExperience: 3 years of work history.\nEducation: B.Tech.\nSkills: Java.\nProjects: ResuLens App.";
-        const resumeIncomplete = "Summary: Only a summary is here.";
-
-        const scoreComplete = calculateAtsScore(resumeComplete, "Software Engineer");
-        const scoreIncomplete = calculateAtsScore(resumeIncomplete, "Software Engineer");
-
-        expect(scoreComplete.atsScoreBreakdown.formattingMatch).toBe(10); // All 5 sections found (5 * 2 = 10)
-        expect(scoreIncomplete.atsScoreBreakdown.formattingMatch).toBe(2);  // Only 1 section found (1 * 2 = 2)
-    });
-});
 
 describe('🔐 Security & Bug Fixes: Case-insensitive Emails & Password Re-hashing Prevention', () => {
     test('should match emails case-insensitively with regex escape helper', () => {

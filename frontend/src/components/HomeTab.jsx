@@ -3,17 +3,28 @@ import React from 'react';
 import { Zap, Briefcase, AlertTriangle, CheckCircle, Download, CheckCircle as CheckIcon, Globe, Shield, Sparkles, Rocket } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useResume } from '../context/ResumeContext';
+import { validateResumeFile } from '../utils/fileValidation.js';
 
 const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding }) => {
     const {
         file, setFile, selectedRole, setSelectedRole,
-        customRole, setCustomRole, error, loading
+        customRole, setCustomRole, error, setError, loading
     } = useResume();
 
     const handleFileUpload = (event) => {
         const uploadedFile = event.target.files[0];
         if (!uploadedFile) return;
+
+        const validation = validateResumeFile(uploadedFile);
+        if (!validation.isValid) {
+            setError(validation.error);
+            setFile(null);
+            event.target.value = null; // Clear input
+            return;
+        }
+
         setFile(uploadedFile);
+        setError('');
     };
 
     return (
@@ -78,7 +89,7 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                                 Professional Manuscript
                             </label>
                             <label className={`block w-full border-4 border-dashed rounded-[3rem] p-12 text-center cursor-pointer transition-all ${file ? 'border-emerald-400 bg-emerald-500/10' : 'border-[var(--border-secondary)] hover:border-cyan-400 hover:bg-cyan-500/5 hover:shadow-inner'}`}>
-                                <input type="file" onChange={handleFileUpload} accept=".pdf,.doc,.docx" className="hidden" />
+                                <input type="file" onChange={handleFileUpload} accept=".pdf,.docx" className="hidden" />
                                 <div className="flex flex-col items-center gap-4">
                                     {file ? (
                                         <>
@@ -138,7 +149,7 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                             ) : (
                                 <Zap size={24} className="group-hover:text-cyan-400 transition-colors" />
                             )}
-                            {loading ? 'Processing...' : 'Execute Neural Analysis'}
+                            {loading ? 'Processing...' : 'Analyze Resume'}
                         </button>
 
                         {error && <p className="text-center text-rose-500 text-sm font-bold italic">! {error}</p>}

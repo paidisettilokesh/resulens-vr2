@@ -215,7 +215,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                     {/* Header + Actions */}
                     <div className="flex justify-between items-center bg-[var(--bg-surface)] p-6 rounded-[2rem] border border-[var(--border-primary)] shadow-sm">
                         <div>
-                            <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tighter">Architect Mode</h2>
+                            <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tighter">Resume Builder</h2>
                             <p className="text-[var(--text-muted)] text-[10px] font-bold mt-1 uppercase tracking-widest">Live Editor</p>
                         </div>
                         <button onClick={saveResume} disabled={loading} className="p-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-2xl transition-all shadow-lg flex items-center gap-2">
@@ -347,9 +347,9 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                                         {builderData.experience.map((exp, index) => (
                                             <div key={exp.id} className="p-5 bg-[var(--bg-surface-secondary)] rounded-2xl relative space-y-4 border border-[var(--border-secondary)] group">
                                                 <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button onClick={() => moveExp(index, -1)} disabled={index === 0} className="p-1.5 bg-[var(--bg-surface)] rounded-md border border-[var(--border-secondary)] disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-slate-800"><ArrowUp size={12} /></button>
-                                                    <button onClick={() => moveExp(index, 1)} disabled={index === builderData.experience.length - 1} className="p-1.5 bg-[var(--bg-surface)] rounded-md border border-[var(--border-secondary)] disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-slate-800"><ArrowDown size={12} /></button>
-                                                    <button onClick={() => setBuilderData({ ...builderData, experience: builderData.experience.filter(e => e.id !== exp.id) })} className="p-1.5 bg-[var(--bg-surface)] text-rose-500 rounded-md border border-[var(--border-secondary)] hover:bg-rose-50 dark:hover:bg-rose-500/10"><Trash size={12} /></button>
+                                                    <button aria-label="Move experience up" onClick={() => moveExp(index, -1)} disabled={index === 0} className="p-1.5 bg-[var(--bg-surface)] rounded-md border border-[var(--border-secondary)] disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-slate-800"><ArrowUp size={12} /></button>
+                                                    <button aria-label="Move experience down" onClick={() => moveExp(index, 1)} disabled={index === builderData.experience.length - 1} className="p-1.5 bg-[var(--bg-surface)] rounded-md border border-[var(--border-secondary)] disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-slate-800"><ArrowDown size={12} /></button>
+                                                    <button aria-label="Delete experience" onClick={() => setBuilderData({ ...builderData, experience: builderData.experience.filter(e => e.id !== exp.id) })} className="p-1.5 bg-[var(--bg-surface)] text-rose-500 rounded-md border border-[var(--border-secondary)] hover:bg-rose-50 dark:hover:bg-rose-500/10"><Trash size={12} /></button>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div className="space-y-1">

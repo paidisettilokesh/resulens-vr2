@@ -10,7 +10,7 @@ router.post("/", upload.single("resume"), (req, res) => {
     return `JD: ${jobDescription?.substring(0, 800)}
 Resume: ${resumeText.substring(0, 1500)}
 
-Match resume to JD. Return ONLY JSON:
+Match resume to JD. CRITICAL: Never remove or invent truthful dates, companies, or metrics. Ground all suggestions strictly in evidence found within the resume. Return ONLY JSON:
 {
   "matchScore": 75,
   "keywordAnalysis": [{ "keyword": "React", "resumeDensity": 80, "jdImportance": "High" }],

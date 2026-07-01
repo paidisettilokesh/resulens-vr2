@@ -9,7 +9,7 @@ router.post('/', upload.single('resume'), (req, res) => {
     handleResumeRequest(req, res, ({ resumeText }) => {
         return `Resume: ${resumeText.substring(0, 1200)}
 
-Optimize for LinkedIn. Return ONLY JSON:
+Optimize for LinkedIn. CRITICAL: Never remove or invent truthful dates, companies, or metrics. Ground all suggestions strictly in evidence found within the resume. Return ONLY JSON:
 {
   "headline": "punchy value-driven headline (max 220 chars)",
   "about": "1st-person About section (3-4 sentences, builds authority)",

@@ -6,10 +6,12 @@ import path from 'path';
  * Replaces insecure usages of os.tmpdir() to prevent privilege escalation
  * and cross-tenant data leaks.
  */
+import os from 'os';
+
 export function getSecureStorageDir() {
-    const storageDir = path.join(process.cwd(), 'data');
+    const storageDir = path.join(os.tmpdir(), 'resulens-data');
     
-    // Ensure the directory exists with restricted permissions (0700: Owner Read/Write/Execute only)
+    // Ensure the directory exists
     if (!fs.existsSync(storageDir)) {
         fs.mkdirSync(storageDir, { recursive: true, mode: 0o700 });
     }

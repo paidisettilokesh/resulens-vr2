@@ -13,14 +13,14 @@ const ResumeStudio = (props) => {
     const sections = [
         {
             id: 'builder',
-            label: 'Architect Mode',
+            label: 'Resume Builder',
             desc: 'Build & Structure Foundation',
             icon: FileEdit,
             color: 'indigo'
         },
         {
             id: 'optimize',
-            label: 'Optimization Engine',
+            label: 'Improve Resume',
             desc: 'AI-Powered Precision Polish',
             icon: Sparkles,
             color: 'emerald'

@@ -9,6 +9,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { downloadPDF, downloadTextFile, copyToClipboard, getJobLinks, getCourseLink } from '../utils/helpers';
 import ProgressiveLoader from './ui/ProgressiveLoader.jsx';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 
 const AnalysisView = ({
     analysis, loading, error, file, selectedRole, customRole, candidateName,
@@ -275,7 +276,7 @@ const AnalysisView = ({
             className="pb-20 space-y-8"
         >
             {/* 1. ELITE COMMAND HEADER */}
-            <div className="flex flex-col md:flex-row justify-between items-end gap-6 bg-gradient-to-r from-[var(--bg-surface)] to-[var(--bg-surface-secondary)] p-12 rounded-[3.5rem] border border-[var(--border-primary)] shadow-2xl relative overflow-hidden">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 bg-gradient-to-r from-[var(--bg-surface)] to-[var(--bg-surface-secondary)] p-6 sm:p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] border border-[var(--border-primary)] shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-1/2 h-full bg-cyan-600/5 blur-[120px] -translate-y-1/2 translate-x-1/2" />
 
                 <div className="relative z-10 space-y-4">
@@ -565,24 +566,22 @@ const AnalysisView = ({
                     {analysis.atsScoreBreakdown && (
                         <div className="bg-[var(--bg-surface)] p-6 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-4">
                             <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">Scoring Transparency</h3>
-                            <div className="space-y-3">
-                                {[
-                                    { label: 'Technical Skills Match', val: analysis.atsScoreBreakdown.skillsMatch, max: analysis.atsScoreBreakdown.skillsMatchMax, color: 'bg-cyan-500' },
-                                    { label: 'Soft Skills & Keywords', val: analysis.atsScoreBreakdown.keywordMatch, max: analysis.atsScoreBreakdown.keywordMatchMax, color: 'bg-indigo-500' },
-                                    { label: 'Experience Relevance', val: analysis.atsScoreBreakdown.experienceMatch, max: analysis.atsScoreBreakdown.experienceMatchMax, color: 'bg-emerald-500' },
-                                    { label: 'Education Alignment', val: analysis.atsScoreBreakdown.educationMatch, max: analysis.atsScoreBreakdown.educationMatchMax, color: 'bg-amber-500' },
-                                    { label: 'Formatting & Completeness', val: analysis.atsScoreBreakdown.formattingMatch, max: analysis.atsScoreBreakdown.formattingMatchMax, color: 'bg-rose-500' }
-                                ].map((item, idx) => (
-                                    <div key={idx} className="space-y-1">
-                                        <div className="flex justify-between text-[10px] font-bold text-[var(--text-primary)]">
-                                            <span className="truncate max-w-[120px]">{item.label}</span>
-                                            <span className="text-[var(--text-muted)]">{item.val}/{item.max}</span>
-                                        </div>
-                                        <div className="w-full h-1 bg-[var(--border-primary)] rounded-full overflow-hidden">
-                                            <div className={`h-full ${item.color} rounded-full`} style={{ width: `${(item.val / item.max) * 100}%` }} />
-                                        </div>
-                                    </div>
-                                ))}
+                            
+                            <div className="h-64 w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <RadarChart cx="50%" cy="50%" outerRadius="70%" data={[
+                                        { subject: 'Skills', A: analysis.atsScoreBreakdown.skillsMatch || 0, fullMark: analysis.atsScoreBreakdown.skillsMatchMax || 100 },
+                                        { subject: 'Keywords', A: analysis.atsScoreBreakdown.keywordMatch || 0, fullMark: analysis.atsScoreBreakdown.keywordMatchMax || 100 },
+                                        { subject: 'Experience', A: analysis.atsScoreBreakdown.experienceMatch || 0, fullMark: analysis.atsScoreBreakdown.experienceMatchMax || 100 },
+                                        { subject: 'Education', A: analysis.atsScoreBreakdown.educationMatch || 0, fullMark: analysis.atsScoreBreakdown.educationMatchMax || 100 },
+                                        { subject: 'Formatting', A: analysis.atsScoreBreakdown.formattingMatch || 0, fullMark: analysis.atsScoreBreakdown.formattingMatchMax || 100 },
+                                    ]}>
+                                        <PolarGrid stroke="var(--border-secondary)" />
+                                        <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontWeight: 700 }} />
+                                        <Radar name="Score" dataKey="A" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.3} />
+                                        <RechartsTooltip contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border-primary)', borderRadius: '1rem' }} itemStyle={{ color: 'var(--text-primary)', fontWeight: 'bold' }} />
+                                    </RadarChart>
+                                </ResponsiveContainer>
                             </div>
                         </div>
                     )}

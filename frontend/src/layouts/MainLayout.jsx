@@ -2,9 +2,11 @@ import { motion } from 'framer-motion';
 import Header from '../components/Header';
 import { SOCIAL_LINKS } from '../constants/socialLinks';
 
+import TrustFooter from '../components/TrustFooter';
+
 const MainLayout = ({ children, user, activeTab, setActiveTab, candidateName, analysis, resetAnalysis, triggerNewUpload, handleLogout, onOpenOnboarding }) => {
     return (
-        <div className="min-h-screen bg-[var(--bg-app)] font-sans text-[var(--text-primary)] selection:bg-cyan-100 selection:text-cyan-900 relative overflow-x-hidden transition-colors duration-300">
+        <div className="min-h-screen bg-[var(--bg-app)] font-sans text-[var(--text-primary)] selection:bg-cyan-100 selection:text-cyan-900 relative overflow-x-hidden transition-colors duration-300 flex flex-col">
 
             {/* Elite Background Architecture */}
             <div className="fixed inset-0 -z-10 pointer-events-none">
@@ -29,14 +31,14 @@ const MainLayout = ({ children, user, activeTab, setActiveTab, candidateName, an
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="pt-32 pb-20 relative z-10"
+                className="pt-32 pb-20 relative z-10 md:pl-20 flex-1"
             >
                 <main className="container-custom">
                     {children}
                 </main>
             </motion.div>
 
-
+            <TrustFooter />
 
             {/* Global Interaction Ring — Subtle ambient decoration */}
             <div className="fixed bottom-10 right-10 w-32 h-32 border border-slate-200/50 rounded-full -z-10 animate-pulse pointer-events-none" />

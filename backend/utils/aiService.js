@@ -3,6 +3,8 @@ import fs from "fs";
 import crypto from "crypto";
 import { extractText } from "./extractText.js";
 import AICache from "../models/AICache.js";
+import { analyzeSchema, roastSchema, optimizeSchema } from "./schemas.js";
+import { calculateDeterministicScores } from "./scoringEngine.js";
 
 // --- GROQ PROVIDER (Primary: Free, No Daily Limit, Ultra-Fast) ---
 const callGroq = async (prompt) => {
@@ -140,6 +142,8 @@ export const callAI = async (prompt) => {
     const hash = getPromptHash(prompt);
 
     // 1. Check local in-memory cache first (ultrafast)
+    // TEMPORARILY DISABLED to force fresh analysis
+    /*
     if (localCache.has(hash)) {
         const cached = localCache.get(hash);
         if (cached.expiresAt > Date.now()) {
@@ -148,6 +152,7 @@ export const callAI = async (prompt) => {
         }
         localCache.delete(hash); // Expired
     }
+    */
 
     // 2. Check MongoDB cache if connected
     if (global.isMongoConnected) {
@@ -231,16 +236,35 @@ const normalizeAnalysis = (data) => {
         return isNaN(n) ? 0 : Math.min(Math.max(n, 0), 100);
     };
 
+    let ds = null;
+    if (data.extractedFeatures) {
+        ds = calculateDeterministicScores({
+            ...data.extractedFeatures,
+            skillMatch: data.jobMatchAnalysis?.skillMatch
+        });
+    }
+
     return {
         candidateName: data.candidateName || data.name || 'Candidate',
         location: data.location || 'N/A',
-        atsScore: parseScore(data.atsScore || data.score),
+        atsScore: ds ? ds.overallAts : parseScore(data.atsScore || data.score),
         jobMatchScore: parseScore(data.jobMatchScore || data.matchScore),
         recruiterInterest: parseScore(data.recruiterInterest),
-        educationScore: parseScore(data.educationScore),
-        experienceScore: parseScore(data.experienceScore),
-        skillsMatch: parseScore(data.skillsMatch),
-        atsScoreBreakdown: data.atsScoreBreakdown || null,
+        educationScore: ds ? ds.educationScore : parseScore(data.educationScore),
+        experienceScore: ds ? ds.experienceScore : parseScore(data.experienceScore),
+        skillsMatch: ds ? ds.skillsMatch : parseScore(data.skillsMatch),
+        atsScoreBreakdown: ds ? {
+            educationMatch: ds.educationScore,
+            educationMatchMax: 100,
+            experienceMatch: ds.experienceScore,
+            experienceMatchMax: 100,
+            skillsMatch: ds.skillsMatch,
+            skillsMatchMax: 100,
+            keywordMatch: Math.round(ds.skillsMatch * 0.8), // Placeholder logic if extractedFeatures lacks keyword relevance
+            keywordMatchMax: 100,
+            formattingMatch: ds.formattingScore,
+            formattingMatchMax: 100
+        } : data.atsScoreBreakdown || null,
         summary: data.summary || '',
         competencyMatrix: ensureArray(data.competencyMatrix).map(c => ({
             skill: c.skill || "Core Competency",
@@ -353,24 +377,79 @@ export const handleResumeRequest = async (req, res, promptBuilder, onSuccess) =>
         let resumeText = req.body.resumeText || "";
 
         if (file) {
+            if (file.size === 0) {
+                throw new Error("File is empty (0 bytes). Please upload a valid resume.");
+            }
             filePath = file.path;
             resumeText = await extractText(file);
         }
 
-        const prompt = typeof promptBuilder === 'function'
+        const basePrompt = typeof promptBuilder === 'function'
             ? promptBuilder({ ...req.body, resumeText })
             : promptBuilder;
 
         const url = req.originalUrl.toLowerCase();
 
-        let result = await callAI(prompt);
+        let result = null;
+        let retries = 1;
+        let currentPrompt = basePrompt;
 
-        if (!result) {
-            throw new Error("All AI providers failed. Please add a GROQ_API_KEY to your .env file or wait for your OpenRouter quota to reset.");
-        }
+        while (retries >= 0) {
+            result = await callAI(currentPrompt);
 
-        if (result.error === "QUOTA_EXHAUSTED") {
-            throw new Error(result.message);
+            if (!result || result.error) {
+                if (result?.error === "QUOTA_EXHAUSTED") throw new Error(result.message);
+                if (retries > 0) {
+                    console.warn(`[AI] Validation or parse failed. Retrying... (${retries} left)`);
+                    currentPrompt = basePrompt + "\n\nCRITICAL: You failed to provide valid JSON in the correct schema. You MUST return strictly valid JSON matching the requested structure.";
+                    retries--;
+                    continue;
+                }
+                throw new Error("All AI providers failed. Please check API keys or formatting.");
+            }
+
+            // Validate against schema based on URL
+            let parsed = null;
+            if (url.includes('analyze')) parsed = analyzeSchema.safeParse(result);
+            else if (url.includes('roast')) parsed = roastSchema.safeParse(result);
+            else parsed = optimizeSchema.safeParse(result);
+
+            if (parsed && parsed.success) {
+                result = parsed.data;
+                break; // Valid JSON!
+            } else {
+                console.warn(`[AI Validation] Schema mismatch:`, parsed?.error);
+                if (retries > 0) {
+                    currentPrompt = basePrompt + "\n\nCRITICAL: Your JSON did not match the requested schema. Please strictly adhere to the provided schema.";
+                    retries--;
+                    continue; // Retry
+                }
+                
+                // Safe Fallbacks
+                console.warn("[AI] Exhausted retries. Applying safe fallback.");
+                if (url.includes('roast')) {
+                    result = {
+                        weaknesses: ["Unable to analyze due to AI validation error."],
+                        critique: "The AI parser failed to validate the response.",
+                        priorityFixes: ["Please try submitting the document again."],
+                        rejectionRisks: ["Formatting was not parseable."],
+                        brutalTruth: "System error: Failed to parse AI JSON.",
+                        roastScore: 0
+                    };
+                } else if (url.includes('analyze')) {
+                    result = {
+                        extractedFeatures: {},
+                        summary: "Analysis failed due to AI output mismatch. Returning original document text.",
+                        atsAnalysis: { suggestions: ["Try re-uploading the resume."] }
+                    };
+                } else {
+                    result = {
+                        rewrittenBullets: [],
+                        overallAdvice: "AI optimization failed due to formatting issues. Please try again."
+                    };
+                }
+                break;
+            }
         }
 
         if (url.includes('analyze')) {

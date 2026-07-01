@@ -10,7 +10,7 @@ router.post("/", upload.single("resume"), (req, res) => {
     return `Resume: ${resumeText.substring(0, 1500)}
 Role: ${jobRole}
 
-Rewrite resume for ATS and ${jobRole}. Return ONLY JSON:
+Rewrite resume for ATS and ${jobRole}. CRITICAL: Never remove or invent truthful dates, companies, or metrics. Ground all suggestions strictly in evidence found within the resume. Return ONLY JSON:
 {
   "rewrittenBullets": [{ "original": "...", "rewritten": "...", "reasoning": "brief" }],
   "skillGapAnalysis": ["skill1", "skill2"],

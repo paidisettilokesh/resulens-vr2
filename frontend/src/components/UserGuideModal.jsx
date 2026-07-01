@@ -106,7 +106,7 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
             content: (
                 <div className="space-y-4">
                     {[
-                        { step: "1", title: "Select a Target Role & Upload", desc: "Choose your target domain track (or type a custom one) and select a PDF/DOCX resume. Hit 'Execute Neural Analysis' to score your resume." },
+                        { step: "1", title: "Select a Target Role & Upload", desc: "Choose your target domain track (or type a custom one) and select a PDF/DOCX resume. Hit 'Analyze Resume' to score your resume." },
                         { step: "2", title: "Inspect the Analyzer Breakdown", desc: "Dive into your scoring metrics, keyword density matches, spelling/grammar reviews, and actionable formatting/layout recommendations." },
                         { step: "3", title: "Refine in Resume Studio", desc: "Copy and paste the job description you want to apply to. Run features like Cover Letter, Tailor, or Bullet Rewrite to instantly align your application." },
                         { step: "4", title: "Practice & Upskill", desc: "Run Mock Interviews under the Coach tab, check Roast feedback, and review recommended training courses to address critical skill gaps." }

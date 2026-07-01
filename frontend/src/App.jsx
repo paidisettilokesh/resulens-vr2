@@ -10,6 +10,7 @@ import { useUser } from './context/UserContext';
 import { useResume } from './context/ResumeContext';
 
 // --- COMPONENTS ---
+import { validateResumeFile } from './utils/fileValidation.js';
 import Auth from './components/Auth.jsx';
 import Navigation from './components/Navigation.jsx';
 import HomeTab from './components/HomeTab.jsx';
@@ -184,6 +185,15 @@ function App() {
     const handleFileUpload = (event) => {
         const uploadedFile = event.target.files[0];
         if (!uploadedFile) return;
+
+        const validation = validateResumeFile(uploadedFile);
+        if (!validation.isValid) {
+            setError(validation.error);
+            setFile(null);
+            event.target.value = null; // Clear input
+            return;
+        }
+
         setFile(uploadedFile);
         setError('');
     };
@@ -301,7 +311,7 @@ function App() {
 
     return (
         <div className="app-container min-h-screen">
-            <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".pdf,.doc,.docx" className="hidden" />
+            <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".pdf,.docx" className="hidden" />
 
             <MainLayout
                 user={user}

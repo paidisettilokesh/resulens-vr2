@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, RotateCcw, User, LogOut, ChevronDown, Sparkles, LayoutDashboard, Target, BarChart3, Rocket, Sun, Moon, BookOpen } from 'lucide-react';
+import { Zap, RotateCcw, User, LogOut, ChevronDown, Sparkles, LayoutDashboard, Target, BarChart3, Rocket, Sun, Moon, BookOpen, CheckCircle } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { SOCIAL_LINKS } from '../constants/socialLinks';
 
@@ -31,15 +31,39 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
     }, []);
 
 
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const tabs = [
+        { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'analyzer', label: 'AI Analysis', icon: Zap },
+        { id: 'studio', label: 'Resume Studio', icon: CheckCircle }, // Actually FilePlus, I'll use CheckCircle for now or import it
+        { id: 'interview', label: 'Interview Prep', icon: Target },
+        { id: 'courses', label: 'Learning Path', icon: BookOpen },
+        { id: 'roast', label: 'Resume Roast', icon: Sparkles },
+        { id: 'history', label: 'History', icon: RotateCcw }
+    ];
+    if (user && (user.role === 'admin' || user.role === 'founder')) {
+        tabs.push({ id: 'admin', label: 'Admin Panel', icon: User });
+    }
+
     return (
-        <header className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${scrolled ? 'py-4' : 'py-8'}`}>
+        <header className={`fixed top-0 left-0 md:left-20 right-0 z-[100] transition-all duration-500 ${scrolled ? 'py-4' : 'py-8'}`}>
             <div className="container-custom">
                 <div className={`
                     relative bg-[var(--glass-bg)] backdrop-blur-2xl px-6 py-4 rounded-[2.5rem] border border-[var(--glass-border)] shadow-2xl flex items-center justify-between
                     ${scrolled ? 'shadow-premium' : ''}
                 `} style={{ boxShadow: `0 8px 30px var(--shadow-color)` }}>
                     {/* Brand Section */}
-                    <div className="flex items-center gap-10">
+                    <div className="flex items-center gap-4 md:gap-10">
+                        {/* Mobile Hamburger */}
+                        <button 
+                            aria-label="Toggle mobile menu"
+                            className="md:hidden p-2 bg-[var(--bg-surface-secondary)] rounded-lg text-[var(--text-primary)]"
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                        </button>
+
                         <div
                             className="flex items-center gap-3 cursor-pointer group"
                             onClick={() => setActiveTab('home')}
@@ -172,6 +196,36 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
                     </div>
                 </div>
             </div>
+
+            <AnimatePresence>
+                {mobileMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="md:hidden bg-[var(--bg-surface)] border-b border-[var(--border-primary)] shadow-2xl overflow-hidden mt-4 mx-4 rounded-2xl"
+                    >
+                        <div className="flex flex-col p-4 gap-2">
+                            {tabs.map(tab => {
+                                const isActive = activeTab === tab.id;
+                                return (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => { setActiveTab(tab.id); setMobileMenuOpen(false); }}
+                                        className={`
+                                            flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold transition-all
+                                            ${isActive ? 'bg-cyan-50 dark:bg-cyan-900/20 text-cyan-600 dark:text-cyan-400' : 'text-[var(--text-secondary)]'}
+                                        `}
+                                    >
+                                        <tab.icon size={18} />
+                                        {tab.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </header>
     );
 };

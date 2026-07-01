@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
     Users, Activity, Server, Shield, TrendingUp, CheckCircle,
     AlertTriangle, RefreshCw, Search, ShieldAlert, Cpu, HardDrive, Clock, Key,
-    Lock, Unlock, Eye, X, Trash2, ShieldCheck, Play, Pause, Ban, Terminal, HelpCircle
+    Lock, Unlock, Eye, X, Trash2, ShieldCheck, Play, Pause, Ban, Terminal, HelpCircle, Download
 } from 'lucide-react';
 
 // Client-side lightweight User Agent parser
@@ -614,6 +614,37 @@ export default function AdminDashboard({ user, backendUrl }) {
                         <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
                             <Users size={16} className="text-cyan-500" /> Platform Directory Controls
                         </h3>
+                        <button
+                            onClick={() => {
+                                if (!sortedUsers.length) return;
+                                const headers = ['ID', 'Name', 'Email', 'Role', 'Status', 'Plan', 'Logins', 'CreatedAt', 'LastLoginAt'];
+                                const csvContent = [
+                                    headers.join(','),
+                                    ...sortedUsers.map(u => [
+                                        u._id,
+                                        `"${(u.name || '').replace(/"/g, '""')}"`,
+                                        `"${(u.email || '').replace(/"/g, '""')}"`,
+                                        u.role || 'user',
+                                        u.status || 'active',
+                                        u.plan || 'free',
+                                        u.loginCount || 0,
+                                        u.createdAt ? new Date(u.createdAt).toISOString() : '',
+                                        u.lastLoginAt ? new Date(u.lastLoginAt).toISOString() : ''
+                                    ].join(','))
+                                ].join('\n');
+                                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                                const url = URL.createObjectURL(blob);
+                                const link = document.createElement('a');
+                                link.setAttribute('href', url);
+                                link.setAttribute('download', `resulens_users_${new Date().toISOString().split('T')[0]}.csv`);
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] rounded-lg text-xs font-bold text-[var(--text-secondary)] hover:text-cyan-500 hover:border-cyan-500/30 transition-all shadow-sm"
+                        >
+                            <Download size={14} /> Export CSV
+                        </button>
                     </div>
 
                     {/* Filter, Sort and search parameters */}

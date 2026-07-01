@@ -57,6 +57,10 @@ jobs:
         working-directory: frontend
         continue-on-error: true
 
+      - name: Run Tests
+        run: npm test
+        working-directory: frontend
+
       - name: Run Build
         run: npm run build
         working-directory: frontend

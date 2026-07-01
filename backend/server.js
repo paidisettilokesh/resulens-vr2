@@ -233,10 +233,15 @@ app.use((err, req, res, next) => {
                           err.name === 'MulterError' || 
                           (err.message && err.message.includes('Only PDF and DOCX files are allowed'));
                           
+    let errorMessage = err.message;
+    if (err.name === 'MulterError' && err.code === 'LIMIT_FILE_SIZE') {
+        errorMessage = 'File size exceeds the 5MB limit.';
+    }
+
     res.status(err.status || (isClientError ? 400 : 500)).json({
         error: (process.env.NODE_ENV === 'production' && !isClientError) 
             ? 'Internal server error' 
-            : err.message
+            : errorMessage
     });
 });
 

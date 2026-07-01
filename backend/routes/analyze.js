@@ -14,14 +14,32 @@ ANALYZE this resume vs the target role. Return ONLY this JSON (no preamble, mark
 {
   "candidateName": "Full name from resume",
   "location": "City, Country",
-  "atsScore": 75,
+  "extractedFeatures": {
+    "education": {
+      "hasDegree": true,
+      "degreeRelevance": "High",
+      "hasGPA": true,
+      "hasCoursework": true,
+      "hasCertifications": true
+    },
+    "experience": {
+      "yearsOfExperience": 5,
+      "hasInternships": true,
+      "hasFreelanceOrOSS": true,
+      "hasLeadership": true,
+      "hasProjects": true,
+      "hasQuantifiedAchievements": true
+    },
+    "formatting": {
+      "hasContactInfo": true,
+      "hasSummary": true,
+      "usesActionVerbs": true,
+      "goodGrammarAndReadability": true,
+      "clearSectionStructure": true
+    }
+  },
   "jobMatchScore": 70,
   "recruiterInterest": 82,
-  "educationScore": 85,
-  "experienceScore": 70,
-  "skillsMatch": 78,
-  "resumeCompleteness": 80,
-  "formattingScore": 85,
   "verdict": "Strong Candidate/Moderate Candidate/Needs Improvement",
   "summary": "2-sentence professional executive summary",
   "atsAnalysis": {
@@ -33,19 +51,10 @@ ANALYZE this resume vs the target role. Return ONLY this JSON (no preamble, mark
     },
     "resumeStructure": "Professional/Standard/Fragmented",
     "issues": ["issue1", "issue2"],
-    "suggestions": ["suggestion1", "suggestion2"]
-  },
-  "atsScoreBreakdown": {
-    "educationMatch": 80,
-    "educationMatchMax": 100,
-    "experienceMatch": 75,
-    "experienceMatchMax": 100,
-    "skillsMatch": 85,
-    "skillsMatchMax": 100,
-    "keywordMatch": 70,
-    "keywordMatchMax": 100,
-    "formattingMatch": 90,
-    "formattingMatchMax": 100
+    "suggestions": [
+      "Suggestion 1 (MUST reference specific bullet points or sections from the resume as evidence)",
+      "Suggestion 2 (MUST reference specific bullet points or sections from the resume as evidence)"
+    ]
   },
   "competencyMatrix": [
     { "skill": "Skill Name", "level": 8, "benchmark": "Senior/Mid/Junior", "category": "Technical/Soft", "gap": "brief gap explanation" }

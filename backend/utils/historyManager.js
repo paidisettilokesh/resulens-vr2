@@ -8,6 +8,8 @@ import { getSecureStorageDir } from './storage.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const historyCache = new Map();
+
 // Move fallback and uploads outside project to prevent watch-mode restarts
 const FALLBACK_DIR = path.join(getSecureStorageDir(), 'talentsync-v2-data');
 const FALLBACK_FILE = path.join(FALLBACK_DIR, 'history_fallback.json');
@@ -19,6 +21,7 @@ const ensureDir = async () => {
 
 export const saveHistory = async (data, userId = 'guest') => {
     try {
+        historyCache.delete(userId); // Invalidate cache
         const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
         if (global.isMongoConnected && isValidObjectId) {
             const newEntry = new Analysis({
@@ -59,16 +62,24 @@ export const saveHistory = async (data, userId = 'guest') => {
 
 export const getHistory = async (userId = 'guest') => {
     try {
+        if (historyCache.has(userId)) {
+            return historyCache.get(userId);
+        }
+
         const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
+        let result = [];
         if (global.isMongoConnected && isValidObjectId) {
-            return await Analysis.find({ userId }).sort({ timestamp: -1 }).limit(50);
+            result = await Analysis.find({ userId }).sort({ timestamp: -1 }).limit(50);
         } else {
             try {
                 const fileData = await fs.readFile(FALLBACK_FILE, 'utf8');
                 const history = JSON.parse(fileData);
-                return history.filter(h => h.userId === userId);
-            } catch (e) { return []; }
+                result = history.filter(h => h.userId === userId);
+            } catch (e) { result = []; }
         }
+
+        historyCache.set(userId, result);
+        return result;
     } catch (e) {
         console.error("Failed to fetch history:", e);
         return [];
@@ -77,6 +88,7 @@ export const getHistory = async (userId = 'guest') => {
 
 export const clearHistory = async (userId = 'guest') => {
     try {
+        historyCache.delete(userId); // Invalidate cache
         const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
         if (global.isMongoConnected && isValidObjectId) {
             await Analysis.deleteMany({ userId });

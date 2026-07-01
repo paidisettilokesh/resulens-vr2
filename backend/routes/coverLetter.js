@@ -14,7 +14,7 @@ router.post("/", upload.single("resume"), (req, res) => {
 JD: ${jobDescription?.substring(0, 600) || 'N/A'}
 Resume: ${resumeText.substring(0, 1200)}
 
-Write a compelling cover letter. Return ONLY JSON:
+Write a compelling cover letter. CRITICAL: Never remove or invent truthful dates, companies, or metrics. Ground all suggestions strictly in evidence found within the resume. Return ONLY JSON:
 {
   "coverLetter": "Full 2-3 paragraph cover letter text.",
   "toneAnalysis": "1-sentence tone explanation.",
