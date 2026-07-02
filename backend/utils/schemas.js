@@ -96,7 +96,7 @@ export const roastSchema = z.object({
 }).passthrough();
 
 export const optimizeSchema = z.object({
-    rewrittenBullets: z.array(z.string()).optional(),
+    rewrittenBullets: z.array(z.any()).optional(),
     bullets: z.array(z.string()).optional(),
     skillGapAnalysis: z.array(z.string()).optional(),
     optimizedSkills: z.object({
