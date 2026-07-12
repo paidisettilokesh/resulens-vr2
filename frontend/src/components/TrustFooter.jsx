@@ -67,7 +67,7 @@ const TrustFooter = () => {
                 <p>Need help navigating the platform or encountered an issue?</p>
                 <div className="bg-[var(--bg-surface-secondary)] p-4 rounded-xl border border-[var(--border-primary)] mt-4">
                     <h3 className="font-bold text-[var(--text-primary)]">Email Support</h3>
-                    <p className="mt-1">Contact our engineering team directly at: <a href="mailto:support@resulens.ai" className="text-cyan-500 font-bold hover:underline">support@resulens.ai</a></p>
+                    <p className="mt-1">Contact our engineering team directly at: <a href="mailto:support@resulens.ai" className="text-cyan-700 dark:text-cyan-400 font-bold hover:underline">support@resulens.ai</a></p>
                 </div>
                 <div className="bg-[var(--bg-surface-secondary)] p-4 rounded-xl border border-[var(--border-primary)] mt-4">
                     <h3 className="font-bold text-[var(--text-primary)]">Bug Reports</h3>
@@ -90,17 +90,17 @@ const TrustFooter = () => {
                 <div className="container-custom mx-auto px-6">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                         <div className="flex items-center gap-2 opacity-50 hover:opacity-100 transition-opacity">
-                            <Shield size={16} className="text-cyan-500" />
+                            <Shield size={16} className="text-cyan-700 dark:text-cyan-400" />
                             <span className="text-xs font-bold tracking-widest uppercase text-[var(--text-primary)]">ResuLens Enterprise</span>
                         </div>
                         <div className="flex flex-wrap justify-center gap-6">
-                            <button onClick={() => setActiveModal('privacy')} className="text-xs font-medium text-[var(--text-muted)] hover:text-cyan-500 flex items-center gap-1.5 transition-colors">
+                            <button onClick={() => setActiveModal('privacy')} className="text-xs font-medium text-[var(--text-muted)] hover:text-cyan-700 dark:text-cyan-400 flex items-center gap-1.5 transition-colors">
                                 <FileText size={12} /> Privacy
                             </button>
-                            <button onClick={() => setActiveModal('terms')} className="text-xs font-medium text-[var(--text-muted)] hover:text-cyan-500 flex items-center gap-1.5 transition-colors">
+                            <button onClick={() => setActiveModal('terms')} className="text-xs font-medium text-[var(--text-muted)] hover:text-cyan-700 dark:text-cyan-400 flex items-center gap-1.5 transition-colors">
                                 <FileText size={12} /> Terms
                             </button>
-                            <button onClick={() => setActiveModal('disclaimer')} className="text-xs font-medium text-[var(--text-muted)] hover:text-amber-500 flex items-center gap-1.5 transition-colors">
+                            <button onClick={() => setActiveModal('disclaimer')} className="text-xs font-medium text-[var(--text-muted)] hover:text-amber-700 dark:text-amber-400 flex items-center gap-1.5 transition-colors">
                                 <AlertCircle size={12} /> AI Disclaimer
                             </button>
                             <button onClick={() => setActiveModal('support')} className="text-xs font-medium text-[var(--text-muted)] hover:text-blue-500 flex items-center gap-1.5 transition-colors">

@@ -59,7 +59,16 @@
 
     /* Accessibility focus rings */
     *:focus-visible {
-        @apply outline-none ring-4 ring-cyan-500/50 dark:ring-cyan-400/50 transition-shadow duration-150;
+        @apply outline-none ring-[3px] ring-cyan-700 dark:ring-cyan-400 ring-offset-2 ring-offset-[var(--bg-app)] transition-shadow duration-150;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, ::before, ::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
     }
 }
 

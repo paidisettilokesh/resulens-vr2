@@ -97,7 +97,7 @@ const HistoryTab = ({ user, backendUrl, setActiveTab, setAnalysis, setCandidateN
                 {history.length > 0 && (
                     <button
                         onClick={clearHistory}
-                        className="group flex items-center gap-2 px-6 py-3 bg-[var(--bg-surface-secondary)] hover:bg-rose-500/10 text-[var(--text-primary)] hover:text-rose-500 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border border-transparent hover:border-rose-500/20"
+                        className="group flex items-center gap-2 px-6 py-3 bg-[var(--bg-surface-secondary)] hover:bg-rose-500/10 text-[var(--text-primary)] hover:text-rose-700 dark:text-rose-400 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border border-transparent hover:border-rose-500/20"
                     >
                         <Trash2 size={16} className="group-hover:rotate-12 transition-transform" /> Reset History
                     </button>

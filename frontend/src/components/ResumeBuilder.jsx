@@ -188,7 +188,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                     {/* AI Health Bar */}
                     <div className="bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-primary)] p-4 flex items-center justify-between shadow-sm">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg">
+                            <div className="p-2 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-lg">
                                 <Activity size={18} />
                             </div>
                             <div>
@@ -202,11 +202,11 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                             <div className="flex gap-4">
                                 <div className="text-center">
                                     <div className="text-[10px] font-black uppercase text-[var(--text-muted)]">Keywords</div>
-                                    <div className="text-sm font-bold text-cyan-500">{healthScore.keywordScore}%</div>
+                                    <div className="text-sm font-bold text-cyan-700 dark:text-cyan-400">{healthScore.keywordScore}%</div>
                                 </div>
                                 <div className="text-center">
                                     <div className="text-[10px] font-black uppercase text-[var(--text-muted)]">Readability</div>
-                                    <div className="text-sm font-bold text-amber-500">{healthScore.readabilityScore}%</div>
+                                    <div className="text-sm font-bold text-amber-700 dark:text-amber-400">{healthScore.readabilityScore}%</div>
                                 </div>
                             </div>
                         )}
@@ -227,7 +227,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                     {/* Target Job Generator */}
                     <div className="bg-[var(--bg-surface)] rounded-[2rem] border border-[var(--border-primary)] overflow-hidden shadow-sm">
                         <button onClick={() => toggleSection('target')} className="w-full flex justify-between items-center p-6 bg-gradient-to-r from-cyan-500/5 to-transparent hover:from-cyan-500/10 transition-colors">
-                            <h3 className="text-sm font-black text-[var(--text-primary)] flex items-center gap-3"><Target size={18} className="text-cyan-500" /> Target Job Blueprint</h3>
+                            <h3 className="text-sm font-black text-[var(--text-primary)] flex items-center gap-3"><Target size={18} className="text-cyan-700 dark:text-cyan-400" /> Target Job Blueprint</h3>
                             {expandedSection === 'target' ? <ChevronUp size={16} className="text-[var(--text-muted)]" /> : <ChevronDown size={16} className="text-[var(--text-muted)]" />}
                         </button>
                         <AnimatePresence>
@@ -281,7 +281,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                     {/* Identity */}
                     <div className="bg-[var(--bg-surface)] rounded-[2rem] border border-[var(--border-primary)] overflow-hidden shadow-sm">
                         <button onClick={() => toggleSection('identity')} className="w-full flex justify-between items-center p-6 hover:bg-[var(--bg-surface-secondary)] transition-colors">
-                            <h3 className="text-sm font-black text-[var(--text-primary)] flex items-center gap-3"><MapPin size={18} className="text-emerald-500" /> Identity & Profile</h3>
+                            <h3 className="text-sm font-black text-[var(--text-primary)] flex items-center gap-3"><MapPin size={18} className="text-emerald-700 dark:text-emerald-400" /> Identity & Profile</h3>
                             {expandedSection === 'identity' ? <ChevronUp size={16} className="text-[var(--text-muted)]" /> : <ChevronDown size={16} className="text-[var(--text-muted)]" />}
                         </button>
                         <AnimatePresence>
@@ -321,12 +321,12 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                                                         }, { headers: { 'x-user-id': user?.id || 'guest', ...(user?.token ? { 'Authorization': `Bearer ${user.token}` } : {}) } });
                                                         if (res.data.bio) setBuilderData(prev => ({ ...prev, personal: { ...prev.personal, bio: res.data.bio } }));
                                                     } catch (e) { setBioError('AI unavailable.'); } finally { setBioLoading(false); }
-                                                }} disabled={bioLoading} className="text-[9px] font-bold text-emerald-500 hover:text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                                                }} disabled={bioLoading} className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 hover:text-emerald-400 uppercase tracking-widest flex items-center gap-1">
                                                     {bioLoading ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />} Auto-Write
                                                 </button>
                                             </div>
                                             <textarea placeholder="Senior Technology Executive with 12+ years..." value={builderData.personal.bio} onChange={(e) => setBuilderData({ ...builderData, personal: { ...builderData.personal, bio: e.target.value } })} className="w-full bg-[var(--bg-surface-secondary)] text-[var(--text-primary)] border border-[var(--border-secondary)] rounded-2xl p-4 h-32 text-xs leading-relaxed" />
-                                            {bioError && <p className="text-[10px] text-rose-500 font-bold px-2">⚠ {bioError}</p>}
+                                            {bioError && <p className="text-[10px] text-rose-700 dark:text-rose-400 font-bold px-2">⚠ {bioError}</p>}
                                         </div>
                                     </div>
                                 </motion.div>
@@ -337,7 +337,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                     {/* Experience */}
                     <div className="bg-[var(--bg-surface)] rounded-[2rem] border border-[var(--border-primary)] overflow-hidden shadow-sm">
                         <button onClick={() => toggleSection('experience')} className="w-full flex justify-between items-center p-6 hover:bg-[var(--bg-surface-secondary)] transition-colors">
-                            <h3 className="text-sm font-black text-[var(--text-primary)] flex items-center gap-3"><Briefcase size={18} className="text-amber-500" /> Career History</h3>
+                            <h3 className="text-sm font-black text-[var(--text-primary)] flex items-center gap-3"><Briefcase size={18} className="text-amber-700 dark:text-amber-400" /> Career History</h3>
                             {expandedSection === 'experience' ? <ChevronUp size={16} className="text-[var(--text-muted)]" /> : <ChevronDown size={16} className="text-[var(--text-muted)]" />}
                         </button>
                         <AnimatePresence>
@@ -349,7 +349,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                                                 <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <button aria-label="Move experience up" onClick={() => moveExp(index, -1)} disabled={index === 0} className="p-1.5 bg-[var(--bg-surface)] rounded-md border border-[var(--border-secondary)] disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-slate-800"><ArrowUp size={12} /></button>
                                                     <button aria-label="Move experience down" onClick={() => moveExp(index, 1)} disabled={index === builderData.experience.length - 1} className="p-1.5 bg-[var(--bg-surface)] rounded-md border border-[var(--border-secondary)] disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-slate-800"><ArrowDown size={12} /></button>
-                                                    <button aria-label="Delete experience" onClick={() => setBuilderData({ ...builderData, experience: builderData.experience.filter(e => e.id !== exp.id) })} className="p-1.5 bg-[var(--bg-surface)] text-rose-500 rounded-md border border-[var(--border-secondary)] hover:bg-rose-50 dark:hover:bg-rose-500/10"><Trash size={12} /></button>
+                                                    <button aria-label="Delete experience" onClick={() => setBuilderData({ ...builderData, experience: builderData.experience.filter(e => e.id !== exp.id) })} className="p-1.5 bg-[var(--bg-surface)] text-rose-700 dark:text-rose-400 rounded-md border border-[var(--border-secondary)] hover:bg-rose-50 dark:hover:bg-rose-500/10"><Trash size={12} /></button>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div className="space-y-1">
@@ -406,7 +406,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                     {/* Skills */}
                     <div className="bg-[var(--bg-surface)] rounded-[2rem] border border-[var(--border-primary)] overflow-hidden shadow-sm">
                         <button onClick={() => toggleSection('skills')} className="w-full flex justify-between items-center p-6 hover:bg-[var(--bg-surface-secondary)] transition-colors">
-                            <h3 className="text-sm font-black text-[var(--text-primary)] flex items-center gap-3"><Settings size={18} className="text-rose-500" /> Core Competencies</h3>
+                            <h3 className="text-sm font-black text-[var(--text-primary)] flex items-center gap-3"><Settings size={18} className="text-rose-700 dark:text-rose-400" /> Core Competencies</h3>
                             {expandedSection === 'skills' ? <ChevronUp size={16} className="text-[var(--text-muted)]" /> : <ChevronDown size={16} className="text-[var(--text-muted)]" />}
                         </button>
                         <AnimatePresence>

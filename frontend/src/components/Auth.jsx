@@ -201,10 +201,10 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-6 right-6 p-2 rounded-xl bg-[var(--bg-surface-secondary)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--border-primary)]/20 transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-cyan-500/50"
+                    className="absolute top-6 right-6 p-2 rounded-xl bg-[var(--bg-surface-secondary)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--border-primary)]/20 transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-cyan-500/50 min-h-[44px] min-w-[44px] flex items-center justify-center"
                     aria-label="Close Authentication Screen"
                 >
-                    <X size={16} />
+                    <X size={16} aria-hidden="true" />
                 </button>
 
                 {/* File Upload Pending Banner */}
@@ -222,7 +222,8 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                         {[['login', 'Sign In'], ['signup', 'Create Account']].map(([m, label]) => (
                             <button key={m} type="button" onClick={() => switchMode(m)}
                                 id={`auth-tab-${m}`}
-                                className="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 focus-visible:ring-2 focus-visible:ring-cyan-500/50"
+                                aria-current={mode === m ? 'true' : undefined}
+                                className="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 focus-visible:ring-2 focus-visible:ring-cyan-700 dark:focus-visible:ring-cyan-400 min-h-[44px]"
                                 style={{
                                     background: mode === m ? 'var(--bg-surface)' : 'transparent',
                                     color: mode === m ? 'var(--accent-primary)' : 'var(--text-muted)',
@@ -260,11 +261,12 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                                     Full Name
                                 </label>
                                 <div className="relative">
-                                    <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]" />
+                                    <User size={16} aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]" />
                                     <input id="auth-name" type="text" autoComplete="name" required={isSignup}
                                         value={name} onChange={e => setName(e.target.value)}
+                                        aria-invalid={!!error && isSignup}
                                         placeholder="Jane Doe"
-                                        className="input-field pl-10 text-xs py-3"
+                                        className="input-field pl-10 text-xs py-3 min-h-[44px]"
                                         style={{ borderRadius: '14px' }} />
                                 </div>
                             </motion.div>
@@ -279,11 +281,12 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                                 Email Address
                             </label>
                             <div className="relative">
-                                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]" />
+                                <Mail size={16} aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]" />
                                 <input id="auth-email" type="email" autoComplete="email" required
                                     value={email} onChange={e => setEmail(e.target.value)}
+                                    aria-invalid={!!error}
                                     placeholder="you@company.com"
-                                    className="input-field pl-10 text-xs py-3"
+                                    className="input-field pl-10 text-xs py-3 min-h-[44px]"
                                     style={{ borderRadius: '14px' }} />
                             </div>
                         </div>
@@ -306,7 +309,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                                 )}
                             </div>
                         <div className="relative">
-                            <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]" />
+                            <Lock size={16} aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]" />
                             <input id="auth-password"
                                 type={showPassword ? 'text' : 'password'}
                                 autoComplete={isLogin ? 'current-password' : 'new-password'}
@@ -315,21 +318,23 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                                 onChange={e => setPassword(e.target.value)}
                                 onFocus={() => setPasswordFocused(true)}
                                 onBlur={() => setPasswordFocused(false)}
+                                aria-invalid={!!error && !isForgot}
+                                aria-describedby={isSignup || isReset ? "password-requirements" : undefined}
                                 placeholder="••••••••"
-                                className="input-field pl-10 pr-12 text-xs py-3"
+                                className="input-field pl-10 pr-12 text-xs py-3 min-h-[44px]"
                                 style={{ borderRadius: '14px' }} />
                             <button type="button" id="toggle-password-visibility"
                                 onClick={() => setShowPassword(v => !v)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-100 text-[var(--text-muted)] opacity-60"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-100 text-[var(--text-muted)] opacity-60 min-h-[44px] min-w-[44px] flex items-center justify-center"
                                 aria-label={showPassword ? 'Hide password' : 'Show password'}>
-                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                {showPassword ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
                             </button>
                         </div>
 
                             {/* Password strength - signup and reset only */}
                             <AnimatePresence>
                                 {(isSignup || isReset) && password && (
-                                    <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
+                                    <motion.div id="password-requirements" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0 }} className="mt-2.5 space-y-2">
                                     <div className="flex gap-1 h-1">
                                         {[1, 2, 3, 4, 5].map(i => (
@@ -382,7 +387,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                             <motion.div role="alert" aria-live="assertive"
                                 initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="flex items-start gap-2.5 p-3.5 rounded-xl text-xs bg-rose-500/10 border border-rose-500/20 text-rose-500">
+                                className="flex items-start gap-2.5 p-3.5 rounded-xl text-xs bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-400">
                                 <AlertCircle size={14} className="flex-shrink-0 mt-0.5" />
                                 <span className="font-semibold">{error}</span>
                             </motion.div>
@@ -391,7 +396,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                             <motion.div role="status" aria-live="polite"
                                 initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="flex items-center gap-2.5 p-3.5 rounded-xl text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">
+                                className="flex items-center gap-2.5 p-3.5 rounded-xl text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400">
                                 <CheckCircle2 size={14} />
                                 <span className="font-semibold">{successMsg}</span>
                             </motion.div>
@@ -401,14 +406,14 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                     {/* Submit Button */}
                     <button type="submit" id="auth-submit-btn"
                         disabled={loading}
-                        className="btn-primary w-full py-3 text-xs relative overflow-hidden focus-visible:ring-4 focus-visible:ring-cyan-500/50"
+                        className="btn-primary w-full py-3 text-xs relative overflow-hidden focus-visible:ring-4 focus-visible:ring-cyan-700 min-h-[44px]"
                         style={{ borderRadius: '14px', marginTop: '4px' }}>
                         {loading ? (
-                            <Loader2 size={16} className="animate-spin" />
+                            <Loader2 size={16} aria-hidden="true" className="animate-spin" />
                         ) : (
                             <>
                                 <span>{isLogin ? 'Sign In to Portal' : isSignup ? 'Create Free Account' : isForgot ? 'Send Reset Link' : 'Reset Password'}</span>
-                                <ArrowRight size={14} />
+                                <ArrowRight size={14} aria-hidden="true" />
                             </>
                         )}
                     </button>
@@ -434,10 +439,10 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                             <button type="button" id="guest-access-btn"
                                 onClick={handleGuestLogin}
                                 disabled={loading}
-                                className="w-full py-3 px-4 rounded-full font-bold text-[12px] flex items-center justify-center gap-2 transition-all duration-200 hover:opacity-80 text-[var(--text-muted)] focus-visible:ring-2 focus-visible:ring-cyan-500/50"
+                                className="w-full py-3 px-4 rounded-full font-bold text-[12px] flex items-center justify-center gap-2 transition-all duration-200 hover:opacity-80 text-[var(--text-muted)] focus-visible:ring-2 focus-visible:ring-cyan-700 min-h-[44px]"
                             >
                                 Continue as Guest
-                                <ArrowRight size={13} />
+                                <ArrowRight size={13} aria-hidden="true" />
                             </button>
                         </div>
                     </>

@@ -128,7 +128,7 @@ const OptimizeTab = ({
 
                                 {rewrittenResume?.skillGapAnalysis?.length > 0 && (
                                     <div className="p-10 bg-rose-500/5 rounded-[3rem] border border-rose-500/10 animate-fade-in">
-                                        <h4 className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-6 flex items-center gap-3">
+                                        <h4 className="text-[10px] font-black text-rose-700 dark:text-rose-400 uppercase tracking-widest mb-6 flex items-center gap-3">
                                             <Target size={18} /> Narrative Skill Gaps Identified
                                         </h4>
                                         <div className="flex flex-wrap gap-2">
@@ -187,7 +187,7 @@ const OptimizeTab = ({
                                 <div className="grid md:grid-cols-2 gap-8">
                                     <div className="bg-[var(--bg-surface)] p-10 rounded-[3rem] border border-[var(--border-primary)] shadow-sm">
                                         <h3 className="text-2xl font-black text-[var(--text-primary)] mb-6 flex items-center gap-3">
-                                            <Target className="text-emerald-500" /> Executive JD Mapping
+                                            <Target className="text-emerald-700 dark:text-emerald-400" /> Executive JD Mapping
                                         </h3>
                                         <textarea
                                             value={jobDescription}
@@ -196,7 +196,7 @@ const OptimizeTab = ({
                                             placeholder="Example: We are looking for a Senior React Engineer with 5+ years of experience in distributed systems and state management..."
                                         />
                                         <div className="mt-4 flex items-center gap-2 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest italic">
-                                            <Lightbulb size={12} className="text-amber-500" /> Pro Tip: Paste the full JD for 99% accuracy.
+                                            <Lightbulb size={12} className="text-amber-700 dark:text-amber-400" /> Pro Tip: Paste the full JD for 99% accuracy.
                                         </div>
                                         <button onClick={() => runFeature('tailor')} disabled={loading || !jobDescription} className="w-full mt-6 btn-primary bg-emerald-600 hover:bg-emerald-700 !py-5 shadow-emerald-200">
                                             {loading ? <Loader2 className="animate-spin" /> : 'Map Resume to JD'}
@@ -208,7 +208,7 @@ const OptimizeTab = ({
 
                                         {!tailorData ? (
                                             <div className="text-center space-y-4">
-                                                <UserCheck size={48} className="mx-auto text-emerald-500 opacity-50 mb-4" />
+                                                <UserCheck size={48} className="mx-auto text-emerald-700 dark:text-emerald-400 opacity-50 mb-4" />
                                                 <h4 className="text-xl font-bold text-[var(--text-primary)]">Strategic Compatibility</h4>
                                                 <p className="text-[var(--text-muted)] text-sm font-medium">Deconstructing your profile against specific employer requirements.</p>
                                             </div>
@@ -240,7 +240,7 @@ const OptimizeTab = ({
                                                                         <span className="text-[10px] font-black text-[var(--text-primary)]">{kw.keyword}</span>
                                                                         <span className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-tighter">Imp: {kw.jdImportance}</span>
                                                                     </div>
-                                                                    <div className={`text-xs font-black ${kw.resumeDensity > 50 ? 'text-emerald-500' : 'text-rose-400'}`}>{kw.resumeDensity}%</div>
+                                                                    <div className={`text-xs font-black ${kw.resumeDensity > 50 ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-400'}`}>{kw.resumeDensity}%</div>
                                                                 </div>
                                                             ))}
                                                         </div>
@@ -261,7 +261,7 @@ const OptimizeTab = ({
                                 {tailorData && (
                                     <div className="bg-[var(--bg-surface)] p-12 rounded-[4rem] border-2 border-emerald-100 shadow-xl animate-fade-in divide-y divide-slate-100">
                                         <div className="pb-8">
-                                            <h4 className="text-lg font-black text-[var(--text-primary)] mb-4 flex items-center gap-3"><Lightbulb className="text-amber-500" /> Recruiter Gap Analysis</h4>
+                                            <h4 className="text-lg font-black text-[var(--text-primary)] mb-4 flex items-center gap-3"><Lightbulb className="text-amber-700 dark:text-amber-400" /> Recruiter Gap Analysis</h4>
                                             <p className="text-sm text-[var(--text-secondary)] font-bold leading-relaxed italic pr-12">"{tailorData.recruiterGapAnalysis}"</p>
                                         </div>
                                         <div className="pt-8 space-y-4">
@@ -304,7 +304,7 @@ const OptimizeTab = ({
                                                 Master Draft: {selectedRole}
                                             </div>
                                             <button onClick={() => handleCopy(coverLetter.coverLetter, 'cl')} className="flex items-center gap-2 group/btn text-cyan-600 hover:opacity-70 transition-opacity">
-                                                {copyStatus === 'cl' ? <CheckCircle size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                                {copyStatus === 'cl' ? <CheckCircle size={14} className="text-emerald-700 dark:text-emerald-400" /> : <Copy size={14} />}
                                                 {copyStatus === 'cl' ? 'Copied Success' : 'Copy Full Text'}
                                             </button>
                                         </div>
@@ -346,7 +346,7 @@ const OptimizeTab = ({
                                                 </div>
                                                 <h4 className="text-2xl font-black text-[var(--text-primary)] leading-tight mb-8">{linkedinData.headline}</h4>
                                                 <button onClick={() => handleCopy(linkedinData.headline, 'li_h')} className="text-xs font-black text-cyan-600 flex items-center gap-2 hover:opacity-70 group/copy">
-                                                    {copyStatus === 'li_h' ? <CheckCircle size={16} className="text-emerald-500" /> : <Copy size={16} className="group-hover/copy:rotate-6 transition-transform" />}
+                                                    {copyStatus === 'li_h' ? <CheckCircle size={16} className="text-emerald-700 dark:text-emerald-400" /> : <Copy size={16} className="group-hover/copy:rotate-6 transition-transform" />}
                                                     {copyStatus === 'li_h' ? 'Authorized Copy Success' : 'Copy Premium Headline'}
                                                 </button>
                                             </div>
@@ -355,7 +355,7 @@ const OptimizeTab = ({
                                                 <div className="flex justify-between items-center mb-10 pb-6 border-b border-[var(--border-primary)]">
                                                     <span className="text-[10px] font-black text-cyan-600 uppercase tracking-widest">Elite "About" Narrative</span>
                                                     <button onClick={() => handleCopy(linkedinData.about, 'li_a')} className="flex items-center gap-2 text-[10px] font-black text-[var(--text-muted)] hover:text-cyan-600 uppercase tracking-widest transition-colors">
-                                                        {copyStatus === 'li_a' ? <CheckCircle size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                                        {copyStatus === 'li_a' ? <CheckCircle size={14} className="text-emerald-700 dark:text-emerald-400" /> : <Copy size={14} />}
                                                         {copyStatus === 'li_a' ? 'Copied' : 'Copy Full Story'}
                                                     </button>
                                                 </div>
@@ -390,7 +390,7 @@ const OptimizeTab = ({
                                             </div>
 
                                             <div className="bg-[var(--bg-surface)] p-8 rounded-[3rem] border border-[var(--border-primary)] shadow-sm">
-                                                <span className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest mb-6 block">Targeted Endorsements</span>
+                                                <span className="text-[10px] font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-widest mb-6 block">Targeted Endorsements</span>
                                                 <div className="flex flex-wrap gap-2">
                                                     {linkedinData.skillsToPin?.map((s, i) => (
                                                         <span key={i} className="px-3 py-1.5 bg-cyan-50 text-cyan-700 text-[10px] font-bold rounded-xl border border-cyan-100 uppercase italic"># {s}</span>

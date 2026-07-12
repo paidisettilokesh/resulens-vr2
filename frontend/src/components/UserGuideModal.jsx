@@ -35,11 +35,11 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
                     </div>
                     <div className="grid grid-cols-2 gap-4 pt-2">
                         <div className="p-4 rounded-2xl bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] flex items-center gap-3">
-                            <Shield className="text-cyan-500 shrink-0" size={18} />
+                            <Shield className="text-cyan-700 dark:text-cyan-400 shrink-0" size={18} />
                             <span className="text-xs font-semibold text-[var(--text-primary)]">Data Secured</span>
                         </div>
                         <div className="p-4 rounded-2xl bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] flex items-center gap-3">
-                            <BookOpen className="text-cyan-500 shrink-0" size={18} />
+                            <BookOpen className="text-cyan-700 dark:text-cyan-400 shrink-0" size={18} />
                             <span className="text-xs font-semibold text-[var(--text-primary)]">ATS Optimizations</span>
                         </div>
                     </div>
@@ -58,7 +58,7 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
                             title: "ATS Resume Auditor",
                             desc: "Upload your resume to receive a comprehensive score, structure evaluation, formatting critiques, and exact keyword recommendations matching target roles.",
                             icon: BarChart3,
-                            color: "text-cyan-500 bg-cyan-500/10"
+                            color: "text-cyan-700 dark:text-cyan-400 bg-cyan-500/10"
                         },
                         {
                             title: "Resume Studio",
@@ -70,19 +70,19 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
                             title: "Interview Coach",
                             desc: "Practice with custom interview prep questions based on your resume and a target job description, featuring interactive answer feedback using the STAR framework.",
                             icon: Mic,
-                            color: "text-emerald-500 bg-emerald-500/10"
+                            color: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/10"
                         },
                         {
                             title: "Resume Roast",
                             desc: "Need some tough love? The Roast module serves up brutal, raw, and constructive AI feedback to expose weak statements, clichés, and style mistakes instantly.",
                             icon: Zap,
-                            color: "text-rose-500 bg-rose-500/10"
+                            color: "text-rose-700 dark:text-rose-400 bg-rose-500/10"
                         },
                         {
                             title: "Market Insights",
                             desc: "Assess market trends, typical salary bands, and job demand statistics in real time. Gain recommendations on high-value skills and matching upskilling courses.",
                             icon: Shield,
-                            color: "text-amber-500 bg-amber-500/10"
+                            color: "text-amber-700 dark:text-amber-400 bg-amber-500/10"
                         }
                     ].map((feat, idx) => (
                         <div key={idx} className="p-5 bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] rounded-[1.8rem] flex gap-4 items-start">
@@ -226,10 +226,10 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
                             Our support staff is ready to assist you. You can connect with our global support and community channels below:
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                            <a href="mailto:support@resulens.ai" className="p-3 bg-[var(--bg-surface)] border border-[var(--border-primary)] rounded-xl text-xs font-bold text-center block hover:text-cyan-500 hover:border-cyan-500 transition-all">
+                            <a href="mailto:support@resulens.ai" className="p-3 bg-[var(--bg-surface)] border border-[var(--border-primary)] rounded-xl text-xs font-bold text-center block hover:text-cyan-700 dark:text-cyan-400 hover:border-cyan-500 transition-all">
                                 support@resulens.ai
                             </a>
-                            <a href="https://discord.gg/resulens" target="_blank" rel="noreferrer" className="p-3 bg-[var(--bg-surface)] border border-[var(--border-primary)] rounded-xl text-xs font-bold text-center block hover:text-cyan-500 hover:border-cyan-500 transition-all">
+                            <a href="https://discord.gg/resulens" target="_blank" rel="noreferrer" className="p-3 bg-[var(--bg-surface)] border border-[var(--border-primary)] rounded-xl text-xs font-bold text-center block hover:text-cyan-700 dark:text-cyan-400 hover:border-cyan-500 transition-all">
                                 Join our Discord
                             </a>
                         </div>
@@ -269,6 +269,9 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
     return (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
             <motion.div
+                role="dialog"
+                aria-modal="true"
+                aria-label="User Guide and Tour"
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -278,10 +281,10 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-6 right-6 p-2 rounded-xl bg-[var(--bg-surface-secondary)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--border-primary)]/20 transition-all active:scale-95 z-55"
+                    className="absolute top-6 right-6 p-2 rounded-xl bg-[var(--bg-surface-secondary)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--border-primary)]/20 transition-all active:scale-95 z-55 min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-cyan-700"
                     aria-label="Close Guide"
                 >
-                    <X size={16} />
+                    <X size={16} aria-hidden="true" />
                 </button>
 
                 {/* Sidebar Navigation */}
@@ -303,15 +306,16 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
                                 <button
                                     key={idx}
                                     onClick={() => setCurrentSlide(idx)}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all text-left group ${
+                                    aria-current={currentSlide === idx ? 'step' : undefined}
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all text-left group min-h-[44px] focus-visible:ring-2 focus-visible:ring-cyan-700 ${
                                         currentSlide === idx 
-                                        ? 'bg-cyan-600 text-white shadow-md shadow-cyan-600/15' 
+                                        ? 'bg-cyan-700 dark:bg-cyan-600 text-white shadow-md shadow-cyan-600/15' 
                                         : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--border-primary)]/20'
                                     }`}
                                 >
                                     <span className={`w-5 h-5 rounded-lg flex items-center justify-center text-[10px] ${
                                         currentSlide === idx ? 'bg-white/20 text-white' : 'bg-[var(--border-primary)] text-[var(--text-muted)] group-hover:bg-[var(--border-primary)]/40'
-                                    }`}>
+                                    }`} aria-hidden="true">
                                         {idx + 1}
                                     </span>
                                     <span>{slide.title}</span>
@@ -343,7 +347,7 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
                     <div className="space-y-6 md:space-y-8 flex-grow overflow-hidden flex flex-col justify-center">
                         <div className="space-y-2 text-left shrink-0">
                             <div className="flex items-center gap-3">
-                                <div className="p-2.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-xl shrink-0">
+                                <div className="p-2.5 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 rounded-xl shrink-0" aria-hidden="true">
                                     <SlideIcon size={22} />
                                 </div>
                                 <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] tracking-tight">
@@ -376,7 +380,7 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
                     <div className="pt-6 border-t border-[var(--border-primary)] flex justify-between items-center shrink-0 gap-4 mt-6 md:mt-0">
                         <button
                             onClick={handleComplete}
-                            className="text-xs font-bold text-[var(--text-muted)] hover:text-rose-500 transition-colors py-2"
+                            className="text-xs font-bold text-[var(--text-muted)] hover:text-rose-700 dark:text-rose-400 transition-colors py-2"
                         >
                             Skip Tour
                         </button>
@@ -385,17 +389,17 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
                             {currentSlide > 0 && (
                                 <button
                                     onClick={handleBack}
-                                    className="flex items-center gap-1.5 px-5 py-3 rounded-2xl text-xs font-bold bg-[var(--bg-surface-secondary)] text-[var(--text-primary)] border border-[var(--border-primary)] hover:bg-[var(--border-primary)]/10 transition-all active:scale-95"
+                                    className="flex items-center gap-1.5 px-5 py-3 rounded-2xl text-xs font-bold bg-[var(--bg-surface-secondary)] text-[var(--text-primary)] border border-[var(--border-primary)] hover:bg-[var(--border-primary)]/10 transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-cyan-700 min-h-[44px]"
                                 >
-                                    <ChevronLeft size={14} /> Back
+                                    <ChevronLeft size={14} aria-hidden="true" /> Back
                                 </button>
                             )}
                             <button
                                 onClick={handleNext}
-                                className="flex items-center gap-1.5 px-6 py-3 rounded-2xl text-xs font-bold bg-cyan-600 text-white shadow-xl shadow-cyan-600/15 hover:bg-cyan-700 transition-all active:scale-95"
+                                className="flex items-center gap-1.5 px-6 py-3 rounded-2xl text-xs font-bold bg-cyan-700 dark:bg-cyan-600 text-white shadow-xl shadow-cyan-600/15 hover:bg-cyan-800 dark:hover:bg-cyan-700 transition-all active:scale-95 focus-visible:ring-2 focus-visible:ring-cyan-700 min-h-[44px]"
                             >
                                 <span>{currentSlide === slides.length - 1 ? 'Get Started' : 'Next'}</span>
-                                {currentSlide === slides.length - 1 ? <Check size={14} /> : <ChevronRight size={14} />}
+                                {currentSlide === slides.length - 1 ? <Check size={14} aria-hidden="true" /> : <ChevronRight size={14} aria-hidden="true" />}
                             </button>
                         </div>
                     </div>

@@ -22,7 +22,7 @@ const Navigation = ({ activeTab, setActiveTab }) => {
     }
 
     return (
-        <nav className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-20 hover:w-64 z-[110] bg-[var(--bg-surface)] border-r border-[var(--border-primary)] shadow-2xl transition-all duration-300 group overflow-x-hidden overflow-y-auto">
+        <nav aria-label="Main Navigation" className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-20 hover:w-64 z-[110] bg-[var(--bg-surface)] border-r border-[var(--border-primary)] shadow-2xl transition-all duration-300 group overflow-x-hidden overflow-y-auto">
             {/* Logo area in sidebar */}
             <div className="p-6 pb-8 flex items-center gap-4 border-b border-[var(--border-secondary)]">
                 <div className="w-8 h-8 bg-cyan-600 rounded-xl flex shrink-0 items-center justify-center text-white shadow-xl shadow-cyan-100">
@@ -38,12 +38,13 @@ const Navigation = ({ activeTab, setActiveTab }) => {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
+                            aria-current={isActive ? 'page' : undefined}
                             className={`
-                                relative flex items-center gap-4 px-3 py-3 rounded-2xl text-sm font-bold transition-all duration-300 group/item overflow-hidden
-                                ${isActive ? 'text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/20 shadow-sm border border-cyan-100 dark:border-cyan-800/30' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface-secondary)] hover:text-[var(--text-primary)]'}
+                                relative flex items-center gap-4 px-3 py-3 rounded-2xl text-sm font-bold transition-all duration-300 group/item overflow-hidden min-h-[44px]
+                                ${isActive ? 'text-cyan-700 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/20 shadow-sm border border-cyan-100 dark:border-cyan-800/30' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface-secondary)] hover:text-[var(--text-primary)]'}
                             `}
                         >
-                            <tab.icon size={20} className="shrink-0 relative z-10" />
+                            <tab.icon size={20} aria-hidden="true" className="shrink-0 relative z-10" />
                             <span className="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap relative z-10">{tab.label}</span>
                             
                             {/* Tooltip for compact state */}

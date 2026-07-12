@@ -151,7 +151,7 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                 {/* STEP 2: ACTIVE SESSION */}
                 {step === 'session' && !interviewPrep && !loading && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20">
-                        <div className="w-16 h-16 bg-rose-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-rose-500">
+                        <div className="w-16 h-16 bg-rose-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-rose-700 dark:text-rose-400">
                             <AlertTriangle size={32} />
                         </div>
                         <h3 className="text-2xl font-black text-[var(--text-primary)] mb-3">Session Failed to Load</h3>
@@ -218,9 +218,9 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                                     </td>
                                                     <td className="px-8 py-6 align-top">
                                                         {questionEval?.verdict ? (
-                                                            <span className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${questionEval.verdict.includes('Strong') ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                                                                questionEval.verdict.includes('Satisfactory') ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                                                                    'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                                                            <span className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${questionEval.verdict.includes('Strong') ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20' :
+                                                                questionEval.verdict.includes('Satisfactory') ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20' :
+                                                                    'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
                                                                 }`}>
                                                                 {questionEval.verdict}
                                                             </span>
@@ -269,7 +269,7 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                                 <div className="w-10 h-10 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-cyan-600"><Zap size={20} /></div>
                                                 <h4 className="font-black text-[var(--text-primary)]">Practicing Question</h4>
                                             </div>
-                                            <button onClick={() => setActiveQuestion(null)} className="p-3 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-secondary)] text-[var(--text-muted)] hover:text-rose-500 transition-all">
+                                            <button onClick={() => setActiveQuestion(null)} className="p-3 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-secondary)] text-[var(--text-muted)] hover:text-rose-700 dark:text-rose-400 transition-all">
                                                 Close
                                             </button>
                                         </div>
@@ -310,7 +310,7 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                                 <div className="mt-10 p-8 bg-emerald-500/5 rounded-[2.5rem] border border-emerald-500/10 space-y-6">
                                                     <div className="flex items-center justify-between">
                                                         <span className="text-2xl font-black text-emerald-600">Score: {evaluations[activeQuestion.id].score}</span>
-                                                        <span className="text-xs font-black uppercase text-emerald-500">{evaluations[activeQuestion.id].verdict}</span>
+                                                        <span className="text-xs font-black uppercase text-emerald-700 dark:text-emerald-400">{evaluations[activeQuestion.id].verdict}</span>
                                                     </div>
                                                     <p className="text-sm font-medium text-[var(--text-secondary)] leading-relaxed italic">
                                                         "{evaluations[activeQuestion.id].feedback}"

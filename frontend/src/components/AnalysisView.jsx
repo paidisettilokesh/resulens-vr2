@@ -65,7 +65,7 @@ const AnalysisView = ({
                 {loading ? (
                     <ProgressiveLoader active={loading} />
                 ) : error ? (
-                    <div className="text-rose-500 text-center p-12 max-w-xl">
+                    <div className="text-rose-700 dark:text-rose-400 text-center p-12 max-w-xl">
                         <div className="w-20 h-20 bg-rose-50 dark:bg-rose-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-rose-100 shadow-xl shadow-rose-200/50">
                             <AlertTriangle size={40} />
                         </div>
@@ -97,32 +97,32 @@ const AnalysisView = ({
     
     // Recruiter Interest Category
     let interestCategory = 'Moderate';
-    let interestColor = 'text-amber-500';
+    let interestColor = 'text-amber-700 dark:text-amber-400';
     let interestBg = 'bg-amber-500/10';
     let interestBorder = 'border-amber-500/20';
     let interestExplanation = '';
 
     if (recruiterInterest >= 85) {
         interestCategory = 'Excellent';
-        interestColor = 'text-cyan-500 dark:text-cyan-400';
+        interestColor = 'text-cyan-700 dark:text-cyan-400 dark:text-cyan-400';
         interestBg = 'bg-cyan-500/10';
         interestBorder = 'border-cyan-500/20';
         interestExplanation = `Your technical skill depth and experience alignment place you in the top tier.`;
     } else if (recruiterInterest >= 70) {
         interestCategory = 'Strong';
-        interestColor = 'text-emerald-500 dark:text-emerald-400';
+        interestColor = 'text-emerald-700 dark:text-emerald-400 dark:text-emerald-400';
         interestBg = 'bg-emerald-500/10';
         interestBorder = 'border-emerald-500/20';
         interestExplanation = `Your technical skills and experience are attractive to recruiters in this track.`;
     } else if (recruiterInterest >= 50) {
         interestCategory = 'Moderate';
-        interestColor = 'text-amber-500 dark:text-amber-400';
+        interestColor = 'text-amber-700 dark:text-amber-400 dark:text-amber-400';
         interestBg = 'bg-amber-500/10';
         interestBorder = 'border-amber-500/20';
         interestExplanation = `You have a solid foundation, but adding missing skills will boost response rates.`;
     } else {
         interestCategory = 'Needs Improvement';
-        interestColor = 'text-rose-500 dark:text-rose-400';
+        interestColor = 'text-rose-700 dark:text-rose-400 dark:text-rose-400';
         interestBg = 'bg-rose-500/10';
         interestBorder = 'border-rose-500/20';
         interestExplanation = `Significant adjustments are required to pass recruiter screening.`;
@@ -254,16 +254,16 @@ const AnalysisView = ({
     const verdictRating = analysis.verdict || verdictText.split('-')[0]?.trim() || (jobMatchScore >= 80 ? 'Strong Candidate' : 'Moderate Candidate');
     const verdictReasoning = verdictText.split('-').slice(1).join('-')?.trim() || 'Your competency levels map closely to senior parameters for this track.';
 
-    let verdictColor = 'text-emerald-500';
+    let verdictColor = 'text-emerald-700 dark:text-emerald-400';
     let verdictBg = 'bg-emerald-500/10';
     let verdictBorder = 'border-emerald-500/20';
 
     if (verdictRating.toLowerCase().includes('reject') || verdictRating.toLowerCase().includes('improvement')) {
-        verdictColor = 'text-rose-500';
+        verdictColor = 'text-rose-700 dark:text-rose-400';
         verdictBg = 'bg-rose-500/10';
         verdictBorder = 'border-rose-500/20';
     } else if (verdictRating.toLowerCase().includes('maybe') || verdictRating.toLowerCase().includes('moderate')) {
-        verdictColor = 'text-amber-500';
+        verdictColor = 'text-amber-700 dark:text-amber-400';
         verdictBg = 'bg-amber-500/10';
         verdictBorder = 'border-amber-500/20';
     }
@@ -318,14 +318,14 @@ const AnalysisView = ({
                                 {candidateName ? candidateName.charAt(0) : 'E'}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest flex items-center gap-1 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 w-fit mb-1">
+                                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-1 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 w-fit mb-1">
                                     <ShieldCheck size={10} strokeWidth={3} /> Verified Profile
                                 </span>
                                 <h2 className="text-xl font-black text-[var(--text-primary)] tracking-tight truncate leading-none">
                                     {candidateName || 'Professional Lead'}
                                 </h2>
                                 <div className="flex items-center gap-1 text-[11px] text-[var(--text-muted)] font-semibold mt-1">
-                                    <MapPin size={11} className="text-cyan-500 shrink-0" />
+                                    <MapPin size={11} className="text-cyan-700 dark:text-cyan-400 shrink-0" />
                                     <span className="truncate">{analysis.location || 'Remote / Global'}</span>
                                 </div>
                             </div>
@@ -341,7 +341,7 @@ const AnalysisView = ({
                     {/* Recruiter Interest Score */}
                     <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl relative overflow-hidden flex flex-col justify-between">
                         <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] mb-4 flex items-center gap-2">
-                            <Star size={13} className="text-cyan-500" /> Recruiter Interest
+                            <Star size={13} className="text-cyan-700 dark:text-cyan-400" /> Recruiter Interest
                         </h3>
                         <div className="flex items-center gap-5">
                             <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
@@ -384,7 +384,7 @@ const AnalysisView = ({
                     <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-6">
                         <div>
                             <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] mb-3 flex items-center gap-2">
-                                <Zap size={13} className="text-cyan-500" /> Top Skills
+                                <Zap size={13} className="text-cyan-700 dark:text-cyan-400" /> Top Skills
                             </h3>
                             <div className="flex flex-wrap gap-1.5">
                                 {matchedSkills.slice(0, 6).map((skill, idx) => (
@@ -396,7 +396,7 @@ const AnalysisView = ({
                         </div>
                         <div className="pt-5 border-t border-[var(--border-secondary)]">
                             <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] mb-3 flex items-center gap-2">
-                                <Award size={13} className="text-cyan-500" /> Achievement Badges
+                                <Award size={13} className="text-cyan-700 dark:text-cyan-400" /> Achievement Badges
                             </h3>
                             <div className="flex flex-wrap gap-1.5">
                                 {activeBadges.map((badge, idx) => (
@@ -423,7 +423,7 @@ const AnalysisView = ({
                         <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-5">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] flex items-center gap-2">
-                                    <Clock size={13} className="text-cyan-500" /> Version History
+                                    <Clock size={13} className="text-cyan-700 dark:text-cyan-400" /> Version History
                                 </h3>
                             </div>
                             <div className="relative pl-5 border-l-2 border-[var(--border-secondary)] space-y-5">
@@ -451,7 +451,7 @@ const AnalysisView = ({
                     {/* Executive Summary */}
                     <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl relative overflow-hidden group">
                         <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] mb-4 flex items-center gap-2">
-                            <FileText size={13} className="text-cyan-500" /> Executive Summary
+                            <FileText size={13} className="text-cyan-700 dark:text-cyan-400" /> Executive Summary
                         </h3>
                         <p className="text-sm font-medium text-[var(--text-primary)] leading-relaxed italic">
                             "{analysis.summary}"
@@ -461,7 +461,7 @@ const AnalysisView = ({
                     {/* Intelligence Metrics Grid */}
                     <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-5">
                         <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] flex items-center gap-2">
-                            <BarChart3 size={13} className="text-cyan-500" /> Intelligence Metrics
+                            <BarChart3 size={13} className="text-cyan-700 dark:text-cyan-400" /> Intelligence Metrics
                         </h3>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="p-4 bg-[var(--bg-surface-secondary)] border border-[var(--border-secondary)] rounded-2xl text-center">
@@ -486,13 +486,13 @@ const AnalysisView = ({
                     {/* ATS Improvement Roadmap */}
                     <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-5">
                         <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] flex items-center gap-2">
-                            <Target size={13} className="text-cyan-500" /> ATS Improvement Roadmap
+                            <Target size={13} className="text-cyan-700 dark:text-cyan-400" /> ATS Improvement Roadmap
                         </h3>
                         <div className="space-y-3.5">
                             {activeRoadmap.map((item, idx) => {
-                                let priorityColor = 'text-cyan-500 bg-cyan-500/10 border-cyan-500/20';
-                                if (item.priority?.toLowerCase() === 'high') priorityColor = 'text-rose-500 bg-rose-500/10 border-rose-500/20';
-                                else if (item.priority?.toLowerCase() === 'medium') priorityColor = 'text-amber-500 bg-amber-500/10 border-amber-500/20';
+                                let priorityColor = 'text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 border-cyan-500/20';
+                                if (item.priority?.toLowerCase() === 'high') priorityColor = 'text-rose-700 dark:text-rose-400 bg-rose-500/10 border-rose-500/20';
+                                else if (item.priority?.toLowerCase() === 'medium') priorityColor = 'text-amber-700 dark:text-amber-400 bg-amber-500/10 border-amber-500/20';
 
                                 return (
                                     <div key={idx} className="p-4 bg-[var(--bg-surface-secondary)] rounded-2xl border border-[var(--border-secondary)] flex items-start justify-between gap-4">
@@ -517,7 +517,7 @@ const AnalysisView = ({
                     {/* AI Career Coach */}
                     <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-5">
                         <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] flex items-center gap-2">
-                            <Sparkles size={13} className="text-cyan-500" /> AI Career Coach
+                            <Sparkles size={13} className="text-cyan-700 dark:text-cyan-400" /> AI Career Coach
                         </h3>
                         <div className="space-y-3">
                             {activeCoach.map((rec, idx) => (
@@ -545,14 +545,14 @@ const AnalysisView = ({
                         </div>
                         <div className="p-6 bg-[var(--bg-surface)] border border-[var(--border-primary)] rounded-[2.5rem] shadow-xl text-center">
                             <span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Market Fit</span>
-                            <span className="text-3xl font-black text-emerald-500">{jobMatchScore}%</span>
+                            <span className="text-3xl font-black text-emerald-700 dark:text-emerald-400">{jobMatchScore}%</span>
                         </div>
                     </div>
 
                     {/* AI Verdict Card */}
                     <div className="bg-[var(--bg-surface)] p-6 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-3">
                         <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] flex items-center gap-1.5">
-                            <Shield size={12} className="text-cyan-500" /> AI Verdict
+                            <Shield size={12} className="text-cyan-700 dark:text-cyan-400" /> AI Verdict
                         </h3>
                         <div className={`p-4 rounded-xl border ${verdictBg} ${verdictBorder} text-center`}>
                             <span className={`text-xs font-black uppercase tracking-widest ${verdictColor}`}>{verdictRating}</span>

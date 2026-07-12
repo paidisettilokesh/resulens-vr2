@@ -90,25 +90,25 @@ export default function LandingPage({ onOpenAuth }) {
             title: "ATS Audit & Score",
             desc: "Receive real-time grading of your resume formatting, layout, structure, and text density.",
             icon: BarChart3,
-            color: "text-cyan-500 bg-cyan-500/10"
+            color: "text-cyan-700 dark:text-cyan-400 bg-cyan-500/10"
         },
         {
             title: "Resume Studio",
             desc: "Tailor applications for specific job requirements, draft cover letters, and optimize LinkedIn profiles.",
             icon: FileText,
-            color: "text-indigo-500 bg-indigo-500/10"
+            color: "text-indigo-700 dark:text-indigo-400 bg-indigo-500/10"
         },
         {
             title: "Interview Coach",
             desc: "Practice behavioral interviews against a AI model matching the job description with STAR metrics.",
             icon: Mic,
-            color: "text-emerald-500 bg-emerald-500/10"
+            color: "text-emerald-700 dark:text-emerald-400 bg-emerald-500/10"
         },
         {
             title: "Resume Roast",
             desc: "Get direct, unfiltered feedback that exposes passive verbs, buzzwords, and weak metric details.",
             icon: Zap,
-            color: "text-rose-500 bg-rose-500/10"
+            color: "text-rose-700 dark:text-rose-400 bg-rose-500/10"
         }
     ];
 
@@ -159,31 +159,31 @@ export default function LandingPage({ onOpenAuth }) {
             <header className="fixed top-0 left-0 right-0 z-50 py-6 backdrop-blur-xl border-b border-[var(--border-primary)]/50 bg-[var(--bg-app)]/70">
                 <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-cyan-600 rounded-xl flex items-center justify-center text-white shadow-xl shadow-cyan-500/10 shrink-0">
+                        <div className="w-9 h-9 bg-cyan-700 dark:bg-cyan-600 rounded-xl flex items-center justify-center text-white shadow-xl shadow-cyan-500/10 shrink-0" aria-hidden="true">
                             <Zap size={18} fill="white" />
                         </div>
                         <div className="flex flex-col text-left">
                             <span className="font-bold text-lg leading-none tracking-tight">ResuLens</span>
-                            <span className="text-[8px] font-bold text-cyan-600 uppercase tracking-widest leading-none mt-1">AI Resume Intelligence</span>
+                            <span className="text-[8px] font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-widest leading-none mt-1">AI Resume Intelligence</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
                         <button
                             onClick={toggleTheme}
-                            className="p-2.5 rounded-xl bg-[var(--bg-surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-primary)]/40 transition-all active:scale-95"
+                            className="p-2.5 rounded-xl bg-[var(--bg-surface-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-primary)]/40 transition-all active:scale-95 min-h-[44px] min-w-[44px]"
                             aria-label="Toggle Theme"
                         >
-                            {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+                            {theme === 'light' ? <Moon size={16} aria-hidden="true" /> : <Sun size={16} aria-hidden="true" />}
                         </button>
                         <button
                             onClick={() => onOpenAuth('login')}
-                            className="px-5 py-2.5 rounded-xl border border-[var(--border-secondary)] hover:bg-[var(--bg-surface-secondary)] transition-all text-xs font-bold text-[var(--accent-primary)] focus-visible:ring-2 focus-visible:ring-cyan-500/50"
+                            className="px-5 py-2.5 rounded-xl border border-[var(--border-secondary)] hover:bg-[var(--bg-surface-secondary)] transition-all text-xs font-bold text-cyan-700 dark:text-cyan-400 focus-visible:ring-2 focus-visible:ring-cyan-500/50 min-h-[44px]"
                         >
                             Sign In
                         </button>
                         <button
                             onClick={() => onOpenAuth('signup')}
-                            className="px-5 py-2.5 rounded-xl bg-cyan-600 text-white hover:bg-cyan-700 transition-all text-xs font-bold shadow-md shadow-cyan-600/10 focus-visible:ring-2 focus-visible:ring-cyan-500/50"
+                            className="px-5 py-2.5 rounded-xl bg-cyan-700 dark:bg-cyan-600 text-white hover:bg-cyan-800 dark:hover:bg-cyan-700 transition-all text-xs font-bold shadow-md shadow-cyan-600/10 focus-visible:ring-2 focus-visible:ring-cyan-500/50 min-h-[44px]"
                         >
                             Get Started
                         </button>
@@ -196,11 +196,11 @@ export default function LandingPage({ onOpenAuth }) {
                 <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center pt-8">
                     {/* Left: Text Hook */}
                     <div className="lg:col-span-6 text-left space-y-6">
-                        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[10px] font-bold tracking-widest uppercase">
-                            <Sparkles size={12} /> Beat the Hiring Systems
+                        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 text-[10px] font-bold tracking-widest uppercase">
+                            <Sparkles size={12} aria-hidden="true" /> Beat the Hiring Systems
                         </div>
                         <h1 className="text-5xl sm:text-6xl font-black text-[var(--text-primary)] leading-[1.05] tracking-tight">
-                            Audit Your Resume with <span className="text-cyan-600 dark:text-cyan-400">AI</span> in Seconds
+                            Audit Your Resume with <span className="text-cyan-700 dark:text-cyan-400">AI</span> in Seconds
                         </h1>
                         <p className="text-base sm:text-lg font-medium text-[var(--text-secondary)] leading-relaxed">
                             ResuLens computes a rigorous ATS score, detects hidden skill gaps, drafts custom cover letters, and optimizes your profile to land elite interviews.
@@ -209,21 +209,21 @@ export default function LandingPage({ onOpenAuth }) {
                         <div className="pt-2 flex flex-wrap gap-4">
                             <a
                                 href="#upload"
-                                className="px-8 py-4 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-2xl shadow-xl shadow-cyan-600/20 active:scale-[0.97] transition-all text-sm flex items-center gap-2 focus-visible:ring-4 focus-visible:ring-cyan-500/50"
+                                className="px-8 py-4 bg-cyan-700 dark:bg-cyan-600 hover:bg-cyan-800 dark:hover:bg-cyan-700 text-white font-bold rounded-2xl shadow-xl shadow-cyan-600/20 active:scale-[0.97] transition-all text-sm flex items-center gap-2 focus-visible:ring-4 focus-visible:ring-cyan-500/50 min-h-[44px]"
                             >
-                                Analyze My Resume Now <ArrowRight size={16} />
+                                Analyze My Resume Now <ArrowRight size={16} aria-hidden="true" />
                             </a>
                             <button
                                 onClick={() => onOpenAuth('guest')}
-                                className="px-8 py-4 bg-[var(--bg-surface)] text-[var(--accent-primary)] border border-[var(--border-secondary)] hover:bg-[var(--bg-surface-secondary)] font-bold rounded-2xl shadow-sm active:scale-[0.97] transition-all text-sm focus-visible:ring-4 focus-visible:ring-cyan-500/50"
+                                className="px-8 py-4 bg-[var(--bg-surface)] text-cyan-700 dark:text-cyan-400 border border-[var(--border-secondary)] hover:bg-[var(--bg-surface-secondary)] font-bold rounded-2xl shadow-sm active:scale-[0.97] transition-all text-sm focus-visible:ring-4 focus-visible:ring-cyan-500/50 min-h-[44px]"
                             >
                                 Explore Guest Demo
                             </button>
                         </div>
 
                         <div className="flex items-center gap-6 pt-4 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                            <span className="flex items-center gap-1.5"><Shield size={14} className="text-cyan-500" /> Free Analysis</span>
-                            <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-cyan-500" /> Instant ATS score</span>
+                            <span className="flex items-center gap-1.5"><Shield size={14} aria-hidden="true" className="text-cyan-700 dark:text-cyan-500" /> Free Analysis</span>
+                            <span className="flex items-center gap-1.5"><CheckCircle2 size={14} aria-hidden="true" className="text-cyan-700 dark:text-cyan-500" /> Instant ATS score</span>
                         </div>
                     </div>
 
@@ -242,11 +242,12 @@ export default function LandingPage({ onOpenAuth }) {
                                         className="space-y-6"
                                     >
                                         <div className="text-left">
-                                            <h3 className="text-xl font-bold text-[var(--text-primary)]">Upload Your Resume</h3>
+                                            <h2 className="text-xl font-bold text-[var(--text-primary)]">Upload Your Resume</h2>
                                             <p className="text-xs text-[var(--text-muted)] mt-1">Get immediate feedback on formatting, keyword density, and metrics.</p>
                                         </div>
 
                                         <label
+                                            htmlFor="resume-upload-landing"
                                             onDragEnter={handleDrag}
                                             onDragOver={handleDrag}
                                             onDragLeave={handleDrag}
@@ -257,9 +258,9 @@ export default function LandingPage({ onOpenAuth }) {
                                                 : 'border-[var(--border-secondary)] hover:border-cyan-500 hover:bg-cyan-500/5 hover:shadow-inner'
                                             }`}
                                         >
-                                            <input type="file" onChange={handleFileInput} accept=".pdf,.docx" className="hidden" />
+                                            <input id="resume-upload-landing" type="file" onChange={handleFileInput} accept=".pdf,.docx" className="hidden" />
                                             <div className="flex flex-col items-center gap-4">
-                                                <div className="w-16 h-16 bg-cyan-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/10">
+                                                <div className="w-16 h-16 bg-cyan-700 dark:bg-cyan-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/10" aria-hidden="true">
                                                     <Upload size={28} />
                                                 </div>
                                                 <div className="space-y-1">
@@ -268,7 +269,7 @@ export default function LandingPage({ onOpenAuth }) {
                                                 </div>
                                             </div>
                                         </label>
-                                        {error && <p className="text-center text-rose-500 text-sm font-bold pt-2">{error}</p>}
+                                        {error && <p className="text-center text-rose-700 dark:text-rose-400 text-sm font-bold pt-2">{error}</p>}
                                     </motion.div>
                                 ) : (
                                     <motion.div
@@ -283,23 +284,23 @@ export default function LandingPage({ onOpenAuth }) {
                                             <div className="absolute inset-0 border-4 border-cyan-500/20 rounded-full" />
                                             <div className="absolute inset-0 border-4 border-cyan-600 border-t-transparent rounded-full animate-spin" />
                                             <div className="absolute inset-2 bg-[var(--bg-surface)] rounded-full flex items-center justify-center">
-                                                <Zap size={20} className="text-cyan-500 animate-pulse" />
+                                                <Zap size={20} className="text-cyan-700 dark:text-cyan-400 animate-pulse" />
                                             </div>
                                         </div>
 
                                         <div className="space-y-2">
-                                            <h4 className="text-lg font-bold text-[var(--text-primary)]">
+                                            <h3 className="text-lg font-bold text-[var(--text-primary)]" aria-live="polite">
                                                 {STAGES[uploadingStage]}
-                                            </h4>
+                                            </h3>
                                             <div className="w-60 h-1.5 bg-[var(--bg-surface-secondary)] rounded-full overflow-hidden mx-auto">
                                                 <motion.div
-                                                    className="h-full bg-cyan-600"
+                                                    className="h-full bg-cyan-700 dark:bg-cyan-600"
                                                     initial={{ width: "0%" }}
                                                     animate={{ width: `${((uploadingStage + 1) / STAGES.length) * 100}%` }}
                                                     transition={{ duration: 1.2, ease: "easeInOut" }}
                                                 />
                                             </div>
-                                            <p className="text-[10px] font-bold text-cyan-600 uppercase tracking-widest">
+                                            <p className="text-[10px] font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-widest">
                                                 Analyzing Resume
                                             </p>
                                         </div>
@@ -344,7 +345,7 @@ export default function LandingPage({ onOpenAuth }) {
                                     <ul className="space-y-2">
                                         {["✓ Strong action verbs used", "✓ Clean layout formatting structure", "✓ Valid metric-based indicators"].map((st, i) => (
                                             <li key={i} className="flex gap-2 items-start text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                                <span className="text-emerald-500">✓</span> {st.replace('✓', '')}
+                                                <span className="text-emerald-700 dark:text-emerald-400">✓</span> {st.replace('✓', '')}
                                             </li>
                                         ))}
                                     </ul>
@@ -359,19 +360,19 @@ export default function LandingPage({ onOpenAuth }) {
                                     <ul className="space-y-2">
                                         {["✗ Missing AWS/Cloud keyword density", "✗ Missing Docker containerization details", "✗ Weak metrics in senior project block"].map((gap, i) => (
                                             <li key={i} className="flex gap-2 items-start text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                                <span className="text-rose-500">✗</span> {gap.replace('✗', '')}
+                                                <span className="text-rose-700 dark:text-rose-400">✗</span> {gap.replace('✗', '')}
                                             </li>
                                         ))}
                                     </ul>
                                 </div>
-                                <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider block">3 Critical gaps detected</span>
+                                <span className="text-[10px] font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wider block">3 Critical gaps detected</span>
                             </div>
                         </div>
 
                         <div className="pt-2">
                             <button
                                 onClick={() => onOpenAuth('signup')}
-                                className="px-8 py-4 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-2xl shadow-xl shadow-cyan-600/20 active:scale-[0.97] transition-all text-sm focus-visible:ring-4 focus-visible:ring-cyan-500/50"
+                                className="px-8 py-4 bg-cyan-700 dark:bg-cyan-600 hover:bg-cyan-800 dark:hover:bg-cyan-700 text-white font-bold rounded-2xl shadow-xl shadow-cyan-600/20 active:scale-[0.97] transition-all text-sm focus-visible:ring-4 focus-visible:ring-cyan-500/50 min-h-[44px]"
                             >
                                 Get Your Full Analysis Report
                             </button>
@@ -433,13 +434,13 @@ export default function LandingPage({ onOpenAuth }) {
                         {testimonials.map((t, idx) => (
                             <div key={idx} className="bg-[var(--bg-surface)] p-8 rounded-[2rem] border border-[var(--border-primary)] text-left flex flex-col justify-between relative shadow-sm">
                                 <div className="flex gap-1 mb-4">
-                                    {[1, 2, 3, 4, 5].map(i => <Star key={i} size={14} className="text-amber-500 fill-amber-500" />)}
+                                    {[1, 2, 3, 4, 5].map(i => <Star key={i} size={14} className="text-amber-700 dark:text-amber-400 fill-amber-500" />)}
                                 </div>
                                 <p className="text-xs font-medium text-[var(--text-secondary)] italic leading-relaxed mb-6">
                                     &ldquo;{t.quote}&rdquo;
                                 </p>
                                 <div className="border-t border-[var(--border-primary)] pt-4">
-                                    <h5 className="font-bold text-xs text-[var(--text-primary)]">{t.author}</h5>
+                                    <div className="font-bold text-xs text-[var(--text-primary)]">{t.author}</div>
                                     <p className="text-[10px] text-[var(--text-muted)] font-semibold uppercase tracking-wider">{t.role}</p>
                                 </div>
                             </div>
@@ -459,15 +460,21 @@ export default function LandingPage({ onOpenAuth }) {
                             return (
                                 <div key={idx} className="border border-[var(--border-primary)] bg-[var(--bg-surface)] rounded-2xl overflow-hidden transition-all duration-300">
                                     <button
+                                        id={`faq-btn-${idx}`}
+                                        aria-expanded={isExpanded}
+                                        aria-controls={`faq-content-${idx}`}
                                         onClick={() => setActiveFaq(isExpanded ? null : idx)}
-                                        className="w-full flex justify-between items-center p-5 text-xs sm:text-sm font-bold text-[var(--text-primary)] hover:bg-[var(--bg-surface-secondary)]/50 transition-colors"
+                                        className="w-full flex justify-between items-center p-5 text-xs sm:text-sm font-bold text-[var(--text-primary)] hover:bg-[var(--bg-surface-secondary)]/50 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-500 min-h-[44px]"
                                     >
                                         <span>{faq.q}</span>
-                                        <ArrowRight size={14} className={`text-[var(--text-muted)] transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`} />
+                                        <ArrowRight aria-hidden="true" size={14} className={`text-[var(--text-muted)] transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`} />
                                     </button>
                                     <AnimatePresence initial={false}>
                                         {isExpanded && (
                                             <motion.div
+                                                id={`faq-content-${idx}`}
+                                                role="region"
+                                                aria-labelledby={`faq-btn-${idx}`}
                                                 initial={{ height: 0, opacity: 0 }}
                                                 animate={{ height: "auto", opacity: 1 }}
                                                 exit={{ height: 0, opacity: 0 }}

@@ -146,13 +146,13 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
         if (s.includes('coursera')) return { name: 'Coursera', url: 'https://www.coursera.org', color: 'text-blue-500 bg-blue-500/10' };
         if (s.includes('udemy')) return { name: 'Udemy', url: 'https://www.udemy.com', color: 'text-purple-500 bg-purple-500/10' };
         if (s.includes('edx')) return { name: 'edX', url: 'https://www.edx.org', color: 'text-red-500 bg-red-500/10' };
-        if (s.includes('freecodecamp') || s.includes('camp') || s.includes('free')) return { name: 'freeCodeCamp', url: 'https://www.freecodecamp.org', color: 'text-amber-500 bg-amber-500/10' };
-        if (s.includes('odin') || s.includes('project')) return { name: 'The Odin Project', url: 'https://www.theodinproject.com', color: 'text-emerald-500 bg-emerald-500/10' };
-        if (s.includes('harvard') || s.includes('cs50')) return { name: 'Harvard CS50', url: 'https://cs50.harvard.edu/x', color: 'text-rose-500 bg-rose-500/10' };
-        if (s.includes('microsoft')) return { name: 'Microsoft Learn', url: 'https://learn.microsoft.com', color: 'text-cyan-500 bg-cyan-500/10' };
+        if (s.includes('freecodecamp') || s.includes('camp') || s.includes('free')) return { name: 'freeCodeCamp', url: 'https://www.freecodecamp.org', color: 'text-amber-700 dark:text-amber-400 bg-amber-500/10' };
+        if (s.includes('odin') || s.includes('project')) return { name: 'The Odin Project', url: 'https://www.theodinproject.com', color: 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10' };
+        if (s.includes('harvard') || s.includes('cs50')) return { name: 'Harvard CS50', url: 'https://cs50.harvard.edu/x', color: 'text-rose-700 dark:text-rose-400 bg-rose-500/10' };
+        if (s.includes('microsoft')) return { name: 'Microsoft Learn', url: 'https://learn.microsoft.com', color: 'text-cyan-700 dark:text-cyan-400 bg-cyan-500/10' };
         if (s.includes('aws')) return { name: 'AWS Skill Builder', url: 'https://aws.amazon.com/training', color: 'text-orange-500 bg-orange-500/10' };
         if (s.includes('google')) return { name: 'Google Skillshop', url: 'https://skillshop.google.com', color: 'text-indigo-500 bg-indigo-500/10' };
-        return { name: 'freeCodeCamp', url: 'https://www.freecodecamp.org', color: 'text-cyan-500 bg-cyan-500/10' };
+        return { name: 'freeCodeCamp', url: 'https://www.freecodecamp.org', color: 'text-cyan-700 dark:text-cyan-400 bg-cyan-500/10' };
     };
 
     const getEnhancedCourseDetails = (skill, priority) => {
@@ -437,7 +437,7 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
                                 <div className="flex items-baseline justify-center gap-2">
                                     <span className="text-4xl font-black text-[var(--text-primary)]">{simulatedScore}%</span>
                                     {simulatedPoints > 0 && (
-                                        <span className="text-xs font-black text-emerald-500 uppercase tracking-widest">+{simulatedPoints} Points</span>
+                                        <span className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">+{simulatedPoints} Points</span>
                                     )}
                                 </div>
                                 <div className="w-full h-2 bg-[var(--border-primary)] rounded-full overflow-hidden border border-[var(--border-secondary)]">
@@ -487,7 +487,7 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
                         {/* FEATURE 4: CURATED FREE LEARNING HUB (Right 8 Cols) */}
                         <div className="lg:col-span-8 space-y-6">
                             <h3 className="text-xl font-black text-[var(--text-primary)] tracking-tight flex items-center gap-2">
-                                <BookOpen size={18} className="text-cyan-500" />
+                                <BookOpen size={18} className="text-cyan-700 dark:text-cyan-400" />
                                 Curated Free Learning Hub
                             </h3>
 

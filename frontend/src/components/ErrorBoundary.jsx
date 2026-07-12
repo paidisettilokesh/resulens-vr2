@@ -28,7 +28,7 @@ class ErrorBoundary extends React.Component {
                         <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl" />
                         
                         <div className="relative z-10 space-y-6">
-                            <div className="w-20 h-20 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center justify-center mx-auto text-rose-500 shadow-inner">
+                            <div className="w-20 h-20 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center justify-center mx-auto text-rose-700 dark:text-rose-400 shadow-inner">
                                 <AlertTriangle size={32} />
                             </div>
                             

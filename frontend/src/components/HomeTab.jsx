@@ -35,7 +35,7 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                     <Sparkles size={14} /> AI-Powered Career Intelligence
                 </div>
                 <h1 className="text-7xl font-bold text-[var(--text-primary)] tracking-tighter leading-[0.9] mb-6">
-                    Engineering <span className="text-cyan-600 dark:text-cyan-400">Elite</span> Professional Identities
+                    Engineering <span className="text-cyan-700 dark:text-cyan-400">Elite</span> Professional Identities
                 </h1>
                 <p className="text-[var(--text-secondary)] text-xl font-medium max-w-2xl mx-auto leading-relaxed">
                     A senior-grade diagnostic engine designed to optimize your resume for the world's most competitive roles.
@@ -43,9 +43,9 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                 <div className="pt-2 flex justify-center">
                     <button 
                         onClick={onOpenOnboarding}
-                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white rounded-full text-xs font-bold transition-all shadow-sm active:scale-95 border border-slate-200/50 dark:border-slate-700/50"
+                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-white rounded-full text-xs font-bold transition-all shadow-sm active:scale-95 border border-slate-200/50 dark:border-slate-700/50 min-h-[44px]"
                     >
-                        <Rocket size={14} className="text-cyan-500 animate-pulse" /> Take the Feature Tour
+                        <Rocket size={14} aria-hidden="true" className="text-cyan-600 dark:text-cyan-400 animate-pulse" /> Take the Feature Tour
                     </button>
                 </div>
             </div>
@@ -58,12 +58,13 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
 
                     <div className="relative z-10 space-y-10">
                         <div className="space-y-6">
-                            <label className="flex items-center gap-3 text-xs font-bold text-[var(--text-muted)] uppercase tracking-[0.3em] ml-1">
-                                <div className="w-6 h-6 rounded-lg bg-cyan-600 text-white flex items-center justify-center text-[10px]">1</div>
+                            <label htmlFor="role-select" className="flex items-center gap-3 text-xs font-bold text-[var(--text-muted)] uppercase tracking-[0.3em] ml-1">
+                                <div className="w-6 h-6 rounded-lg bg-cyan-700 dark:bg-cyan-600 text-white flex items-center justify-center text-[10px]" aria-hidden="true">1</div>
                                 Target Career Track
                             </label>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <select
+                                    id="role-select"
                                     value={selectedRole}
                                     onChange={e => setSelectedRole(e.target.value)}
                                     className="input-field appearance-none cursor-pointer hover:border-cyan-400 transition-colors"
@@ -74,22 +75,23 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                                 </select>
                                 {selectedRole === 'Other' && (
                                     <input
+                                        aria-label="Enter Specific Role"
                                         placeholder="Enter Specific Role"
                                         value={customRole}
                                         onChange={e => setCustomRole(e.target.value)}
-                                        className="input-field animate-fade-up"
+                                        className="input-field animate-fade-up min-h-[44px]"
                                     />
                                 )}
                             </div>
                         </div>
 
                         <div className="space-y-6">
-                            <label className="flex items-center gap-3 text-xs font-bold text-[var(--text-muted)] uppercase tracking-[0.3em] ml-1">
-                                <div className="w-6 h-6 rounded-lg bg-cyan-600 text-white flex items-center justify-center text-[10px]">2</div>
-                                Professional Manuscript
-                            </label>
-                            <label className={`block w-full border-4 border-dashed rounded-[3rem] p-12 text-center cursor-pointer transition-all ${file ? 'border-emerald-400 bg-emerald-500/10' : 'border-[var(--border-secondary)] hover:border-cyan-400 hover:bg-cyan-500/5 hover:shadow-inner'}`}>
-                                <input type="file" onChange={handleFileUpload} accept=".pdf,.docx" className="hidden" />
+                            <div className="flex items-center gap-3 text-xs font-bold text-[var(--text-muted)] uppercase tracking-[0.3em] ml-1">
+                                <div className="w-6 h-6 rounded-lg bg-cyan-700 dark:bg-cyan-600 text-white flex items-center justify-center text-[10px]" aria-hidden="true">2</div>
+                                <label htmlFor="resume-upload" className="cursor-pointer">Professional Manuscript</label>
+                            </div>
+                            <label htmlFor="resume-upload" className={`block w-full border-4 border-dashed rounded-[3rem] p-12 text-center cursor-pointer transition-all ${file ? 'border-emerald-500 bg-emerald-500/10' : 'border-[var(--border-secondary)] hover:border-cyan-500 hover:bg-cyan-500/5 hover:shadow-inner'}`}>
+                                <input id="resume-upload" type="file" onChange={handleFileUpload} accept=".pdf,.docx" className="hidden" />
                                 <div className="flex flex-col items-center gap-4">
                                     {file ? (
                                         <>
@@ -97,13 +99,13 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                                                 <CheckIcon size={32} strokeWidth={3} />
                                             </div>
                                             <div className="space-y-1">
-                                                <span className="text-xl font-bold text-emerald-500 block">{file.name}</span>
+                                                <span className="text-xl font-bold text-emerald-700 dark:text-emerald-400 block">{file.name}</span>
                                                 <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">Document Secured</span>
                                             </div>
                                         </>
                                     ) : (
                                         <>
-                                            <div className="w-20 h-20 bg-cyan-600 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-cyan-100 group-hover:scale-110 transition-transform">
+                                            <div className="w-20 h-20 bg-cyan-700 dark:bg-cyan-600 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-cyan-100 dark:shadow-none group-hover:scale-110 transition-transform" aria-hidden="true">
                                                 <Download size={32} />
                                             </div>
                                             <div className="space-y-3">
@@ -128,8 +130,8 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                                                 </div>
 
                                                 {/* Scanned PDF warning */}
-                                                <p className="text-[10px] text-amber-500 font-bold flex items-center justify-center gap-1 mt-1">
-                                                    <AlertTriangle size={11} />
+                                                <p className="text-[10px] text-amber-700 dark:text-amber-500 font-bold flex items-center justify-center gap-1 mt-1">
+                                                    <AlertTriangle size={11} aria-hidden="true" />
                                                     Scanned / image-only PDFs cannot be parsed
                                                 </p>
                                             </div>
@@ -142,57 +144,56 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                         <button
                             onClick={() => { setActiveTab('analyzer'); analyzeResume(); }}
                             disabled={!file || !selectedRole || loading}
-                            className="btn-primary w-full !rounded-[2rem] group"
+                            className="btn-primary w-full !rounded-[2rem] group min-h-[44px]"
                         >
                             {loading ? (
-                                <Zap size={24} className="animate-spin text-cyan-400" />
+                                <Zap size={24} aria-hidden="true" className="animate-spin text-cyan-200 dark:text-cyan-400" />
                             ) : (
-                                <Zap size={24} className="group-hover:text-cyan-400 transition-colors" />
+                                <Zap size={24} aria-hidden="true" className="group-hover:text-cyan-200 dark:group-hover:text-cyan-400 transition-colors" />
                             )}
                             {loading ? 'Processing...' : 'Analyze Resume'}
                         </button>
 
-                        {error && <p className="text-center text-rose-500 text-sm font-bold italic">! {error}</p>}
+                        {error && <p className="text-center text-rose-600 dark:text-rose-500 text-sm font-bold italic" role="alert" aria-live="assertive">! {error}</p>}
                     </div>
                 </div>
 
                 {/* 2. INSIGHTS SIDEBAR (5 cols) */}
                 <div className="lg:col-span-5 h-full flex flex-col gap-6">
                     <div className="bg-[var(--bg-surface-secondary)] rounded-[4rem] p-10 text-[var(--text-primary)] flex-grow relative overflow-hidden shadow-2xl border border-[var(--border-primary)]">
-                        <div className="absolute top-0 right-0 p-10 opacity-[0.05] dark:opacity-[0.1]">
+                        <div className="absolute top-0 right-0 p-10 opacity-[0.05] dark:opacity-[0.1]" aria-hidden="true">
                             <Shield size={120} />
                         </div>
-                        <h3 className="text-3xl font-bold mb-8 leading-tight tracking-tight pr-12 relative z-10">
-                            Proprietary <span className="text-cyan-600 dark:text-cyan-400">Diagnostic</span> Protocol
-                        </h3>
+                        <h2 className="text-3xl font-bold mb-8 leading-tight tracking-tight pr-12 relative z-10">
+                            Proprietary <span className="text-cyan-700 dark:text-cyan-400">Diagnostic</span> Protocol
+                        </h2>
                         <div className="space-y-4 relative z-10">
                             {[
-                                { id: 'analyzer', label: 'ATS Architecture Audit', icon: Zap, color: 'text-cyan-600 dark:text-cyan-400', bg: 'bg-cyan-500/10' },
-                                { id: 'market', label: 'Market Intelligence 2026', icon: Briefcase, color: 'text-cyan-600 dark:text-cyan-400', bg: 'bg-cyan-500/10' },
-                                { id: 'studio', label: 'Identity Rank Optimization', icon: Globe, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-500/10' }
+                                { id: 'analyzer', label: 'ATS Architecture Audit', icon: Zap, color: 'text-cyan-700 dark:text-cyan-400', bg: 'bg-cyan-100 dark:bg-cyan-900/30' },
+                                { id: 'market', label: 'Market Intelligence 2026', icon: Briefcase, color: 'text-cyan-700 dark:text-cyan-400', bg: 'bg-cyan-100 dark:bg-cyan-900/30' },
+                                { id: 'studio', label: 'Identity Rank Optimization', icon: Globe, color: 'text-amber-700 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/30' }
                             ].map((f, i) => (
-                                <motion.div
+                                <button
                                     key={i}
-                                    whileHover={{ x: 10 }}
                                     onClick={() => setActiveTab(f.id)}
-                                    className="flex items-center gap-5 p-6 bg-[var(--bg-surface)] backdrop-blur-sm rounded-[2rem] border border-[var(--border-secondary)] shadow-sm hover:bg-[var(--bg-surface-secondary)] transition-all cursor-pointer group"
+                                    className="w-full text-left flex items-center gap-5 p-6 bg-[var(--bg-surface)] backdrop-blur-sm rounded-[2rem] border border-[var(--border-secondary)] shadow-sm hover:bg-[var(--bg-surface-secondary)] transition-all cursor-pointer group focus-visible:ring-2 focus-visible:ring-cyan-700 min-h-[44px]"
                                 >
-                                    <div className={`p-4 rounded-2xl ${f.bg} ${f.color} shadow-inner shrink-0`}><f.icon size={22} /></div>
+                                    <div className={`p-4 rounded-2xl ${f.bg} ${f.color} shadow-inner shrink-0`} aria-hidden="true"><f.icon size={22} /></div>
                                     <span className="font-bold text-[var(--text-primary)] text-lg tracking-tight">{f.label}</span>
-                                </motion.div>
+                                </button>
                             ))}
                         </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-cyan-600 to-blue-700 rounded-[3.5rem] p-10 text-white shadow-xl shadow-cyan-100/50 flex items-center gap-6 group hover:scale-[1.02] transition-transform cursor-pointer">
-                        <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center shrink-0">
+                    <button className="text-left bg-gradient-to-br from-cyan-700 to-blue-700 rounded-[3.5rem] p-10 text-white shadow-xl shadow-cyan-100/50 flex items-center gap-6 group hover:scale-[1.02] transition-transform cursor-pointer focus-visible:ring-2 focus-visible:ring-cyan-700 min-h-[44px]">
+                        <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center shrink-0" aria-hidden="true">
                             <Sparkles size={32} />
                         </div>
                         <div>
-                            <h4 className="font-bold text-xl leading-snug">Elite Answer Engine</h4>
+                            <h3 className="font-bold text-xl leading-snug">Elite Answer Engine</h3>
                             <p className="text-cyan-100 text-xs font-medium opacity-80">Generate high-stakes interview responses.</p>
                         </div>
-                    </div>
+                    </button>
                 </div>
             </div>
         </div>

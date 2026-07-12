@@ -64,13 +64,14 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
                         </button>
 
-                        <div
-                            className="flex items-center gap-3 cursor-pointer group"
+                        <button
+                            aria-label="Home"
+                            className="flex items-center gap-3 cursor-pointer group focus-visible:ring-2 focus-visible:ring-cyan-700 dark:focus-visible:ring-cyan-400 rounded-2xl"
                             onClick={() => setActiveTab('home')}
                         >
-                            <div className="w-10 h-10 bg-cyan-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-cyan-100 group-hover:scale-110 group-active:scale-95 transition-all overflow-hidden">
+                            <div className="w-10 h-10 bg-cyan-700 dark:bg-cyan-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-cyan-100 dark:shadow-none group-hover:scale-110 group-active:scale-95 transition-all overflow-hidden" aria-hidden="true">
                                 {/* ResuLens Logo Mark */}
-                                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-7 h-7">
+                                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-7 h-7" aria-hidden="true">
                                     <circle cx="22" cy="22" r="14" stroke="white" strokeWidth="2.2" fill="none" />
                                     <circle cx="22" cy="22" r="8.5" stroke="white" strokeWidth="1" fill="none" opacity="0.4" />
                                     <rect x="16.5" y="15" width="11" height="14" rx="1.5" fill="white" fillOpacity="0.15" />
@@ -85,9 +86,9 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
                             </div>
                             <div className="flex flex-col">
                                 <span className="font-bold text-xl text-slate-800 tracking-tighter leading-none dark:text-white">ResuLens</span>
-                                <span className="text-[9px] font-bold text-cyan-500 uppercase tracking-[0.2em] leading-none mt-0.5">AI Resume Intelligence</span>
+                                <span className="text-[9px] font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-[0.2em] leading-none mt-0.5">AI Resume Intelligence</span>
                             </div>
-                        </div>
+                        </button>
 
                         {/* Theme Toggle */}
                         <button
@@ -136,30 +137,33 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
                                 )}
                                 <button
                                     onClick={triggerNewUpload}
-                                    className="hidden sm:flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-sm"
+                                    className="hidden sm:flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm min-w-[44px] min-h-[44px]"
                                 >
-                                    <RotateCcw size={14} /> New Audit
+                                    <RotateCcw size={14} aria-hidden="true" /> New Audit
                                 </button>
                             </div>
                         )}
 
                         <div className="relative">
-                            <button
+                                <button
+                                aria-label="Profile menu"
+                                aria-expanded={showProfileMenu}
+                                aria-haspopup="true"
                                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                                className="flex items-center gap-3 p-1.5 pr-4 bg-[var(--bg-surface)] border border-[var(--border-secondary)] rounded-2xl shadow-sm hover:scale-[1.02] transition-all"
+                                className="flex items-center gap-3 p-1.5 pr-4 bg-[var(--bg-surface)] border border-[var(--border-secondary)] rounded-2xl shadow-sm hover:scale-[1.02] transition-all min-h-[44px]"
                             >
-                                <div className="w-9 h-9 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-sm border border-white/20">
+                                <div className="w-9 h-9 bg-gradient-to-br from-cyan-600 to-blue-700 rounded-xl flex items-center justify-center text-white font-bold text-sm border border-white/20" aria-hidden="true">
                                     {user?.name?.charAt(0) || 'G'}
                                 </div>
                                 <div className="flex flex-col items-start text-left">
-                                    <span className="text-[10px] font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-widest truncate max-w-[100px]">
+                                    <span className="text-[10px] font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-widest truncate max-w-[100px]">
                                         {analysis?.location || (user?.id === 'guest' ? 'Elite Access' : 'Verified')}
                                     </span>
                                     <span className="text-xs font-bold text-[var(--text-primary)] truncate max-w-[100px]">
                                         {candidateName || user?.name || 'Guest'}
                                     </span>
                                 </div>
-                                <ChevronDown className={`text-slate-400 transition-transform duration-300 ${showProfileMenu ? 'rotate-180' : ''}`} size={14} />
+                                <ChevronDown aria-hidden="true" className={`text-slate-500 dark:text-slate-400 transition-transform duration-300 ${showProfileMenu ? 'rotate-180' : ''}`} size={14} />
                             </button>
 
                             <AnimatePresence>
@@ -179,15 +183,15 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
                                                 onOpenOnboarding();
                                                 setShowProfileMenu(false);
                                             }}
-                                            className="w-full flex items-center gap-3 p-4 rounded-2xl text-[var(--text-primary)] hover:bg-[var(--bg-surface-secondary)] transition-all font-bold text-xs"
+                                            className="w-full flex items-center gap-3 p-4 rounded-2xl text-[var(--text-primary)] hover:bg-[var(--bg-surface-secondary)] transition-all font-bold text-xs min-h-[44px]"
                                         >
-                                            <BookOpen size={16} className="text-cyan-600 dark:text-cyan-400" /> User Guide & Tour
+                                            <BookOpen size={16} aria-hidden="true" className="text-cyan-700 dark:text-cyan-400" /> User Guide & Tour
                                         </button>
                                         <button
                                             onClick={handleLogout}
-                                            className="w-full flex items-center gap-3 p-4 rounded-2xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all font-bold text-xs border-t border-[var(--border-primary)] mt-1 pt-4"
+                                            className="w-full flex items-center gap-3 p-4 rounded-2xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all font-bold text-xs border-t border-[var(--border-primary)] mt-1 pt-4 min-h-[44px]"
                                         >
-                                            <LogOut size={16} /> Sign Out of Portal
+                                            <LogOut size={16} aria-hidden="true" /> Sign Out of Portal
                                         </button>
                                     </motion.div>
                                 )}
@@ -209,17 +213,18 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
                             {tabs.map(tab => {
                                 const isActive = activeTab === tab.id;
                                 return (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => { setActiveTab(tab.id); setMobileMenuOpen(false); }}
-                                        className={`
-                                            flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold transition-all
-                                            ${isActive ? 'bg-cyan-50 dark:bg-cyan-900/20 text-cyan-600 dark:text-cyan-400' : 'text-[var(--text-secondary)]'}
-                                        `}
-                                    >
-                                        <tab.icon size={18} />
-                                        {tab.label}
-                                    </button>
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => { setActiveTab(tab.id); setMobileMenuOpen(false); }}
+                                            className={`
+                                                flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-bold transition-all min-h-[44px]
+                                                ${isActive ? 'bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-400' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface-secondary)]'}
+                                            `}
+                                            aria-current={isActive ? 'page' : undefined}
+                                        >
+                                            <tab.icon size={18} aria-hidden="true" />
+                                            {tab.label}
+                                        </button>
                                 );
                             })}
                         </div>

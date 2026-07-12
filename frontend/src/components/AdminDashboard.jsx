@@ -223,7 +223,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                         />
 
                         {authError && (
-                            <div className="text-xs font-bold text-rose-500 flex items-center justify-center gap-1">
+                            <div className="text-xs font-bold text-rose-700 dark:text-rose-400 flex items-center justify-center gap-1">
                                 <AlertTriangle size={12} /> {authError}
                             </div>
                         )}
@@ -250,7 +250,7 @@ export default function AdminDashboard({ user, backendUrl }) {
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center py-32 space-y-4">
-                <RefreshCw className="w-10 h-10 animate-spin text-cyan-500" />
+                <RefreshCw className="w-10 h-10 animate-spin text-cyan-700 dark:text-cyan-400" />
                 <p className="text-sm font-semibold tracking-wider text-[var(--text-secondary)] uppercase">Decrypting System telemetry...</p>
             </div>
         );
@@ -259,7 +259,7 @@ export default function AdminDashboard({ user, backendUrl }) {
     if (error) {
         return (
             <div className="max-w-2xl mx-auto bg-rose-500/10 border border-rose-500/20 rounded-2xl p-6 text-center space-y-4 my-10 animate-fade-in">
-                <ShieldAlert className="w-16 h-16 mx-auto text-rose-500" />
+                <ShieldAlert className="w-16 h-16 mx-auto text-rose-700 dark:text-rose-400" />
                 <h3 className="text-lg font-bold text-[var(--text-primary)]">Admin Verification Fault</h3>
                 <p className="text-sm text-[var(--text-secondary)]">{error}</p>
                 <button onClick={handleLock} className="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition-all duration-200">
@@ -353,7 +353,7 @@ export default function AdminDashboard({ user, backendUrl }) {
             <div className="absolute -top-3 right-0 z-20">
                 <button
                     onClick={handleLock}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-wider font-bold text-rose-500 hover:text-white bg-rose-500/10 hover:bg-rose-600 rounded-xl border border-rose-500/20 transition-all duration-200 shadow-sm"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-wider font-bold text-rose-700 dark:text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-600 rounded-xl border border-rose-500/20 transition-all duration-200 shadow-sm"
                 >
                     <Lock size={12} /> Lock Admin Panel
                 </button>
@@ -422,9 +422,9 @@ export default function AdminDashboard({ user, backendUrl }) {
                         >
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest group-hover:text-cyan-500">Total Accounts</p>
+                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest group-hover:text-cyan-700 dark:text-cyan-400">Total Accounts</p>
                                     <h3 className="text-3xl font-black text-[var(--text-primary)] mt-1">{analytics?.users?.total || 0}</h3>
-                                    <p className="text-[10px] text-cyan-500 font-semibold mt-1">Navigate to Directory →</p>
+                                    <p className="text-[10px] text-cyan-700 dark:text-cyan-400 font-semibold mt-1">Navigate to Directory →</p>
                                 </div>
                                 <span className="p-3 bg-blue-500/10 rounded-xl text-blue-500 group-hover:bg-cyan-500/20">
                                     <Users size={18} />
@@ -446,11 +446,11 @@ export default function AdminDashboard({ user, backendUrl }) {
                         >
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest group-hover:text-emerald-500">Active (30D)</p>
+                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest group-hover:text-emerald-700 dark:text-emerald-400">Active (30D)</p>
                                     <h3 className="text-3xl font-black text-[var(--text-primary)] mt-1">{analytics?.users?.active30Days || 0}</h3>
-                                    <p className="text-[10px] text-emerald-500 font-semibold mt-1">Filter active directory →</p>
+                                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold mt-1">Filter active directory →</p>
                                 </div>
-                                <span className="p-3 bg-emerald-500/10 rounded-xl text-emerald-500 group-hover:bg-emerald-500/20">
+                                <span className="p-3 bg-emerald-500/10 rounded-xl text-emerald-700 dark:text-emerald-400 group-hover:bg-emerald-500/20">
                                     <Activity size={18} />
                                 </span>
                             </div>
@@ -469,7 +469,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                     <h3 className="text-3xl font-black text-[var(--text-primary)] mt-1">{analytics?.users?.totalLogins || 0}</h3>
                                     <p className="text-[10px] text-purple-500 font-semibold mt-1">Navigate to Audit Logs →</p>
                                 </div>
-                                <span className="p-3 bg-cyan-500/10 rounded-xl text-cyan-500 group-hover:bg-purple-500/20">
+                                <span className="p-3 bg-cyan-500/10 rounded-xl text-cyan-700 dark:text-cyan-400 group-hover:bg-purple-500/20">
                                     <TrendingUp size={18} />
                                 </span>
                             </div>
@@ -484,13 +484,13 @@ export default function AdminDashboard({ user, backendUrl }) {
                         >
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest group-hover:text-emerald-500">System Link Status</p>
-                                    <h3 className="text-sm font-black text-emerald-500 mt-3.5 flex items-center gap-1.5">
+                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest group-hover:text-emerald-700 dark:text-emerald-400">System Link Status</p>
+                                    <h3 className="text-sm font-black text-emerald-700 dark:text-emerald-400 mt-3.5 flex items-center gap-1.5">
                                         <CheckCircle size={14} /> Active Mode
                                     </h3>
-                                    <p className="text-[10px] text-emerald-500 font-semibold mt-2.5">Navigate to System Logs →</p>
+                                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold mt-2.5">Navigate to System Logs →</p>
                                 </div>
-                                <span className="p-3 bg-emerald-500/10 rounded-xl text-emerald-500 group-hover:bg-emerald-500/20">
+                                <span className="p-3 bg-emerald-500/10 rounded-xl text-emerald-700 dark:text-emerald-400 group-hover:bg-emerald-500/20">
                                     <Server size={18} />
                                 </span>
                             </div>
@@ -502,7 +502,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                         {/* 1. Account Growth Graph */}
                         <div className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-3xl p-6 shadow-sm">
                             <h3 className="text-sm font-bold text-[var(--text-primary)] mb-6 flex items-center gap-2">
-                                <TrendingUp size={16} className="text-cyan-500" /> New Account Growth (Last 7 Days)
+                                <TrendingUp size={16} className="text-cyan-700 dark:text-cyan-400" /> New Account Growth (Last 7 Days)
                             </h3>
                             <div className="h-56 w-full flex items-end justify-between relative pt-6 px-4">
                                 <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-8 pt-4">
@@ -515,7 +515,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                     const heightPercent = `${Math.max(5, (d.registrations / maxGrowth) * 100)}%`;
                                     return (
                                         <div key={i} className="flex flex-col items-center justify-end h-full flex-1 z-10 group">
-                                            <div className="text-[10px] font-bold text-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-1.5">
+                                            <div className="text-[10px] font-bold text-cyan-700 dark:text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-1.5">
                                                 {d.registrations}
                                             </div>
                                             <div
@@ -612,7 +612,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                 <div className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-3xl p-6 shadow-sm space-y-6">
                     <div className="flex justify-between items-center flex-wrap gap-4 border-b border-[var(--border-primary)] pb-4">
                         <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
-                            <Users size={16} className="text-cyan-500" /> Platform Directory Controls
+                            <Users size={16} className="text-cyan-700 dark:text-cyan-400" /> Platform Directory Controls
                         </h3>
                         <button
                             onClick={() => {
@@ -641,7 +641,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                 link.click();
                                 document.body.removeChild(link);
                             }}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] rounded-lg text-xs font-bold text-[var(--text-secondary)] hover:text-cyan-500 hover:border-cyan-500/30 transition-all shadow-sm"
+                            className="flex items-center gap-2 px-3 py-1.5 bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] rounded-lg text-xs font-bold text-[var(--text-secondary)] hover:text-cyan-700 dark:text-cyan-400 hover:border-cyan-500/30 transition-all shadow-sm"
                         >
                             <Download size={14} /> Export CSV
                         </button>
@@ -739,7 +739,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                             <tr key={u._id} className="hover:bg-slate-500/[0.02] transition-colors">
                                                 <td className="py-4 pl-4 font-semibold text-[var(--text-primary)]">
                                                     <div className="flex items-center gap-2">
-                                                        <div className="w-6 h-6 rounded-full bg-cyan-500/10 text-cyan-500 flex items-center justify-center font-bold text-[10px]">
+                                                        <div className="w-6 h-6 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 flex items-center justify-center font-bold text-[10px]">
                                                             {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
                                                         </div>
                                                         <div>
@@ -750,7 +750,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                                 </td>
                                                 <td className="py-4">
                                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 w-max ${
-                                                        isUserVerified ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-slate-500/10 text-slate-500 border border-slate-500/20'
+                                                        isUserVerified ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20' : 'bg-slate-500/10 text-slate-500 border border-slate-500/20'
                                                     }`}>
                                                         <ShieldCheck size={10} />
                                                         {isUserVerified ? 'Verified' : 'Guest'}
@@ -758,7 +758,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                                 </td>
                                                 <td className="py-4">
                                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                                        u.role === 'founder' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                                                        u.role === 'founder' ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20' :
                                                         u.role === 'admin' ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20' :
                                                         'bg-slate-500/10 text-slate-500 border border-slate-500/20'
                                                     }`}>
@@ -781,8 +781,8 @@ export default function AdminDashboard({ user, backendUrl }) {
                                                 </td>
                                                 <td className="py-4">
                                                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                                        userStatus === 'active' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
-                                                        userStatus === 'suspended' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' :
+                                                        userStatus === 'active' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20' :
+                                                        userStatus === 'suspended' ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20' :
                                                         'bg-slate-500/10 text-slate-500 border border-slate-500/20'
                                                     }`}>
                                                         {userStatus}
@@ -796,14 +796,14 @@ export default function AdminDashboard({ user, backendUrl }) {
                                                     {/* View Profile */}
                                                     <button
                                                         onClick={() => setSelectedUserProfile(u)}
-                                                        className="p-1 bg-cyan-500/10 text-cyan-500 hover:bg-cyan-500 hover:text-white rounded-lg border border-cyan-500/20 transition-all duration-200"
+                                                        className="p-1 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 hover:bg-cyan-500 hover:text-white rounded-lg border border-cyan-500/20 transition-all duration-200"
                                                         title="View Full Profile Details"
                                                     >
                                                         <Eye size={12} />
                                                     </button>
                                                     {user.role === 'founder' ? (
                                                         u.role === 'founder' ? (
-                                                            <span className="text-[10px] font-bold text-amber-500">SYSTEM OWNER</span>
+                                                            <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400">SYSTEM OWNER</span>
                                                         ) : (
                                                             <>
                                                                 {/* Promote/Demote */}
@@ -813,7 +813,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                                                     className={`px-2 py-1 rounded-lg font-bold text-[9px] uppercase tracking-wider transition-all duration-200 border ${
                                                                         u.role === 'admin'
                                                                             ? 'bg-purple-500/10 text-purple-500 border-purple-500/20 hover:bg-purple-500/20'
-                                                                            : 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20 hover:bg-cyan-500/20'
+                                                                            : 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20'
                                                                     }`}
                                                                 >
                                                                     {u.role === 'admin' ? 'Make User' : 'Make Admin'}
@@ -824,7 +824,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                                                     <button
                                                                         onClick={() => handleStatusChange(u._id, 'active')}
                                                                         disabled={actionLoading === `${u._id}-status`}
-                                                                        className="px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500/20 font-bold text-[9px] uppercase tracking-wider"
+                                                                        className="px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 font-bold text-[9px] uppercase tracking-wider"
                                                                     >
                                                                         Activate
                                                                     </button>
@@ -832,7 +832,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                                                     <button
                                                                         onClick={() => handleStatusChange(u._id, 'suspended')}
                                                                         disabled={actionLoading === `${u._id}-status`}
-                                                                        className="px-2 py-1 rounded-lg bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500/20 font-bold text-[9px] uppercase tracking-wider"
+                                                                        className="px-2 py-1 rounded-lg bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 font-bold text-[9px] uppercase tracking-wider"
                                                                     >
                                                                         Suspend
                                                                     </button>
@@ -848,7 +848,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                                         <button
                                                             onClick={() => handleUserDelete(u._id)}
                                                             disabled={actionLoading === `${u._id}-delete`}
-                                                            className="p-1.5 bg-rose-500/10 text-rose-500 hover:bg-rose-600 hover:text-white rounded-lg border border-rose-500/20 transition-all duration-200"
+                                                            className="p-1.5 bg-rose-500/10 text-rose-700 dark:text-rose-400 hover:bg-rose-600 hover:text-white rounded-lg border border-rose-500/20 transition-all duration-200"
                                                         >
                                                             <Trash2 size={13} />
                                                         </button>
@@ -899,7 +899,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                             <ShieldCheck size={16} className="text-purple-500" /> Platform Security & Access Audits
                         </h3>
                         {activeDrill === 'logins' && (
-                            <button onClick={() => setActiveDrill(null)} className="text-xs font-bold text-cyan-500 flex items-center gap-1">
+                            <button onClick={() => setActiveDrill(null)} className="text-xs font-bold text-cyan-700 dark:text-cyan-400 flex items-center gap-1">
                                 <X size={14} /> Close Drilldown
                             </button>
                         )}
@@ -931,8 +931,8 @@ export default function AdminDashboard({ user, backendUrl }) {
                                             </td>
                                             <td className="py-4">
                                                 <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
-                                                    log.action.includes('SUCCESS') || log.action === 'ADMIN_UNLOCKED' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
-                                                    log.action.includes('FAILED') || log.action.includes('SUSPENDED') ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' :
+                                                    log.action.includes('SUCCESS') || log.action === 'ADMIN_UNLOCKED' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20' :
+                                                    log.action.includes('FAILED') || log.action.includes('SUSPENDED') ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20' :
                                                     'bg-purple-500/10 text-purple-500 border border-purple-500/20'
                                                 }`}>
                                                     {log.action}
@@ -968,10 +968,10 @@ export default function AdminDashboard({ user, backendUrl }) {
                 <div className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-3xl p-6 shadow-sm space-y-6">
                     <div className="flex justify-between items-center flex-wrap gap-4 border-b border-[var(--border-primary)] pb-4">
                         <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
-                            <Terminal size={16} className="text-emerald-500" /> Winston Log Console (Last 50 Entries)
+                            <Terminal size={16} className="text-emerald-700 dark:text-emerald-400" /> Winston Log Console (Last 50 Entries)
                         </h3>
                         {activeDrill === 'status' && (
-                            <button onClick={() => setActiveDrill(null)} className="text-xs font-bold text-cyan-500 flex items-center gap-1">
+                            <button onClick={() => setActiveDrill(null)} className="text-xs font-bold text-cyan-700 dark:text-cyan-400 flex items-center gap-1">
                                 <X size={14} /> Close Drilldown
                             </button>
                         )}
@@ -999,7 +999,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                         <div className="bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] rounded-2xl p-4 text-xs space-y-2.5">
                             <h4 className="font-bold text-[var(--text-primary)] border-b border-[var(--border-primary)] pb-2 flex items-center gap-1.5">
-                                <Server size={13} className="text-cyan-500" /> Telemetry Status
+                                <Server size={13} className="text-cyan-700 dark:text-cyan-400" /> Telemetry Status
                             </h4>
                             <div className="flex justify-between">
                                 <span className="text-[var(--text-secondary)] font-medium">Uptime:</span>
@@ -1030,7 +1030,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                             <div className="flex justify-between">
                                 <span className="text-[var(--text-secondary)] font-medium">Groq API key:</span>
                                 <span className={`font-bold uppercase text-[9px] px-1.5 rounded ${
-                                    analytics?.system?.providers?.groq ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'
+                                    analytics?.system?.providers?.groq ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-700 dark:text-rose-400'
                                 }`}>
                                     {analytics?.system?.providers?.groq ? 'Configured' : 'Missing'}
                                 </span>
@@ -1038,7 +1038,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                             <div className="flex justify-between">
                                 <span className="text-[var(--text-secondary)] font-medium">OpenRouter key:</span>
                                 <span className={`font-bold uppercase text-[9px] px-1.5 rounded ${
-                                    analytics?.system?.providers?.openRouter ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'
+                                    analytics?.system?.providers?.openRouter ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' : 'bg-rose-500/10 text-rose-700 dark:text-rose-400'
                                 }`}>
                                     {analytics?.system?.providers?.openRouter ? 'Configured' : 'Missing'}
                                 </span>
@@ -1057,9 +1057,9 @@ export default function AdminDashboard({ user, backendUrl }) {
                 <div className="bg-[var(--glass-bg)] border border-[var(--glass-border)] rounded-3xl p-6 shadow-sm space-y-6">
                     <div className="flex justify-between items-center flex-wrap gap-4 border-b border-[var(--border-primary)] pb-4">
                         <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
-                            <Activity size={16} className="text-emerald-500" /> Active Engagement Configuration
+                            <Activity size={16} className="text-emerald-700 dark:text-emerald-400" /> Active Engagement Configuration
                         </h3>
-                        <button onClick={() => setActiveDrill(null)} className="text-xs font-bold text-cyan-500 flex items-center gap-1">
+                        <button onClick={() => setActiveDrill(null)} className="text-xs font-bold text-cyan-700 dark:text-cyan-400 flex items-center gap-1">
                             <X size={14} /> Close Drilldown
                         </button>
                     </div>
@@ -1104,7 +1104,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                             </td>
                                             <td className="py-4">
                                                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                                    u.role === 'founder' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                                                    u.role === 'founder' ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20' :
                                                     u.role === 'admin' ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20' :
                                                     'bg-slate-500/10 text-slate-500 border border-slate-500/20'
                                                 }`}>
@@ -1139,7 +1139,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                         
                         <div className="flex justify-between items-start border-b border-[var(--border-primary)] pb-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-full bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-500 font-black text-lg">
+                                <div className="w-12 h-12 rounded-full bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-700 dark:text-cyan-400 font-black text-lg">
                                     {selectedUserProfile.name ? selectedUserProfile.name.charAt(0).toUpperCase() : 'U'}
                                 </div>
                                 <div>

@@ -436,26 +436,29 @@ function App() {
             <AnimatePresence>
                 {copyStatus && (
                     <motion.div
+                        role="status" aria-live="polite"
                         initial={{ opacity: 0, y: 50, x: '-50%' }} animate={{ opacity: 1, y: 0, x: '-50%' }} exit={{ opacity: 0, y: 50, x: '-50%' }}
                         className="fixed bottom-10 left-1/2 z-50 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-bold uppercase tracking-widest border border-white/10"
                     >
-                        <CheckCircle size={16} className="text-emerald-400" /> Clipboard Sync Success
+                        <CheckCircle size={16} aria-hidden="true" className="text-emerald-400" /> Clipboard Sync Success
                     </motion.div>
                 )}
                 {toastMsg && (
                     <motion.div
+                        role="status" aria-live="polite"
                         initial={{ opacity: 0, y: 50, x: '-50%' }} animate={{ opacity: 1, y: 0, x: '-50%' }} exit={{ opacity: 0, y: 50, x: '-50%' }}
                         className="fixed bottom-10 left-1/2 z-50 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-bold uppercase tracking-widest border border-white/10"
                     >
-                        <CheckCircle size={16} className="text-emerald-400" /> {toastMsg}
+                        <CheckCircle size={16} aria-hidden="true" className="text-emerald-400" /> {toastMsg}
                     </motion.div>
                 )}
                 {error && (
                     <motion.div
+                        role="alert" aria-live="assertive"
                         initial={{ opacity: 0, y: 50, x: '-50%' }} animate={{ opacity: 1, y: 0, x: '-50%' }} exit={{ opacity: 0, y: 50, x: '-50%' }}
                         className="fixed bottom-10 left-1/2 z-50 bg-rose-600 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-xs font-bold uppercase tracking-widest border border-white/10"
                     >
-                        <AlertTriangle size={16} /> System: {error}
+                        <AlertTriangle size={16} aria-hidden="true" /> System: {error}
                     </motion.div>
                 )}
             </AnimatePresence>
