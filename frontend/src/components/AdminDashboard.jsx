@@ -353,7 +353,7 @@ export default function AdminDashboard({ user, backendUrl }) {
             <div className="absolute -top-3 right-0 z-20">
                 <button
                     onClick={handleLock}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] uppercase tracking-wider font-bold text-rose-700 dark:text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-600 rounded-xl border border-rose-500/20 transition-all duration-200 shadow-sm"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs uppercase tracking-wider font-bold text-rose-700 dark:text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-600 rounded-xl border border-rose-500/20 transition-all duration-200 shadow-sm"
                 >
                     <Lock size={12} /> Lock Admin Panel
                 </button>
@@ -369,7 +369,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                         <h1 className="text-2xl font-black tracking-tight text-[var(--text-primary)]">
                             ResuLens Control Center
                         </h1>
-                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-md tracking-wider bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+                        <span className="text-xs uppercase font-bold px-2 py-0.5 rounded-md tracking-wider bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
                             {user.role} mode
                         </span>
                     </div>
@@ -422,9 +422,9 @@ export default function AdminDashboard({ user, backendUrl }) {
                         >
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest group-hover:text-cyan-700 dark:text-cyan-400">Total Accounts</p>
+                                    <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest group-hover:text-cyan-700 dark:text-cyan-400">Total Accounts</p>
                                     <h3 className="text-3xl font-black text-[var(--text-primary)] mt-1">{analytics?.users?.total || 0}</h3>
-                                    <p className="text-[10px] text-cyan-700 dark:text-cyan-400 font-semibold mt-1">Navigate to Directory →</p>
+                                    <p className="text-xs text-cyan-700 dark:text-cyan-400 font-semibold mt-1">Navigate to Directory →</p>
                                 </div>
                                 <span className="p-3 bg-blue-500/10 rounded-xl text-blue-500 group-hover:bg-cyan-500/20">
                                     <Users size={18} />
@@ -446,9 +446,9 @@ export default function AdminDashboard({ user, backendUrl }) {
                         >
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest group-hover:text-emerald-700 dark:text-emerald-400">Active (30D)</p>
+                                    <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest group-hover:text-emerald-700 dark:text-emerald-400">Active (30D)</p>
                                     <h3 className="text-3xl font-black text-[var(--text-primary)] mt-1">{analytics?.users?.active30Days || 0}</h3>
-                                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold mt-1">Filter active directory →</p>
+                                    <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold mt-1">Filter active directory →</p>
                                 </div>
                                 <span className="p-3 bg-emerald-500/10 rounded-xl text-emerald-700 dark:text-emerald-400 group-hover:bg-emerald-500/20">
                                     <Activity size={18} />
@@ -465,9 +465,9 @@ export default function AdminDashboard({ user, backendUrl }) {
                         >
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest group-hover:text-purple-500">Total Logins</p>
+                                    <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest group-hover:text-purple-500">Total Logins</p>
                                     <h3 className="text-3xl font-black text-[var(--text-primary)] mt-1">{analytics?.users?.totalLogins || 0}</h3>
-                                    <p className="text-[10px] text-purple-500 font-semibold mt-1">Navigate to Audit Logs →</p>
+                                    <p className="text-xs text-purple-500 font-semibold mt-1">Navigate to Audit Logs →</p>
                                 </div>
                                 <span className="p-3 bg-cyan-500/10 rounded-xl text-cyan-700 dark:text-cyan-400 group-hover:bg-purple-500/20">
                                     <TrendingUp size={18} />
@@ -484,11 +484,11 @@ export default function AdminDashboard({ user, backendUrl }) {
                         >
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest group-hover:text-emerald-700 dark:text-emerald-400">System Link Status</p>
+                                    <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest group-hover:text-emerald-700 dark:text-emerald-400">System Link Status</p>
                                     <h3 className="text-sm font-black text-emerald-700 dark:text-emerald-400 mt-3.5 flex items-center gap-1.5">
                                         <CheckCircle size={14} /> Active Mode
                                     </h3>
-                                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold mt-2.5">Navigate to System Logs →</p>
+                                    <p className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold mt-2.5">Navigate to System Logs →</p>
                                 </div>
                                 <span className="p-3 bg-emerald-500/10 rounded-xl text-emerald-700 dark:text-emerald-400 group-hover:bg-emerald-500/20">
                                     <Server size={18} />
@@ -515,7 +515,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                     const heightPercent = `${Math.max(5, (d.registrations / maxGrowth) * 100)}%`;
                                     return (
                                         <div key={i} className="flex flex-col items-center justify-end h-full flex-1 z-10 group">
-                                            <div className="text-[10px] font-bold text-cyan-700 dark:text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-1.5">
+                                            <div className="text-xs font-bold text-cyan-700 dark:text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-1.5">
                                                 {d.registrations}
                                             </div>
                                             <div
@@ -547,7 +547,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                     const heightPercent = `${Math.max(5, (d.logins / maxLogin) * 100)}%`;
                                     return (
                                         <div key={i} className="flex flex-col items-center justify-end h-full flex-1 z-10 group">
-                                            <div className="text-[10px] font-bold text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-1.5">
+                                            <div className="text-xs font-bold text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-1.5">
                                                 {d.logins}
                                             </div>
                                             <div
@@ -585,7 +585,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <h4 className="text-xs font-bold text-[var(--text-primary)]">{name}</h4>
-                                                <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{desc}</p>
+                                                <p className="text-xs text-[var(--text-muted)] mt-0.5">{desc}</p>
                                             </div>
                                             <span className="text-xs font-mono font-black text-[var(--text-secondary)]">{count}</span>
                                         </div>
@@ -718,7 +718,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                     <div className="overflow-x-auto border border-[var(--border-primary)]/50 rounded-2xl">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-[var(--bg-surface-secondary)] border-b border-[var(--border-primary)] text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-bold">
+                                <tr className="bg-[var(--bg-surface-secondary)] border-b border-[var(--border-primary)] text-xs uppercase tracking-wider text-[var(--text-muted)] font-bold">
                                     <th className="py-3 pl-4">Account Profile</th>
                                     <th className="py-3">Verification</th>
                                     <th className="py-3">Role Tier</th>
@@ -739,17 +739,17 @@ export default function AdminDashboard({ user, backendUrl }) {
                                             <tr key={u._id} className="hover:bg-slate-500/[0.02] transition-colors">
                                                 <td className="py-4 pl-4 font-semibold text-[var(--text-primary)]">
                                                     <div className="flex items-center gap-2">
-                                                        <div className="w-6 h-6 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 flex items-center justify-center font-bold text-[10px]">
+                                                        <div className="w-6 h-6 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 flex items-center justify-center font-bold text-xs">
                                                             {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
                                                         </div>
                                                         <div>
                                                             <div>{u.name}</div>
-                                                            <div className="text-[10px] font-medium text-[var(--text-muted)] mt-0.5">{u.email}</div>
+                                                            <div className="text-xs font-medium text-[var(--text-muted)] mt-0.5">{u.email}</div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="py-4">
-                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 w-max ${
+                                                    <span className={`px-2 py-0.5 rounded text-xs font-bold flex items-center gap-1 w-max ${
                                                         isUserVerified ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20' : 'bg-slate-500/10 text-slate-500 border border-slate-500/20'
                                                     }`}>
                                                         <ShieldCheck size={10} />
@@ -757,7 +757,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                                     </span>
                                                 </td>
                                                 <td className="py-4">
-                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${
                                                         u.role === 'founder' ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20' :
                                                         u.role === 'admin' ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20' :
                                                         'bg-slate-500/10 text-slate-500 border border-slate-500/20'
@@ -780,7 +780,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                                     </span>
                                                 </td>
                                                 <td className="py-4">
-                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${
                                                         userStatus === 'active' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20' :
                                                         userStatus === 'suspended' ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20' :
                                                         'bg-slate-500/10 text-slate-500 border border-slate-500/20'
@@ -788,7 +788,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                                         {userStatus}
                                                     </span>
                                                 </td>
-                                                <td className="py-4 text-[var(--text-muted)] text-[10px]">
+                                                <td className="py-4 text-[var(--text-muted)] text-xs">
                                                     <div>Reg: {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}</div>
                                                     <div className="mt-0.5">Last: {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString() : 'Never'}</div>
                                                 </td>
@@ -803,7 +803,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                                                     </button>
                                                     {user.role === 'founder' ? (
                                                         u.role === 'founder' ? (
-                                                            <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400">SYSTEM OWNER</span>
+                                                            <span className="text-xs font-bold text-amber-700 dark:text-amber-400">SYSTEM OWNER</span>
                                                         ) : (
                                                             <>
                                                                 {/* Promote/Demote */}
@@ -909,7 +909,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                     <div className="overflow-x-auto border border-[var(--border-primary)]/50 rounded-2xl">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-[var(--bg-surface-secondary)] border-b border-[var(--border-primary)] text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-bold">
+                                <tr className="bg-[var(--bg-surface-secondary)] border-b border-[var(--border-primary)] text-xs uppercase tracking-wider text-[var(--text-muted)] font-bold">
                                     <th className="py-3.5 pl-4">Timestamp</th>
                                     <th className="py-3.5">Trigger Account</th>
                                     <th className="py-3.5">Action Event</th>
@@ -941,13 +941,13 @@ export default function AdminDashboard({ user, backendUrl }) {
                                             <td className="py-4 text-[var(--text-secondary)]">
                                                 {log.targetUserEmail || '-'}
                                             </td>
-                                            <td className="py-4 font-mono text-[10px] text-[var(--text-muted)]">
+                                            <td className="py-4 font-mono text-xs text-[var(--text-muted)]">
                                                 {log.ipAddress || '::1'}
                                             </td>
                                             <td className="py-4 text-[var(--text-muted)] max-w-xs truncate" title={log.userAgent}>
                                                 {parseUserAgent(log.userAgent)}
                                             </td>
-                                            <td className="py-4 pr-4 font-mono text-[10px] text-[var(--text-secondary)] max-w-xs truncate">
+                                            <td className="py-4 pr-4 font-mono text-xs text-[var(--text-secondary)] max-w-xs truncate">
                                                 {log.details ? JSON.stringify(log.details) : '-'}
                                             </td>
                                         </tr>
@@ -978,11 +978,11 @@ export default function AdminDashboard({ user, backendUrl }) {
                     </div>
 
                     <div className="bg-slate-950 rounded-2xl p-5 border border-slate-800 shadow-inner space-y-3">
-                        <div className="flex items-center justify-between text-[10px] uppercase font-bold tracking-widest text-slate-500 border-b border-slate-800 pb-2.5">
+                        <div className="flex items-center justify-between text-xs uppercase font-bold tracking-widest text-slate-500 border-b border-slate-800 pb-2.5">
                             <span>Diagnostic Output Stream</span>
                             <span className="flex items-center gap-1.5"><Play size={8} fill="currentColor" className="text-emerald-400" /> Live Feed</span>
                         </div>
-                        <div className="font-mono text-[10px] leading-relaxed text-slate-300 max-h-[350px] overflow-y-auto space-y-1.5 scrollbar-thin">
+                        <div className="font-mono text-xs leading-relaxed text-slate-300 max-h-[350px] overflow-y-auto space-y-1.5 scrollbar-thin">
                             {systemLogs.length > 0 ? (
                                 systemLogs.map((logLine, idx) => (
                                     <div key={idx} className="hover:bg-slate-900/40 py-0.5 border-l border-transparent hover:border-slate-800 pl-2">
@@ -1086,7 +1086,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                     <div className="overflow-x-auto border border-[var(--border-primary)]/50 rounded-2xl">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-[var(--bg-surface-secondary)] border-b border-[var(--border-primary)] text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-bold">
+                                <tr className="bg-[var(--bg-surface-secondary)] border-b border-[var(--border-primary)] text-xs uppercase tracking-wider text-[var(--text-muted)] font-bold">
                                     <th className="py-3 pl-4">Active User</th>
                                     <th className="py-3">Role</th>
                                     <th className="py-3">Logins count</th>
@@ -1100,10 +1100,10 @@ export default function AdminDashboard({ user, backendUrl }) {
                                         <tr key={u._id} className="hover:bg-slate-500/[0.02] transition-colors">
                                             <td className="py-4 pl-4 font-semibold text-[var(--text-primary)]">
                                                 <div>{u.name}</div>
-                                                <div className="text-[10px] font-medium text-[var(--text-muted)] mt-0.5">{u.email}</div>
+                                                <div className="text-xs font-medium text-[var(--text-muted)] mt-0.5">{u.email}</div>
                                             </td>
                                             <td className="py-4">
-                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                                <span className={`px-2 py-0.5 rounded text-xs font-bold ${
                                                     u.role === 'founder' ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20' :
                                                     u.role === 'admin' ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20' :
                                                     'bg-slate-500/10 text-slate-500 border border-slate-500/20'
@@ -1157,29 +1157,29 @@ export default function AdminDashboard({ user, backendUrl }) {
 
                         <div className="grid grid-cols-2 gap-4 text-xs">
                             <div className="space-y-1 bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] rounded-xl p-3">
-                                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Role Tier</span>
+                                <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Role Tier</span>
                                 <div className="font-bold text-[var(--text-primary)] capitalize">{selectedUserProfile.role || 'user'}</div>
                             </div>
                             <div className="space-y-1 bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] rounded-xl p-3">
-                                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Plan Billing</span>
+                                <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Plan Billing</span>
                                 <div className="font-bold text-[var(--text-primary)] uppercase">{selectedUserProfile.plan || 'free'}</div>
                             </div>
                             <div className="space-y-1 bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] rounded-xl p-3">
-                                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Account State</span>
+                                <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Account State</span>
                                 <div className="font-bold text-[var(--text-primary)] capitalize">{selectedUserProfile.status || 'active'}</div>
                             </div>
                             <div className="space-y-1 bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] rounded-xl p-3">
-                                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Verification Status</span>
+                                <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Verification Status</span>
                                 <div className="font-bold text-[var(--text-primary)]">
                                     {selectedUserProfile.email && selectedUserProfile.email.startsWith('guest') ? 'Guest Account' : 'Verified Profile'}
                                 </div>
                             </div>
                             <div className="space-y-1 bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] rounded-xl p-3">
-                                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Login Count</span>
+                                <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Login Count</span>
                                 <div className="font-bold text-[var(--text-primary)]">{selectedUserProfile.loginCount || 0} logins</div>
                             </div>
                             <div className="space-y-1 bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] rounded-xl p-3">
-                                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Activity Status</span>
+                                <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Activity Status</span>
                                 <div className="flex items-center gap-1.5 font-bold text-[var(--text-primary)]">
                                     {(() => {
                                         if (!selectedUserProfile.lastLoginAt) return <><span className="w-1.5 h-1.5 rounded-full bg-slate-400" /> Idle</>;
@@ -1207,7 +1207,7 @@ export default function AdminDashboard({ user, backendUrl }) {
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-[var(--text-muted)] font-medium">ID Scope:</span>
-                                <span className="font-mono text-[10px] text-[var(--text-muted)]">{selectedUserProfile._id}</span>
+                                <span className="font-mono text-xs text-[var(--text-muted)]">{selectedUserProfile._id}</span>
                             </div>
                         </div>
 

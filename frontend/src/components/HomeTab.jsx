@@ -59,7 +59,7 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                     <div className="relative z-10 space-y-10">
                         <div className="space-y-6">
                             <label htmlFor="role-select" className="flex items-center gap-3 text-xs font-bold text-[var(--text-muted)] uppercase tracking-[0.3em] ml-1">
-                                <div className="w-6 h-6 rounded-lg bg-cyan-700 dark:bg-cyan-600 text-white flex items-center justify-center text-[10px]" aria-hidden="true">1</div>
+                                <div className="w-6 h-6 rounded-lg bg-cyan-700 dark:bg-cyan-600 text-white flex items-center justify-center text-xs" aria-hidden="true">1</div>
                                 Target Career Track
                             </label>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -87,7 +87,7 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
 
                         <div className="space-y-6">
                             <div className="flex items-center gap-3 text-xs font-bold text-[var(--text-muted)] uppercase tracking-[0.3em] ml-1">
-                                <div className="w-6 h-6 rounded-lg bg-cyan-700 dark:bg-cyan-600 text-white flex items-center justify-center text-[10px]" aria-hidden="true">2</div>
+                                <div className="w-6 h-6 rounded-lg bg-cyan-700 dark:bg-cyan-600 text-white flex items-center justify-center text-xs" aria-hidden="true">2</div>
                                 <label htmlFor="resume-upload" className="cursor-pointer">Professional Manuscript</label>
                             </div>
                             <label htmlFor="resume-upload" className={`block w-full border-4 border-dashed rounded-[3rem] p-12 text-center cursor-pointer transition-all ${file ? 'border-emerald-500 bg-emerald-500/10' : 'border-[var(--border-secondary)] hover:border-cyan-500 hover:bg-cyan-500/5 hover:shadow-inner'}`}>
@@ -100,7 +100,7 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                                             </div>
                                             <div className="space-y-1">
                                                 <span className="text-xl font-bold text-emerald-700 dark:text-emerald-400 block">{file.name}</span>
-                                                <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">Document Secured</span>
+                                                <span className="text-xs text-emerald-600 font-bold uppercase tracking-widest">Document Secured</span>
                                             </div>
                                         </>
                                     ) : (
@@ -122,7 +122,7 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                                                         <span
                                                             key={ext}
                                                             title={tip}
-                                                            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${color} cursor-default`}
+                                                            className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${color} cursor-default`}
                                                         >
                                                             .{ext}
                                                         </span>
@@ -130,7 +130,7 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                                                 </div>
 
                                                 {/* Scanned PDF warning */}
-                                                <p className="text-[10px] text-amber-700 dark:text-amber-500 font-bold flex items-center justify-center gap-1 mt-1">
+                                                <p className="text-xs text-amber-700 dark:text-amber-500 font-bold flex items-center justify-center gap-1 mt-1">
                                                     <AlertTriangle size={11} aria-hidden="true" />
                                                     Scanned / image-only PDFs cannot be parsed
                                                 </p>

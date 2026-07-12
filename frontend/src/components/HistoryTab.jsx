@@ -155,7 +155,7 @@ const HistoryTab = ({ user, backendUrl, setActiveTab, setAnalysis, setCandidateN
                                                     {item.role || analysisData.jobRole || (type === 'analysis' ? 'AI Audit Report' : 'Professional Profile')}
                                                 </h4>
                                                 {score !== undefined && score !== 0 && (
-                                                    <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black ${score >= 80 ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'}`}>
+                                                    <span className={`px-2 py-0.5 rounded-lg text-xs font-black ${score >= 80 ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'}`}>
                                                         {score}% Match
                                                     </span>
                                                 )}

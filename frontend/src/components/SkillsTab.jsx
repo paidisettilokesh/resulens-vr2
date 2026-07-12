@@ -210,7 +210,7 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
                 <div className="relative z-10">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--bg-surface)] border border-cyan-100 dark:border-cyan-500/20 mb-6 font-bold text-cyan-600 dark:text-cyan-400 shadow-sm">
                         <Sparkles size={14} />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">Personalized Career Intelligence</span>
+                        <span className="text-xs font-bold uppercase tracking-widest">Personalized Career Intelligence</span>
                     </div>
                     <h2 className="text-5xl font-bold mb-4 tracking-tighter text-[var(--text-primary)]">
                         Learning Path & <span className="text-emerald-600 dark:text-emerald-400 font-serif italic">Market Insights</span>
@@ -308,7 +308,7 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
                                                 y={y}
                                                 textAnchor="middle"
                                                 alignmentBaseline="middle"
-                                                className="text-[10px] font-black fill-[var(--text-primary)] uppercase tracking-wider"
+                                                className="text-xs font-black fill-[var(--text-primary)] uppercase tracking-wider"
                                             >
                                                 {d.name}
                                             </text>
@@ -343,7 +343,7 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
                                 </svg>
                             </div>
 
-                            <p className="text-[10px] text-[var(--text-muted)] font-semibold text-center italic mt-4 max-w-xs leading-relaxed">
+                            <p className="text-xs text-[var(--text-muted)] font-semibold text-center italic mt-4 max-w-xs leading-relaxed">
                                 Strengths are projected outward (100%). Inner vertices identify critical domain gaps requiring roadmap upskilling.
                             </p>
                         </div>
@@ -381,7 +381,7 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
                                                 ? 'bg-cyan-500/5 border-cyan-500/40 ring-1 ring-cyan-500/10' 
                                                 : isCompleted
                                                 ? 'bg-emerald-500/5 border-emerald-500/10 opacity-80'
-                                                : 'bg-[var(--bg-surface-secondary)] border-[var(--border-secondary)] opacity-60'
+                                                : 'bg-[var(--bg-surface-secondary)] border-[var(--border-secondary)] opacity-80'
                                             }`}>
                                                 <div className="flex justify-between items-start mb-1">
                                                     <h5 className="font-black text-sm text-[var(--text-primary)]">
@@ -401,7 +401,7 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
                                                     {stage.desc}
                                                 </p>
                                                 {isActive && (
-                                                    <div className="pt-2 border-t border-cyan-500/15 grid grid-cols-2 gap-4 text-[10px]">
+                                                    <div className="pt-2 border-t border-cyan-500/15 grid grid-cols-2 gap-4 text-xs">
                                                         <div>
                                                             <span className="font-bold text-cyan-600 dark:text-cyan-400 block uppercase tracking-wider">Required skills:</span>
                                                             <span className="text-[var(--text-primary)] font-semibold">{stage.skills}</span>
@@ -448,7 +448,7 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
                                 </span>
                             </div>
 
-                            <p className="text-[10px] text-[var(--text-secondary)] font-medium leading-relaxed italic border-l border-cyan-500/20 pl-3">
+                            <p className="text-xs text-[var(--text-secondary)] font-medium leading-relaxed italic border-l border-cyan-500/20 pl-3">
                                 Check specific action boxes below to simulate how upskilling and formatting corrections boost your score on ATS parsers.
                             </p>
 
@@ -528,7 +528,7 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
                                                     </h5>
                                                 </div>
 
-                                                <div className="grid grid-cols-2 gap-2 text-[10px] pb-4 border-b border-[var(--border-secondary)]">
+                                                <div className="grid grid-cols-2 gap-2 text-xs pb-4 border-b border-[var(--border-secondary)]">
                                                     <div>
                                                         <span className="text-[9px] text-[var(--text-muted)] font-black uppercase block tracking-wider">Duration:</span>
                                                         <span className="font-bold text-[var(--text-primary)]">{course.duration}</span>
@@ -543,7 +543,7 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
                                                     <span className="text-[9px] text-cyan-600 dark:text-cyan-400 font-black uppercase tracking-widest block">
                                                         Practice validation
                                                     </span>
-                                                    <p className="text-[10px] text-[var(--text-secondary)] font-medium leading-normal italic">
+                                                    <p className="text-xs text-[var(--text-secondary)] font-medium leading-normal italic">
                                                         "{item.projectIdea}"
                                                     </p>
                                                 </div>
@@ -554,7 +554,7 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
                                                     href={item.sourceUrl || platform.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="w-full py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl text-[10px] font-black transition-all flex items-center justify-center gap-2 shadow-md uppercase tracking-wider"
+                                                    className="w-full py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 shadow-md uppercase tracking-wider"
                                                 >
                                                     <ExternalLink size={12} /> Start Learning
                                                 </a>
@@ -586,14 +586,14 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="p-5 bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-primary)] space-y-2 shadow-sm">
-                                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase block">Target Geography</span>
+                                    <span className="text-xs font-bold text-[var(--text-muted)] uppercase block">Target Geography</span>
                                     <div className="flex items-center gap-2 font-black text-cyan-600 dark:text-cyan-400">
                                         <MapPin size={16} />
                                         <span>{location || 'Global / Remote'}</span>
                                     </div>
                                 </div>
                                 <div className="p-5 bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-primary)] space-y-2 shadow-sm">
-                                    <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase block">Hiring Pulse</span>
+                                    <span className="text-xs font-bold text-[var(--text-muted)] uppercase block">Hiring Pulse</span>
                                     <div className="flex items-center gap-2 font-black text-emerald-600 dark:text-emerald-400">
                                         <TrendingUp size={16} />
                                         <span>{demand} Demand</span>

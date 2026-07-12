@@ -7,18 +7,18 @@ const Executive = ({ data }) => {
                 <h1 className="text-3xl font-black uppercase tracking-[0.15em] mt-4 mb-2">
                     {data.personal.fullName || 'YOUR FULL NAME'}
                 </h1>
-                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gray-700 mb-4">
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-gray-700 mb-4">
                     {[data.personal.location, data.personal.phone, data.personal.email].filter(Boolean).join('  ·  ')}
                 </p>
             </div>
             {data.personal.bio && (
                 <div className="mb-8">
-                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-3 text-gray-800 border-b border-gray-300 pb-1">Executive Summary</h4>
+                    <h4 className="text-xs font-black uppercase tracking-[0.3em] mb-3 text-gray-800 border-b border-gray-300 pb-1">Executive Summary</h4>
                     <p className="text-[12px] leading-relaxed text-justify opacity-90 italic px-2">"{data.personal.bio}"</p>
                 </div>
             )}
             <div className="mb-8">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-4 text-gray-800 border-b border-gray-300 pb-1">Career History</h4>
+                <h4 className="text-xs font-black uppercase tracking-[0.3em] mb-4 text-gray-800 border-b border-gray-300 pb-1">Career History</h4>
                 <div className="space-y-6">
                     {data.experience.map(exp => (
                         <div key={exp.id}>
@@ -39,7 +39,7 @@ const Executive = ({ data }) => {
             </div>
             <div className="grid grid-cols-2 gap-8 pt-6 border-t border-gray-300">
                 <div>
-                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-4 text-gray-800">Education</h4>
+                    <h4 className="text-xs font-black uppercase tracking-[0.3em] mb-4 text-gray-800">Education</h4>
                     {data.education.map(edu => (
                         <div key={edu.id} className="mb-4">
                             <h5 className="text-[11.5px] font-black uppercase">{edu.school}</h5>
@@ -48,7 +48,7 @@ const Executive = ({ data }) => {
                     ))}
                 </div>
                 <div>
-                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-4 text-gray-800">Core Expertise</h4>
+                    <h4 className="text-xs font-black uppercase tracking-[0.3em] mb-4 text-gray-800">Core Expertise</h4>
                     <p className="text-[11.5px] leading-relaxed font-medium opacity-90">{data.skills || 'Add competencies above.'}</p>
                 </div>
             </div>

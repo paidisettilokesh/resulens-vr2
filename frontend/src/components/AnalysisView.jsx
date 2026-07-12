@@ -286,7 +286,7 @@ const AnalysisView = ({
                                 <ArrowRight className="rotate-180" size={20} />
                             </button>
                         )}
-                        <div className="px-4 py-1.5 bg-cyan-600/10 text-cyan-600 text-[10px] font-black uppercase tracking-[0.3em] rounded-full border border-cyan-600/20">
+                        <div className="px-4 py-1.5 bg-cyan-600/10 text-cyan-600 text-xs font-black uppercase tracking-[0.3em] rounded-full border border-cyan-600/20">
                             Neural Diagnostics Active
                         </div>
                     </div>
@@ -318,7 +318,7 @@ const AnalysisView = ({
                                 {candidateName ? candidateName.charAt(0) : 'E'}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-1 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 w-fit mb-1">
+                                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-1 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 w-fit mb-1">
                                     <ShieldCheck size={10} strokeWidth={3} /> Verified Profile
                                 </span>
                                 <h2 className="text-xl font-black text-[var(--text-primary)] tracking-tight truncate leading-none">
@@ -331,7 +331,7 @@ const AnalysisView = ({
                             </div>
                         </div>
                         <div className="mt-6 pt-4 border-t border-[var(--border-secondary)] flex items-center justify-between relative z-10">
-                            <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest">Track</span>
+                            <span className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest">Track</span>
                             <span className="text-xs font-black text-cyan-600 dark:text-cyan-400 bg-cyan-500/5 dark:bg-cyan-500/10 px-3 py-1 rounded-full">
                                 {selectedRole === 'Other' ? customRole : selectedRole}
                             </span>
@@ -388,7 +388,7 @@ const AnalysisView = ({
                             </h3>
                             <div className="flex flex-wrap gap-1.5">
                                 {matchedSkills.slice(0, 6).map((skill, idx) => (
-                                    <span key={idx} className="px-3 py-1 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800/40 dark:to-slate-800/80 text-[10px] font-bold text-[var(--text-primary)] rounded-lg border border-[var(--border-secondary)] uppercase tracking-wider">
+                                    <span key={idx} className="px-3 py-1 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800/40 dark:to-slate-800/80 text-xs font-bold text-[var(--text-primary)] rounded-lg border border-[var(--border-secondary)] uppercase tracking-wider">
                                         {skill}
                                     </span>
                                 ))}
@@ -412,7 +412,7 @@ const AnalysisView = ({
                     <div className="bg-gradient-to-br from-cyan-900 to-cyan-950 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.05),transparent)]" />
                         <Sparkles className="absolute top-4 right-4 text-cyan-400 opacity-30 animate-pulse" size={20} />
-                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60 mb-3">AI Growth Insight</h4>
+                        <h4 className="text-xs font-black uppercase tracking-[0.2em] opacity-80 mb-3">AI Growth Insight</h4>
                         <p className="text-xs font-bold leading-relaxed italic">
                             "{activeMotivation}"
                         </p>
@@ -503,9 +503,9 @@ const AnalysisView = ({
                                                 </span>
                                                 <span className="text-xs font-bold text-[var(--text-primary)]">{item.text}</span>
                                             </div>
-                                            {item.reason && <p className="text-[10px] text-[var(--text-muted)] leading-relaxed italic">{item.reason}</p>}
+                                            {item.reason && <p className="text-xs text-[var(--text-muted)] leading-relaxed italic">{item.reason}</p>}
                                         </div>
-                                        <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border ${priorityColor} shrink-0`}>
+                                        <span className={`text-xs font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border ${priorityColor} shrink-0`}>
                                             {item.boost || '+5%'}
                                         </span>
                                     </div>
@@ -522,7 +522,7 @@ const AnalysisView = ({
                         <div className="space-y-3">
                             {activeCoach.map((rec, idx) => (
                                 <div key={idx} className="flex gap-3 p-4 bg-[var(--bg-surface-secondary)] rounded-2xl border border-[var(--border-secondary)]">
-                                    <div className="w-5 h-5 rounded-lg bg-cyan-600 text-white flex items-center justify-center shrink-0 text-[10px]">
+                                    <div className="w-5 h-5 rounded-lg bg-cyan-600 text-white flex items-center justify-center shrink-0 text-xs">
                                         {idx + 1}
                                     </div>
                                     <div className="space-y-0.5">
@@ -551,13 +551,13 @@ const AnalysisView = ({
 
                     {/* AI Verdict Card */}
                     <div className="bg-[var(--bg-surface)] p-6 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-3">
-                        <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] flex items-center gap-1.5">
+                        <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em] flex items-center gap-1.5">
                             <Shield size={12} className="text-cyan-700 dark:text-cyan-400" /> AI Verdict
                         </h3>
                         <div className={`p-4 rounded-xl border ${verdictBg} ${verdictBorder} text-center`}>
                             <span className={`text-xs font-black uppercase tracking-widest ${verdictColor}`}>{verdictRating}</span>
                         </div>
-                        <p className="text-[10px] font-medium text-[var(--text-secondary)] leading-relaxed italic border-l border-cyan-500/20 pl-3">
+                        <p className="text-xs font-medium text-[var(--text-secondary)] leading-relaxed italic border-l border-cyan-500/20 pl-3">
                             "{verdictReasoning}"
                         </p>
                     </div>
@@ -565,7 +565,7 @@ const AnalysisView = ({
                     {/* Scoring Transparency Breakdown */}
                     {analysis.atsScoreBreakdown && (
                         <div className="bg-[var(--bg-surface)] p-6 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-4">
-                            <h3 className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">Scoring Transparency</h3>
+                            <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">Scoring Transparency</h3>
                             
                             <div className="h-64 w-full">
                                 <ResponsiveContainer width="100%" height="100%">
@@ -605,7 +605,7 @@ const AnalysisView = ({
 
                 <div className="relative z-10 grid lg:grid-cols-[1fr_2fr] gap-16 items-center">
                     <div>
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 border border-white/10">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-xs font-black uppercase tracking-[0.2em] mb-6 border border-white/10">
                             Growth Expedition
                         </div>
                         <h3 className="text-5xl font-black tracking-tighter mb-6 leading-tight">Strategic Learning Path</h3>
@@ -618,7 +618,7 @@ const AnalysisView = ({
                             </div>
                             <div>
                                 <div className="text-4xl font-black">{analysis.recommendedCourses?.length || 0}</div>
-                                <div className="text-[10px] font-bold uppercase tracking-widest opacity-60">Verified Paths</div>
+                                <div className="text-xs font-bold uppercase tracking-widest opacity-80">Verified Paths</div>
                             </div>
                         </div>
                     </div>
@@ -639,7 +639,7 @@ const AnalysisView = ({
                                     <ArrowRight size={16} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                                 </div>
                                 <h5 className="text-xl font-bold leading-tight mb-4 group-hover:text-cyan-200 transition-colors">{course.title}</h5>
-                                <div className="flex items-center gap-4 text-[10px] font-bold opacity-60">
+                                <div className="flex items-center gap-4 text-xs font-bold opacity-80">
                                     <TrendingUp size={14} /> {course.timeEstimate || 'Flexible Duration'}
                                 </div>
                             </a>

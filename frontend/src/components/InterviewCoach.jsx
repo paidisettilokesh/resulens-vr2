@@ -82,7 +82,7 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                 <div className="relative z-10">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--bg-surface)] border border-cyan-100 dark:border-cyan-500/20 mb-6 font-bold text-cyan-600 dark:text-cyan-400 shadow-sm">
                         <Brain size={16} />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">Neural Interview Logic v4.0</span>
+                        <span className="text-xs font-bold uppercase tracking-widest">Neural Interview Logic v4.0</span>
                     </div>
                     <h2 className="text-5xl font-bold mb-4 tracking-tighter text-[var(--text-primary)]">AI Interview <span className="text-cyan-600 dark:text-cyan-400">Tactician</span></h2>
                     <p className="text-[var(--text-secondary)] text-lg font-medium max-w-2xl mx-auto italic">"Simulation of elite behavioral and technical panels with real-time audio evaluation."</p>
@@ -95,7 +95,7 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }} className="grid lg:grid-cols-2 gap-10 items-stretch">
                         <div className="bg-[var(--bg-surface)] p-12 rounded-[4rem] border border-[var(--border-primary)] shadow-xl flex flex-col justify-between">
                             <div>
-                                <span className="text-[10px] font-black text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 px-4 py-2 rounded-full uppercase tracking-widest mb-8 inline-block">Session Parameters</span>
+                                <span className="text-xs font-black text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 px-4 py-2 rounded-full uppercase tracking-widest mb-8 inline-block">Session Parameters</span>
                                 <h3 className="text-3xl font-black text-[var(--text-primary)] mb-6">Environment Setup</h3>
                                 <p className="text-[var(--text-secondary)] font-medium mb-10 leading-relaxed">Provide the target Job Description to calibrate our AI panel. The tactician will generate questions based strictly on these requirements.</p>
 
@@ -103,7 +103,7 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                     <div className="flex items-center gap-4 p-4 bg-[var(--bg-surface-secondary)] rounded-3xl border border-[var(--border-secondary)]">
                                         <div className="w-12 h-12 bg-[var(--bg-surface)] rounded-2xl flex items-center justify-center text-cyan-600 dark:text-cyan-400 shadow-sm"><ShieldCheck size={24} /></div>
                                         <div>
-                                            <span className="text-[10px] font-black text-[var(--text-muted)] uppercase block">Mode</span>
+                                            <span className="text-xs font-black text-[var(--text-muted)] uppercase block">Mode</span>
                                             <span className="font-black text-[var(--text-primary)]">Advanced Technical Evaluation</span>
                                         </div>
                                     </div>
@@ -184,13 +184,13 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                 <table className="w-full border-collapse">
                                     <thead>
                                         <tr className="bg-[var(--bg-surface-secondary)] border-b border-[var(--border-secondary)]">
-                                            <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] w-16">No.</th>
-                                            <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Interview Question</th>
-                                            <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">Your Answer</th>
-                                            <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] w-32">Evaluation</th>
-                                            <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] w-24">Score</th>
-                                            <th className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">AI Feedback</th>
-                                            <th className="px-8 py-6 text-right text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] w-32">Action</th>
+                                            <th className="px-8 py-6 text-left text-xs font-black uppercase tracking-widest text-[var(--text-muted)] w-16">No.</th>
+                                            <th className="px-8 py-6 text-left text-xs font-black uppercase tracking-widest text-[var(--text-muted)]">Interview Question</th>
+                                            <th className="px-8 py-6 text-left text-xs font-black uppercase tracking-widest text-[var(--text-muted)]">Your Answer</th>
+                                            <th className="px-8 py-6 text-left text-xs font-black uppercase tracking-widest text-[var(--text-muted)] w-32">Evaluation</th>
+                                            <th className="px-8 py-6 text-left text-xs font-black uppercase tracking-widest text-[var(--text-muted)] w-24">Score</th>
+                                            <th className="px-8 py-6 text-left text-xs font-black uppercase tracking-widest text-[var(--text-muted)]">AI Feedback</th>
+                                            <th className="px-8 py-6 text-right text-xs font-black uppercase tracking-widest text-[var(--text-muted)] w-32">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-[var(--border-secondary)]">
@@ -213,7 +213,7 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                                         {questionEval?.answer ? (
                                                             <p className="text-xs font-medium text-[var(--text-secondary)] italic line-clamp-3">"{questionEval.answer}"</p>
                                                         ) : (
-                                                            <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase italic">Pending...</span>
+                                                            <span className="text-xs font-bold text-[var(--text-muted)] uppercase italic">Pending...</span>
                                                         )}
                                                     </td>
                                                     <td className="px-8 py-6 align-top">
@@ -233,7 +233,7 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                                     </td>
                                                     <td className="px-8 py-6 align-top">
                                                         {questionEval?.feedback ? (
-                                                            <p className="text-[10px] font-medium text-[var(--text-secondary)] leading-relaxed max-w-sm">
+                                                            <p className="text-xs font-medium text-[var(--text-secondary)] leading-relaxed max-w-sm">
                                                                 {questionEval.feedback.substring(0, 100)}...
                                                             </p>
                                                         ) : '-'}
@@ -241,7 +241,7 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                                     <td className="px-8 py-6 align-top text-right">
                                                         <button
                                                             onClick={() => setActiveQuestion(q)}
-                                                            className="px-5 py-2.5 bg-cyan-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-cyan-700 transition-all shadow-lg active:scale-95"
+                                                            className="px-5 py-2.5 bg-cyan-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-cyan-700 transition-all shadow-lg active:scale-95"
                                                         >
                                                             {questionEval ? 'Re-Practice' : 'Practice'}
                                                         </button>
@@ -316,7 +316,7 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                                         "{evaluations[activeQuestion.id].feedback}"
                                                     </p>
                                                     <div className="p-6 bg-[var(--bg-surface)] rounded-2xl border border-emerald-500/10">
-                                                        <h5 className="text-[10px] font-black uppercase text-cyan-600 mb-3 tracking-widest">Global Model Answer</h5>
+                                                        <h5 className="text-xs font-black uppercase text-cyan-600 mb-3 tracking-widest">Global Model Answer</h5>
                                                         <p className="text-xs font-serif text-[var(--text-primary)] leading-relaxed italic">
                                                             {evaluations[activeQuestion.id].improvedVersion}
                                                         </p>
@@ -369,11 +369,11 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                                     const nextQ = allQuestions[currentIndex + 1] || allQuestions[0];
                                                     setActiveQuestion(nextQ);
                                                 }}
-                                                className="px-8 bg-[var(--bg-surface)] border border-[var(--border-secondary)] rounded-2.5xl font-bold uppercase text-[10px] tracking-widest text-cyan-600 hover:bg-cyan-50 transition-all flex items-center gap-2"
+                                                className="px-8 bg-[var(--bg-surface)] border border-[var(--border-secondary)] rounded-2.5xl font-bold uppercase text-xs tracking-widest text-cyan-600 hover:bg-cyan-50 transition-all flex items-center gap-2"
                                             >
                                                 Next <ChevronRight size={14} />
                                             </button>
-                                            <button onClick={() => setActiveQuestion(null)} className="px-8 bg-white border border-[var(--border-secondary)] rounded-2.5xl font-bold uppercase text-[10px] tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all">
+                                            <button onClick={() => setActiveQuestion(null)} className="px-8 bg-white border border-[var(--border-secondary)] rounded-2.5xl font-bold uppercase text-xs tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all">
                                                 Close Grid
                                             </button>
                                         </div>

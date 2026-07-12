@@ -107,7 +107,7 @@ const TrustFooter = () => {
                                 <HelpCircle size={12} /> Support
                             </button>
                         </div>
-                        <div className="text-[10px] text-[var(--text-muted)] font-medium">
+                        <div className="text-xs text-[var(--text-muted)] font-medium">
                             &copy; {new Date().getFullYear()} ResuLens. All rights reserved.
                         </div>
                     </div>

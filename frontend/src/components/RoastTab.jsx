@@ -107,7 +107,7 @@ const RoastTab = ({ roastData, runFeature, loading }) => {
                         <div className="grid md:grid-cols-3 gap-6">
                             {roastStats.map((stat, i) => (
                                 <div key={i} className="bg-[var(--bg-surface)] p-6 rounded-[2rem] border border-[var(--border-primary)] shadow-sm text-center">
-                                    <p className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[3px] mb-2">{stat.label}</p>
+                                    <p className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[3px] mb-2">{stat.label}</p>
                                     <p className={`text-2xl font-black text-${stat.color}-500`}>{stat.value}</p>
                                 </div>
                             ))}
@@ -141,7 +141,7 @@ const RoastTab = ({ roastData, runFeature, loading }) => {
                                             <Trophy size={16} />
                                         </div>
                                         <div>
-                                            <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest block mb-1">Elite Fix</span>
+                                            <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest block mb-1">Elite Fix</span>
                                             <p className="text-sm font-bold text-[var(--text-primary)]">{s.fix || "Strategic adjustment required."}</p>
                                         </div>
                                     </div>
@@ -164,7 +164,7 @@ const RoastTab = ({ roastData, runFeature, loading }) => {
                                         {roastData.roastScore !== undefined && (
                                             <div className="bg-white/10 backdrop-blur-md px-10 py-6 rounded-[2rem] border border-white/10">
                                                 <div className="text-5xl font-black text-white">{roastData.roastScore}</div>
-                                                <div className="text-[10px] font-black text-cyan-200 uppercase tracking-widest mt-1">Impact Potential</div>
+                                                <div className="text-xs font-black text-cyan-200 uppercase tracking-widest mt-1">Impact Potential</div>
                                             </div>
                                         )}
                                     </div>

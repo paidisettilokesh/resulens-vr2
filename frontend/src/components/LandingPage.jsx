@@ -196,7 +196,7 @@ export default function LandingPage({ onOpenAuth }) {
                 <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center pt-8">
                     {/* Left: Text Hook */}
                     <div className="lg:col-span-6 text-left space-y-6">
-                        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 text-[10px] font-bold tracking-widest uppercase">
+                        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 text-xs font-bold tracking-widest uppercase">
                             <Sparkles size={12} aria-hidden="true" /> Beat the Hiring Systems
                         </div>
                         <h1 className="text-5xl sm:text-6xl font-black text-[var(--text-primary)] leading-[1.05] tracking-tight">
@@ -300,7 +300,7 @@ export default function LandingPage({ onOpenAuth }) {
                                                     transition={{ duration: 1.2, ease: "easeInOut" }}
                                                 />
                                             </div>
-                                            <p className="text-[10px] font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-widest">
+                                            <p className="text-xs font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-widest">
                                                 Analyzing Resume
                                             </p>
                                         </div>
@@ -327,7 +327,7 @@ export default function LandingPage({ onOpenAuth }) {
                         <div className="grid md:grid-cols-3 gap-8 items-stretch max-w-4xl mx-auto">
                             {/* Score Card */}
                             <div className="p-6 rounded-[2rem] bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] flex flex-col items-center justify-center space-y-4">
-                                <div className="text-[10px] font-bold text-cyan-600 uppercase tracking-widest">Calculated score</div>
+                                <div className="text-xs font-bold text-cyan-600 uppercase tracking-widest">Calculated score</div>
                                 <div className="relative w-28 h-28 flex items-center justify-center">
                                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                                         <circle cx="50" cy="50" r="40" stroke="var(--border-primary)" strokeWidth="8" fill="none" />
@@ -341,7 +341,7 @@ export default function LandingPage({ onOpenAuth }) {
                             {/* Strengths Card */}
                             <div className="p-6 rounded-[2rem] bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] text-left space-y-4 flex flex-col justify-between">
                                 <div className="space-y-3">
-                                    <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Identified Strengths</div>
+                                    <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Identified Strengths</div>
                                     <ul className="space-y-2">
                                         {["✓ Strong action verbs used", "✓ Clean layout formatting structure", "✓ Valid metric-based indicators"].map((st, i) => (
                                             <li key={i} className="flex gap-2 items-start text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -350,13 +350,13 @@ export default function LandingPage({ onOpenAuth }) {
                                         ))}
                                     </ul>
                                 </div>
-                                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block">Format passes checks</span>
+                                <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider block">Format passes checks</span>
                             </div>
 
                             {/* Gaps Card */}
                             <div className="p-6 rounded-[2rem] bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] text-left space-y-4 flex flex-col justify-between">
                                 <div className="space-y-3">
-                                    <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Detected Gaps</div>
+                                    <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Detected Gaps</div>
                                     <ul className="space-y-2">
                                         {["✗ Missing AWS/Cloud keyword density", "✗ Missing Docker containerization details", "✗ Weak metrics in senior project block"].map((gap, i) => (
                                             <li key={i} className="flex gap-2 items-start text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -365,7 +365,7 @@ export default function LandingPage({ onOpenAuth }) {
                                         ))}
                                     </ul>
                                 </div>
-                                <span className="text-[10px] font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wider block">3 Critical gaps detected</span>
+                                <span className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wider block">3 Critical gaps detected</span>
                             </div>
                         </div>
 
@@ -441,7 +441,7 @@ export default function LandingPage({ onOpenAuth }) {
                                 </p>
                                 <div className="border-t border-[var(--border-primary)] pt-4">
                                     <div className="font-bold text-xs text-[var(--text-primary)]">{t.author}</div>
-                                    <p className="text-[10px] text-[var(--text-muted)] font-semibold uppercase tracking-wider">{t.role}</p>
+                                    <p className="text-xs text-[var(--text-muted)] font-semibold uppercase tracking-wider">{t.role}</p>
                                 </div>
                             </div>
                         ))}
@@ -501,7 +501,7 @@ export default function LandingPage({ onOpenAuth }) {
                         <span className="text-[var(--text-muted)]">·</span>
                         <span className="text-xs text-[var(--text-muted)]">support@resulens.ai</span>
                     </div>
-                    <p className="text-[10px] text-[var(--text-muted)] font-medium">
+                    <p className="text-xs text-[var(--text-muted)] font-medium">
                         © {new Date().getFullYear()} ResuLens. Built with ❤️ for professionals.
                     </p>
                 </div>

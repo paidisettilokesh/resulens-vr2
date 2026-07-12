@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import Confetti from 'react-confetti';
 import axios from 'axios';
 import './index.css';
+
+const Confetti = React.lazy(() => import('react-confetti'));
 
 // --- CONTEXTS ---
 import { useUser } from './context/UserContext';
@@ -324,7 +325,11 @@ function App() {
                 handleLogout={handleLogout}
                 onOpenOnboarding={() => setShowOnboarding(true)}
             >
-                {analysis?.atsScore > 75 && <Confetti width={windowSize.width} height={windowSize.height} recycle={false} numberOfPieces={200} />}
+                {analysis?.atsScore > 75 && (
+                    <Suspense fallback={null}>
+                        <Confetti width={windowSize.width} height={windowSize.height} recycle={false} numberOfPieces={200} />
+                    </Suspense>
+                )}
 
                 <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
 

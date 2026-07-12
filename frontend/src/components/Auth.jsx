@@ -257,7 +257,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                                 initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.25 }}>
                                 <label htmlFor="auth-name"
-                                    className="block text-[10px] font-bold uppercase tracking-widest mb-1.5 text-[var(--text-muted)]">
+                                    className="block text-xs font-bold uppercase tracking-widest mb-1.5 text-[var(--text-muted)]">
                                     Full Name
                                 </label>
                                 <div className="relative">
@@ -277,7 +277,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                     {!isReset && (
                         <div>
                             <label htmlFor="auth-email"
-                                className="block text-[10px] font-bold uppercase tracking-widest mb-1.5 text-[var(--text-muted)]">
+                                className="block text-xs font-bold uppercase tracking-widest mb-1.5 text-[var(--text-muted)]">
                                 Email Address
                             </label>
                             <div className="relative">
@@ -297,12 +297,12 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                         <div>
                             <div className="flex justify-between items-center mb-1.5">
                                 <label htmlFor="auth-password"
-                                    className="block text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                                    className="block text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">
                                     Password
                                 </label>
                                 {isLogin && (
                                     <button type="button" id="forgot-password-btn"
-                                        className="text-[10px] font-bold hover:underline text-[var(--accent-primary)] focus-visible:ring-2 focus-visible:ring-cyan-500/50"
+                                        className="text-xs font-bold hover:underline text-[var(--accent-primary)] focus-visible:ring-2 focus-visible:ring-cyan-500/50"
                                         onClick={() => switchMode('forgot-password')}>
                                         Forgot password?
                                     </button>
@@ -325,7 +325,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                                 style={{ borderRadius: '14px' }} />
                             <button type="button" id="toggle-password-visibility"
                                 onClick={() => setShowPassword(v => !v)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-100 text-[var(--text-muted)] opacity-60 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-100 text-[var(--text-muted)] opacity-80 min-h-[44px] min-w-[44px] flex items-center justify-center"
                                 aria-label={showPassword ? 'Hide password' : 'Show password'}>
                                 {showPassword ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
                             </button>
@@ -347,7 +347,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                                         ))}
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-bold"
+                                        <span className="text-xs font-bold"
                                             style={{ color: passwordStrength.color || 'var(--text-muted)' }}>
                                             {passwordStrength.label || 'Enter a password'}
                                         </span>

@@ -91,7 +91,7 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
                             </div>
                             <div className="space-y-1 text-left">
                                 <h4 className="font-bold text-xs text-[var(--text-primary)]">{feat.title}</h4>
-                                <p className="text-[10px] text-[var(--text-muted)] leading-relaxed">{feat.desc}</p>
+                                <p className="text-xs text-[var(--text-muted)] leading-relaxed">{feat.desc}</p>
                             </div>
                         </div>
                     ))}
@@ -117,7 +117,7 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
                             </div>
                             <div className="text-left space-y-0.5">
                                 <h4 className="font-bold text-xs text-[var(--text-primary)]">{step.title}</h4>
-                                <p className="text-[10px] text-[var(--text-muted)] leading-relaxed">{step.desc}</p>
+                                <p className="text-xs text-[var(--text-muted)] leading-relaxed">{step.desc}</p>
                             </div>
                         </div>
                     ))}
@@ -313,7 +313,7 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
                                         : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--border-primary)]/20'
                                     }`}
                                 >
-                                    <span className={`w-5 h-5 rounded-lg flex items-center justify-center text-[10px] ${
+                                    <span className={`w-5 h-5 rounded-lg flex items-center justify-center text-xs ${
                                         currentSlide === idx ? 'bg-white/20 text-white' : 'bg-[var(--border-primary)] text-[var(--text-muted)] group-hover:bg-[var(--border-primary)]/40'
                                     }`} aria-hidden="true">
                                         {idx + 1}
@@ -326,7 +326,7 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
 
                     {/* Progress Bar for Mobile & Footer indicator */}
                     <div className="pt-6 border-t border-[var(--border-primary)] mt-6 md:mt-0 flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                        <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
                             Slide {currentSlide + 1} of {slides.length}
                         </span>
                         <div className="flex gap-1">

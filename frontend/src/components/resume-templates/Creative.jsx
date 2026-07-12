@@ -14,8 +14,8 @@ const Creative = ({ data }) => {
 
                 <div className="space-y-8">
                     <div>
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3 border-b border-slate-700 pb-2">Contact</h4>
-                        <div className="text-[10px] space-y-2 text-slate-300">
+                        <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3 border-b border-slate-700 pb-2">Contact</h4>
+                        <div className="text-xs space-y-2 text-slate-300">
                             {data.personal.email && <p>{data.personal.email}</p>}
                             {data.personal.phone && <p>{data.personal.phone}</p>}
                             {data.personal.location && <p>{data.personal.location}</p>}
@@ -23,20 +23,20 @@ const Creative = ({ data }) => {
                     </div>
 
                     <div>
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3 border-b border-slate-700 pb-2">Expertise</h4>
+                        <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3 border-b border-slate-700 pb-2">Expertise</h4>
                         <div className="flex flex-col gap-2">
                             {(data.skills || '').split(',').filter(Boolean).map((s, i) => (
-                                <span key={i} className="text-[10px] font-bold text-teal-300">{s.trim()}</span>
+                                <span key={i} className="text-xs font-bold text-teal-300">{s.trim()}</span>
                             ))}
                         </div>
                     </div>
 
                     <div>
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-3 border-b border-slate-700 pb-2">Education</h4>
+                        <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-3 border-b border-slate-700 pb-2">Education</h4>
                         {data.education.map(edu => (
                             <div key={edu.id} className="mb-4">
                                 <h5 className="text-[11px] font-bold text-white leading-tight">{edu.school}</h5>
-                                <p className="text-[10px] text-teal-400 mt-1">{edu.degree}</p>
+                                <p className="text-xs text-teal-400 mt-1">{edu.degree}</p>
                                 <p className="text-[9px] text-slate-500 mt-1">{edu.year}</p>
                             </div>
                         ))}
@@ -65,7 +65,7 @@ const Creative = ({ data }) => {
                                 <div className="absolute left-[-28px] top-1 w-2 h-2 rounded-full bg-slate-300"></div>
                                 <div className="flex justify-between items-baseline mb-1">
                                     <h5 className="font-black text-[13px] text-slate-900">{exp.role}</h5>
-                                    <span className="text-[10px] font-bold text-slate-400">{exp.period}</span>
+                                    <span className="text-xs font-bold text-slate-400">{exp.period}</span>
                                 </div>
                                 <p className="text-[10.5px] font-bold text-teal-600 uppercase tracking-wide mb-2">{exp.company}</p>
                                 <div className="text-[11px] leading-relaxed text-slate-700">

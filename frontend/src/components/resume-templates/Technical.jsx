@@ -26,7 +26,7 @@ const Technical = ({ data }) => {
                         <div key={exp.id}>
                             <div className="flex justify-between items-baseline mb-1">
                                 <span className="font-black text-[13px] text-slate-900">{exp.role} <span className="text-indigo-600 font-normal">@ {exp.company}</span></span>
-                                <span className="text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded">{exp.period}</span>
+                                <span className="text-xs font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded">{exp.period}</span>
                             </div>
                             <div className="text-[11px] leading-relaxed text-slate-700 pl-4 mt-2">
                                 {exp.details.split('\n').map((bullet, i) => {

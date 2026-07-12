@@ -39,7 +39,7 @@ const OptimizeTab = ({
                 <div className="relative z-10 max-w-2xl">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--bg-surface)] border border-cyan-100 dark:border-cyan-500/20 mb-6">
                         <Sparkles size={14} className="text-cyan-600 dark:text-cyan-400" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400">Premium Optimization Hub</span>
+                        <span className="text-xs font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400">Premium Optimization Hub</span>
                     </div>
                     <h2 className="text-5xl font-bold mb-4 tracking-tighter text-[var(--text-primary)]">Polish Your <span className="text-cyan-600 dark:text-cyan-400">Professional Identity</span></h2>
                     <p className="text-[var(--text-secondary)] text-lg font-medium leading-relaxed">
@@ -111,16 +111,16 @@ const OptimizeTab = ({
                                     <div className="grid md:grid-cols-3 gap-6 animate-fade-in">
                                         <div className="p-8 bg-cyan-500 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
                                             <div className="absolute top-0 right-0 p-8 opacity-10"><Zap size={40} /></div>
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-2 block">Impact Before</span>
+                                            <span className="text-xs font-black uppercase tracking-[0.2em] opacity-80 mb-2 block">Impact Before</span>
                                             <p className="text-4xl font-black">{rewrittenResume.performanceMetrics.before || 45}%</p>
                                         </div>
                                         <div className="p-8 bg-emerald-500 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
                                             <div className="absolute top-0 right-0 p-8 opacity-10"><Sparkles size={40} /></div>
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-2 block">Optimized Score</span>
+                                            <span className="text-xs font-black uppercase tracking-[0.2em] opacity-80 mb-2 block">Optimized Score</span>
                                             <p className="text-4xl font-black">{rewrittenResume.performanceMetrics.after || 95}%</p>
                                         </div>
                                         <div className="p-8 bg-[var(--bg-surface)] border border-[var(--border-primary)] rounded-[2.5rem] text-emerald-600 shadow-xl relative overflow-hidden flex flex-col justify-center">
-                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] mb-2 block">Performance Delta</span>
+                                            <span className="text-xs font-black uppercase tracking-[0.2em] text-[var(--text-muted)] mb-2 block">Performance Delta</span>
                                             <p className="text-2xl font-black tracking-tighter">{rewrittenResume.performanceMetrics.delta || '+50% Impact Density'}</p>
                                         </div>
                                     </div>
@@ -128,7 +128,7 @@ const OptimizeTab = ({
 
                                 {rewrittenResume?.skillGapAnalysis?.length > 0 && (
                                     <div className="p-10 bg-rose-500/5 rounded-[3rem] border border-rose-500/10 animate-fade-in">
-                                        <h4 className="text-[10px] font-black text-rose-700 dark:text-rose-400 uppercase tracking-widest mb-6 flex items-center gap-3">
+                                        <h4 className="text-xs font-black text-rose-700 dark:text-rose-400 uppercase tracking-widest mb-6 flex items-center gap-3">
                                             <Target size={18} /> Narrative Skill Gaps Identified
                                         </h4>
                                         <div className="flex flex-wrap gap-2">
@@ -143,12 +143,12 @@ const OptimizeTab = ({
                                     <div key={idx} className="grid md:grid-cols-2 gap-8 relative p-2">
                                         <div className="bg-[var(--bg-surface-secondary)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] relative group overflow-hidden">
                                             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none font-black text-6xl uppercase tracking-tighter">PREVIOUS</div>
-                                            <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-6 block">Legacy Bullet Point</span>
+                                            <span className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest mb-6 block">Legacy Bullet Point</span>
                                             <p className="text-sm text-[var(--text-muted)] font-medium leading-relaxed italic line-through decoration-rose-200 decoration-2">{section.original}</p>
                                         </div>
                                         <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border-2 border-primary-100 shadow-xl relative group">
-                                            <div className="absolute -top-4 left-10 bg-gradient-to-r from-primary-600 to-cyan-600 text-white text-[10px] font-black px-4 py-2 rounded-full shadow-lg border-2 border-white uppercase tracking-widest">Optimized Bullet</div>
-                                            <span className="text-[10px] font-black text-primary-600 uppercase tracking-widest mb-6 block">AI Executive Strategy</span>
+                                            <div className="absolute -top-4 left-10 bg-gradient-to-r from-primary-600 to-cyan-600 text-white text-xs font-black px-4 py-2 rounded-full shadow-lg border-2 border-white uppercase tracking-widest">Optimized Bullet</div>
+                                            <span className="text-xs font-black text-primary-600 uppercase tracking-widest mb-6 block">AI Executive Strategy</span>
                                             <p className="text-base text-[var(--text-primary)] font-bold leading-relaxed">{section.rewritten}</p>
                                             <div className="mt-8 pt-6 border-t border-[var(--border-primary)] flex items-start gap-3">
                                                 <div className="p-1.5 bg-emerald-50 rounded-lg text-emerald-600"><CheckCircle size={14} /></div>
@@ -167,10 +167,10 @@ const OptimizeTab = ({
                                         <div className="grid md:grid-cols-3 gap-8">
                                             {['core', 'tools', 'soft'].map(category => (
                                                 <div key={category} className="p-8 bg-[var(--bg-surface)] rounded-[2.5rem] border border-[var(--border-secondary)] shadow-sm">
-                                                    <span className="text-[10px] font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-widest mb-6 block border-b border-[var(--border-primary)] pb-4">{category} Competencies</span>
+                                                    <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-widest mb-6 block border-b border-[var(--border-primary)] pb-4">{category} Competencies</span>
                                                     <div className="flex flex-wrap gap-2">
                                                         {rewrittenResume.optimizedSkills[category]?.map((s, i) => (
-                                                            <span key={i} className="px-3 py-1.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-[10px] font-bold rounded-lg border border-cyan-500/20 uppercase italic">/ {s}</span>
+                                                            <span key={i} className="px-3 py-1.5 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-bold rounded-lg border border-cyan-500/20 uppercase italic">/ {s}</span>
                                                         ))}
                                                     </div>
                                                 </div>
@@ -195,7 +195,7 @@ const OptimizeTab = ({
                                             className="input-field h-64 font-mono text-xs leading-loose focus:ring-emerald-500/20"
                                             placeholder="Example: We are looking for a Senior React Engineer with 5+ years of experience in distributed systems and state management..."
                                         />
-                                        <div className="mt-4 flex items-center gap-2 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest italic">
+                                        <div className="mt-4 flex items-center gap-2 text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest italic">
                                             <Lightbulb size={12} className="text-amber-700 dark:text-amber-400" /> Pro Tip: Paste the full JD for 99% accuracy.
                                         </div>
                                         <button onClick={() => runFeature('tailor')} disabled={loading || !jobDescription} className="w-full mt-6 btn-primary bg-emerald-600 hover:bg-emerald-700 !py-5 shadow-emerald-200">
@@ -216,7 +216,7 @@ const OptimizeTab = ({
                                             <div className="space-y-10">
                                                 <div className="flex items-center justify-between border-b border-[var(--border-secondary)] pb-6">
                                                     <div>
-                                                        <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest block mb-1">Algorithmic Match</span>
+                                                        <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest block mb-1">Algorithmic Match</span>
                                                         <p className="text-4xl font-bold tracking-tight text-[var(--text-primary)]">{tailorData.matchScore}%</p>
                                                     </div>
                                                     <div className="flex gap-4">
@@ -230,14 +230,14 @@ const OptimizeTab = ({
                                                 </div>
                                                 <div className="space-y-6">
                                                     <div>
-                                                        <h5 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-6 flex items-center gap-2">
+                                                        <h5 className="text-xs font-black uppercase tracking-widest text-[var(--text-muted)] mb-6 flex items-center gap-2">
                                                             <Target size={14} /> Critical Keyword Density
                                                         </h5>
                                                         <div className="grid grid-cols-2 gap-3">
                                                             {tailorData.keywordAnalysis?.map((kw, i) => (
                                                                 <div key={i} className="p-4 bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-primary)] flex items-center justify-between group hover:border-emerald-200 transition-colors">
                                                                     <div className="flex flex-col">
-                                                                        <span className="text-[10px] font-black text-[var(--text-primary)]">{kw.keyword}</span>
+                                                                        <span className="text-xs font-black text-[var(--text-primary)]">{kw.keyword}</span>
                                                                         <span className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-tighter">Imp: {kw.jdImportance}</span>
                                                                     </div>
                                                                     <div className={`text-xs font-black ${kw.resumeDensity > 50 ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-400'}`}>{kw.resumeDensity}%</div>
@@ -246,10 +246,10 @@ const OptimizeTab = ({
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <h5 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-4">Critical Skill Gaps</h5>
+                                                        <h5 className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)] mb-4">Critical Skill Gaps</h5>
                                                         <div className="flex flex-wrap gap-2">
                                                             {(tailorData.missingSkills || []).map((s, i) => (
-                                                                <span key={i} className="px-3 py-1.5 bg-rose-50 text-rose-600 text-[10px] font-bold rounded-lg border border-rose-100 uppercase italic">! {s}</span>
+                                                                <span key={i} className="px-3 py-1.5 bg-rose-50 text-rose-600 text-xs font-bold rounded-lg border border-rose-100 uppercase italic">! {s}</span>
                                                             ))}
                                                         </div>
                                                     </div>
@@ -265,13 +265,13 @@ const OptimizeTab = ({
                                             <p className="text-sm text-[var(--text-secondary)] font-bold leading-relaxed italic pr-12">"{tailorData.recruiterGapAnalysis}"</p>
                                         </div>
                                         <div className="pt-8 space-y-4">
-                                            <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-4 block">Precision Resume Adjustments</span>
+                                            <span className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-4 block">Precision Resume Adjustments</span>
                                             <div className="grid md:grid-cols-2 gap-4">
                                                 {tailorData.suggestedEdits?.map((adj, i) => (
                                                     <div key={i} className="p-6 bg-[var(--bg-surface-secondary)] rounded-[2rem] border border-[var(--border-primary)] flex flex-col gap-3">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-6 h-6 bg-[var(--bg-surface)] rounded-lg border border-[var(--border-secondary)] flex items-center justify-center text-[10px] font-black text-[var(--text-muted)]">{i + 1}</div>
-                                                            <span className="text-[10px] font-black text-cyan-600 uppercase tracking-widest">{adj.context}</span>
+                                                            <div className="w-6 h-6 bg-[var(--bg-surface)] rounded-lg border border-[var(--border-secondary)] flex items-center justify-center text-xs font-black text-[var(--text-muted)]">{i + 1}</div>
+                                                            <span className="text-xs font-black text-cyan-600 uppercase tracking-widest">{adj.context}</span>
                                                         </div>
                                                         <p className="text-sm font-bold text-[var(--text-primary)] leading-relaxed">{adj.suggestion}</p>
                                                     </div>
@@ -310,8 +310,8 @@ const OptimizeTab = ({
                                         </div>
                                         <pre className="whitespace-pre-wrap font-serif text-[var(--text-primary)] text-xl leading-relaxed italic max-w-4xl relative z-10">{coverLetter.coverLetter}</pre>
                                         <div className="mt-12 flex justify-between items-center bg-[var(--bg-surface)] p-6 rounded-3xl border border-cyan-100 shadow-sm">
-                                            <p className="text-[10px] font-bold text-[var(--text-muted)] tracking-widest uppercase">Tone Setting: <span className="text-cyan-600">{coverLetter.toneAnalysis}</span></p>
-                                            <button onClick={() => downloadTextFile(coverLetter.coverLetter, `CoverLetter-${candidateName}.txt`)} className="px-10 py-4 bg-cyan-600 hover:bg-cyan-700 text-white rounded-2xl text-[10px] font-bold transition-all flex items-center gap-2 uppercase tracking-widest shadow-lg shadow-cyan-100"><Download size={14} /> Download PDF Ready</button>
+                                            <p className="text-xs font-bold text-[var(--text-muted)] tracking-widest uppercase">Tone Setting: <span className="text-cyan-600">{coverLetter.toneAnalysis}</span></p>
+                                            <button onClick={() => downloadTextFile(coverLetter.coverLetter, `CoverLetter-${candidateName}.txt`)} className="px-10 py-4 bg-cyan-600 hover:bg-cyan-700 text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-2 uppercase tracking-widest shadow-lg shadow-cyan-100"><Download size={14} /> Download PDF Ready</button>
                                         </div>
                                     </div>
                                 )}
@@ -341,7 +341,7 @@ const OptimizeTab = ({
                                             <div className="bg-[var(--bg-surface)] p-10 rounded-[3rem] border border-[var(--border-primary)] shadow-sm relative group overflow-hidden">
                                                 <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none transition-transform group-hover:scale-110"><Sparkles size={100} /></div>
                                                 <div className="flex items-center gap-4 mb-8">
-                                                    <span className="text-[10px] font-black text-primary-600 bg-primary-50 px-4 py-2 rounded-full uppercase tracking-widest">Optimized High-Impact Headline</span>
+                                                    <span className="text-xs font-black text-primary-600 bg-primary-50 px-4 py-2 rounded-full uppercase tracking-widest">Optimized High-Impact Headline</span>
                                                     <div className="h-0.5 bg-[var(--bg-surface-secondary)] flex-grow" />
                                                 </div>
                                                 <h4 className="text-2xl font-black text-[var(--text-primary)] leading-tight mb-8">{linkedinData.headline}</h4>
@@ -353,8 +353,8 @@ const OptimizeTab = ({
 
                                             <div className="bg-[var(--bg-surface)] p-10 rounded-[3.5rem] border border-[var(--border-primary)] shadow-sm">
                                                 <div className="flex justify-between items-center mb-10 pb-6 border-b border-[var(--border-primary)]">
-                                                    <span className="text-[10px] font-black text-cyan-600 uppercase tracking-widest">Elite "About" Narrative</span>
-                                                    <button onClick={() => handleCopy(linkedinData.about, 'li_a')} className="flex items-center gap-2 text-[10px] font-black text-[var(--text-muted)] hover:text-cyan-600 uppercase tracking-widest transition-colors">
+                                                    <span className="text-xs font-black text-cyan-600 uppercase tracking-widest">Elite "About" Narrative</span>
+                                                    <button onClick={() => handleCopy(linkedinData.about, 'li_a')} className="flex items-center gap-2 text-xs font-black text-[var(--text-muted)] hover:text-cyan-600 uppercase tracking-widest transition-colors">
                                                         {copyStatus === 'li_a' ? <CheckCircle size={14} className="text-emerald-700 dark:text-emerald-400" /> : <Copy size={14} />}
                                                         {copyStatus === 'li_a' ? 'Copied' : 'Copy Full Story'}
                                                     </button>
@@ -366,10 +366,10 @@ const OptimizeTab = ({
 
                                             {linkedinData.experience && (
                                                 <div className="space-y-4">
-                                                    <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest block ml-6">Optimized LinkedIn Experience Bullets</span>
+                                                    <span className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest block ml-6">Optimized LinkedIn Experience Bullets</span>
                                                     {linkedinData.experience.map((exp, i) => (
                                                         <div key={i} className="p-8 bg-[var(--bg-surface)] rounded-[2.5rem] border border-[var(--border-primary)] shadow-sm group">
-                                                            <h5 className="text-[10px] font-black text-primary-600 uppercase mb-4">{exp.company}</h5>
+                                                            <h5 className="text-xs font-black text-primary-600 uppercase mb-4">{exp.company}</h5>
                                                             <p className="text-sm font-bold text-[var(--text-primary)] leading-relaxed italic">"{exp.rewritten}"</p>
                                                         </div>
                                                     ))}
@@ -382,7 +382,7 @@ const OptimizeTab = ({
                                                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 via-blue-400 to-sky-400" />
                                                 <div className="flex items-center gap-3 mb-6 text-cyan-600">
                                                     <ImageIcon size={20} />
-                                                    <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Visual Identity Concept</span>
+                                                    <span className="text-xs font-bold uppercase tracking-[0.2em]">Visual Identity Concept</span>
                                                 </div>
                                                 <p className="text-sm font-bold leading-relaxed italic text-[var(--text-secondary)]">
                                                     "{linkedinData.bannerConcept || "A minimalist high-tech background with a blend of your core tech stack icons and professional typography."}"
@@ -390,10 +390,10 @@ const OptimizeTab = ({
                                             </div>
 
                                             <div className="bg-[var(--bg-surface)] p-8 rounded-[3rem] border border-[var(--border-primary)] shadow-sm">
-                                                <span className="text-[10px] font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-widest mb-6 block">Targeted Endorsements</span>
+                                                <span className="text-xs font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-widest mb-6 block">Targeted Endorsements</span>
                                                 <div className="flex flex-wrap gap-2">
                                                     {linkedinData.skillsToPin?.map((s, i) => (
-                                                        <span key={i} className="px-3 py-1.5 bg-cyan-50 text-cyan-700 text-[10px] font-bold rounded-xl border border-cyan-100 uppercase italic"># {s}</span>
+                                                        <span key={i} className="px-3 py-1.5 bg-cyan-50 text-cyan-700 text-xs font-bold rounded-xl border border-cyan-100 uppercase italic"># {s}</span>
                                                     ))}
                                                 </div>
                                             </div>
@@ -421,9 +421,9 @@ const OptimizeTab = ({
                                         {emailData.templates.map((tmpl, idx) => (
                                             <div key={idx} className="bg-[var(--bg-surface)] p-10 rounded-[3.5rem] border border-[var(--border-primary)] shadow-sm flex flex-col h-full hover:shadow-xl transition-all relative group">
                                                 <div className="absolute top-8 right-8 text-primary-100 group-hover:text-primary-500/10 transition-colors"><Mail size={48} /></div>
-                                                <span className="text-[10px] font-black text-primary-600 bg-primary-50 px-4 py-2 rounded-full uppercase tracking-[0.2em] mb-8 self-start">{tmpl.type}</span>
+                                                <span className="text-xs font-black text-primary-600 bg-primary-50 px-4 py-2 rounded-full uppercase tracking-[0.2em] mb-8 self-start">{tmpl.type}</span>
                                                 <div className="mb-6 pb-6 border-b border-[var(--border-primary)]">
-                                                    <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest block mb-2">Subject:</span>
+                                                    <span className="text-xs font-black text-[var(--text-muted)] uppercase tracking-widest block mb-2">Subject:</span>
                                                     <h4 className="font-black text-lg text-[var(--text-primary)] leading-tight">{tmpl.subject}</h4>
                                                 </div>
                                                 <pre className="text-sm text-[var(--text-secondary)] whitespace-pre-wrap font-sans leading-loose flex-grow bg-[var(--bg-surface-secondary)]/50 p-8 rounded-[2.5rem] mb-8 border border-[var(--border-primary)] italic transition-colors group-hover:bg-[var(--bg-surface)]">

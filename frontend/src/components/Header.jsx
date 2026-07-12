@@ -131,7 +131,7 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
                             <div className="flex items-center gap-3">
                                 {candidateName && (
                                     <div className="hidden xl:flex flex-col items-end px-4 border-r border-slate-200">
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Profile</span>
+                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Profile</span>
                                         <span className="text-xs font-bold text-cyan-600 italic">@{candidateName.replace(/\s+/g, '').toLowerCase()}</span>
                                     </div>
                                 )}
@@ -156,7 +156,7 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
                                     {user?.name?.charAt(0) || 'G'}
                                 </div>
                                 <div className="flex flex-col items-start text-left">
-                                    <span className="text-[10px] font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-widest truncate max-w-[100px]">
+                                    <span className="text-xs font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-widest truncate max-w-[100px]">
                                         {analysis?.location || (user?.id === 'guest' ? 'Elite Access' : 'Verified')}
                                     </span>
                                     <span className="text-xs font-bold text-[var(--text-primary)] truncate max-w-[100px]">
@@ -175,7 +175,7 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
                                         className="absolute right-0 mt-4 w-60 bg-[var(--bg-surface)] rounded-[2rem] shadow-2xl border border-[var(--border-primary)] p-3 z-50 overflow-hidden"
                                     >
                                         <div className="p-4 border-b border-[var(--border-primary)] mb-2">
-                                            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Signed in as</p>
+                                            <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Signed in as</p>
                                             <p className="text-sm font-bold text-[var(--text-primary)] truncate">{user?.email || 'Guest Explorer'}</p>
                                         </div>
                                         <button

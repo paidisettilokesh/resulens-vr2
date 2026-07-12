@@ -42,7 +42,7 @@ const ResumeStudio = (props) => {
                                 relative flex-1 flex items-center gap-4 px-8 py-5 rounded-[2rem] transition-all duration-500 group/btn overflow-hidden
                                 ${activeSection === section.id
                                     ? 'bg-[var(--bg-app)] shadow-xl ring-1 ring-[var(--border-secondary)] scale-[1.02]'
-                                    : 'hover:bg-[var(--bg-surface-secondary)] opacity-60 hover:opacity-100 hover:scale-[1.01]'
+                                    : 'hover:bg-[var(--bg-surface-secondary)] opacity-80 hover:opacity-100 hover:scale-[1.01]'
                                 }
                             `}
                         >
@@ -60,7 +60,7 @@ const ResumeStudio = (props) => {
                                 <h4 className={`text-sm font-black uppercase tracking-widest ${activeSection === section.id ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>
                                     {section.label}
                                 </h4>
-                                <p className="text-[10px] font-bold text-[var(--text-secondary)] opacity-70">
+                                <p className="text-xs font-bold text-[var(--text-secondary)] opacity-70">
                                     {section.desc}
                                 </p>
                             </div>
