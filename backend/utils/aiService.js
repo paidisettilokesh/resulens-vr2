@@ -10,13 +10,14 @@ import { calculateDeterministicScores } from "./scoringEngine.js";
 const callGroq = async (prompt) => {
     const key = process.env.GROQ_API_KEY;
     if (!key) return null;
+    
+ const models = [
+     "groq/compound",
+     "groq/compound-mini",
+     "openai/gpt-oss-20b",
+     "qwen/qwen3.8-27b"
+ ];
 
-    const models = [
-        "llama-3.3-70b-versatile",
-        "gemma2-9b-it",
-        "llama-3.1-8b-instant",
-        "llama3-70b-8192"
-    ];
 
     for (const model of models) {
         try {
