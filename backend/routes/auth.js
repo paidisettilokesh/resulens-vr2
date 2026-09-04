@@ -11,7 +11,7 @@ import { sendEmail } from '../utils/email.js';
 import { logAudit } from '../utils/auditLogger.js';
 
 const router = express.Router();
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '301466670902-kcegi1b9m80lknd4s4p45v3ofdctv56h.apps.googleusercontent.com');
 
 // ── Fallback Storage Helpers ──────────────────────────────────────────────────
 const FALLBACK_DIR = path.join(getSecureStorageDir(), 'talentsync-v2-data');
@@ -379,7 +379,7 @@ router.post('/google', async (req, res) => {
         }
 
         let payload;
-        const googleClientId = process.env.GOOGLE_CLIENT_ID;
+        const googleClientId = process.env.GOOGLE_CLIENT_ID || '301466670902-kcegi1b9m80lknd4s4p45v3ofdctv56h.apps.googleusercontent.com';
         const isProduction = process.env.NODE_ENV === 'production';
 
         if (googleClientId) {

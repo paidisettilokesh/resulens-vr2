@@ -53,7 +53,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
     const isForgot = mode === 'forgot-password';
     const isReset = mode === 'reset-password';
     const passwordStrength = getPasswordStrength(password);
-    const clientID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+    const clientID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '301466670902-kcegi1b9m80lknd4s4p45v3ofdctv56h.apps.googleusercontent.com';
     const hasGoogleClientId = clientID.trim() !== '' && clientID !== 'your_google_client_id_here';
 
     // Synchronize initial mode changes
