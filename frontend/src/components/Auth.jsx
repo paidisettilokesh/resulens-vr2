@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Eye, EyeOff, Mail, Lock, User, Loader2,
     ArrowRight, CheckCircle2, AlertCircle, X
 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 // ── Password Strength Engine ─────────────────────────────────────────────────
 const getPasswordStrength = (password) => {
@@ -45,6 +46,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
     const [successMsg, setSuccessMsg] = useState('');
     const [passwordFocused, setPasswordFocused] = useState(false);
     const googleBtnRef = useRef(null);
+    const { theme } = useTheme();
 
     const isLogin = mode === 'login';
     const isSignup = mode === 'signup';
@@ -66,42 +68,8 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
         }
     }, [isOpen, initialMode]);
 
-    // Initialize Google Sign-In SDK
-    useEffect(() => {
-        if (!isOpen || !hasGoogleClientId) return;
-
-        const init = () => {
-            if (!window.google?.accounts?.id) return;
-            window.google.accounts.id.initialize({
-                client_id: clientID,
-                callback: handleGoogleResponse,
-                auto_select: false,
-                cancel_on_tap_outside: true,
-            });
-            if (googleBtnRef.current) {
-                window.google.accounts.id.renderButton(googleBtnRef.current, {
-                    theme: 'outline',
-                    size: 'large',
-                    width: '380',
-                    text: 'continue_with',
-                    shape: 'pill',
-                });
-            }
-        };
-
-        if (window.google?.accounts?.id) {
-            init();
-        } else {
-            const script = document.createElement('script');
-            script.src = 'https://accounts.google.com/gsi/client';
-            script.async = true;
-            script.defer = true;
-            script.onload = init;
-            document.body.appendChild(script);
-        }
-    }, [isOpen, mode, hasGoogleClientId, clientID]);
-
-    const handleGoogleResponse = async (response) => {
+    // Stable callback reference for the Google SDK — must not change between renders
+    const handleGoogleResponse = useCallback(async (response) => {
         setLoading(true);
         setError('');
         try {
@@ -113,7 +81,65 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
         } finally {
             setLoading(false);
         }
-    };
+    }, [backendUrl, onLogin, onClose]);
+
+    // Initialize / re-render the Google Sign-In button whenever the modal opens,
+    // the active tab (mode) changes, or the theme toggles between light and dark.
+    useEffect(() => {
+        if (!isOpen || !hasGoogleClientId) return;
+
+        // Choose the Google button color scheme to match the ResuLens theme.
+        // 'filled_black' satisfies Google brand guidelines for dark surfaces;
+        // 'outline' works for light surfaces.
+        const googleTheme = theme === 'dark' ? 'filled_black' : 'outline';
+
+        const renderGoogleButton = () => {
+            if (!window.google?.accounts?.id) return;
+
+            window.google.accounts.id.initialize({
+                client_id: clientID,
+                callback: handleGoogleResponse,
+                auto_select: false,
+                cancel_on_tap_outside: true,
+            });
+
+            // Use requestAnimationFrame to guarantee the ref container is mounted
+            // in the DOM before calling renderButton — prevents the button from
+            // silently disappearing after a login ↔ signup tab switch.
+            requestAnimationFrame(() => {
+                if (googleBtnRef.current) {
+                    // Clear any previously rendered button iframe first
+                    googleBtnRef.current.innerHTML = '';
+                    window.google.accounts.id.renderButton(googleBtnRef.current, {
+                        theme: googleTheme,
+                        size: 'large',
+                        width: '380',
+                        text: 'continue_with',
+                        shape: 'pill',
+                        logo_alignment: 'left',
+                    });
+                }
+            });
+        };
+
+        if (window.google?.accounts?.id) {
+            renderGoogleButton();
+        } else {
+            // Load the GSI script once; subsequent calls will find it already loaded.
+            const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+            if (existingScript) {
+                // Script tag exists but may still be loading — wait for it
+                existingScript.addEventListener('load', renderGoogleButton, { once: true });
+            } else {
+                const script = document.createElement('script');
+                script.src = 'https://accounts.google.com/gsi/client';
+                script.async = true;
+                script.defer = true;
+                script.onload = renderGoogleButton;
+                document.body.appendChild(script);
+            }
+        }
+    }, [isOpen, mode, hasGoogleClientId, clientID, theme, handleGoogleResponse]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
