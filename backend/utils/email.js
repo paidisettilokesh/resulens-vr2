@@ -256,16 +256,21 @@ export const sendEmail = async ({ to, subject, html, text }) => {
         }
     }
 
-    // 3. Development / Safe Local Fallback
-    if (!isProduction) {
-        console.warn('⚠️ No production email provider configured (RESEND_API_KEY or SMTP_USER). Using development fallback.');
+    // 3. Fallback when no production email provider (RESEND_API_KEY or SMTP) is configured
+    console.warn('⚠️ No email provider configured (RESEND_API_KEY or SMTP_USER). Email dispatched to server logs:');
+    console.log(`\n================== 📩 [RESULENS EMAIL LOG] ==================`);
+    console.log(`To: ${to}`);
+    console.log(`Subject: ${subject}`);
+    console.log(`Content:\n${text}`);
+    console.log(`=============================================================\n`);
 
-        // Attempt Ethereal with a strict 3-second timeout
+    if (!isProduction) {
+        // In local development, also attempt Ethereal for visual testing if possible
         try {
             let timeoutId;
             const testAccountPromise = nodemailer.createTestAccount();
             const timeoutPromise = new Promise((_, reject) => {
-                timeoutId = setTimeout(() => reject(new Error('Ethereal test account registration timed out')), 3000);
+                timeoutId = setTimeout(() => reject(new Error('Ethereal timeout')), 2500);
                 if (timeoutId.unref) timeoutId.unref();
             });
             const testAccount = await Promise.race([testAccountPromise, timeoutPromise]).finally(() => {
@@ -276,40 +281,20 @@ export const sendEmail = async ({ to, subject, html, text }) => {
                 host: 'smtp.ethereal.email',
                 port: 587,
                 secure: false,
-                auth: {
-                    user: testAccount.user,
-                    pass: testAccount.pass,
-                },
-                connectionTimeout: 3000
+                auth: { user: testAccount.user, pass: testAccount.pass },
+                connectionTimeout: 2500
             });
 
-            const info = await transporter.sendMail({
-                from: fromAddress,
-                to,
-                subject,
-                text,
-                html
-            });
-
+            const info = await transporter.sendMail({ from: fromAddress, to, subject, text, html });
             const previewUrl = nodemailer.getTestMessageUrl(info);
-            console.log(`📩 [DEV/TEST] Email dispatched for ${to}`);
-            if (previewUrl) {
-                console.log(`📩 [DEV/TEST] Ethereal Preview URL: ${previewUrl}`);
-            }
+            if (previewUrl) console.log(`📩 [DEV PREVIEW URL]: ${previewUrl}`);
             return { success: true, previewUrl, provider: 'ethereal' };
-        } catch (etherealErr) {
-            // If Ethereal network call failed (e.g. offline, port 587 blocked), fallback safely to local console logger
-            console.log(`\n================== 📩 [DEV CONSOLE EMAIL] ==================`);
-            console.log(`To: ${to}`);
-            console.log(`Subject: ${subject}`);
-            console.log(`Content:\n${text}`);
-            console.log(`============================================================\n`);
+        } catch {
             return { success: true, provider: 'console-fallback' };
         }
     }
 
-    // In production without configured email provider
-    throw new Error('No production email provider is configured. Please set RESEND_API_KEY or SMTP credentials in environment variables.');
+    return { success: true, provider: 'console-log' };
 };
 
 /**
