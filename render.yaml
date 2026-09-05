@@ -21,4 +21,10 @@ services:
       - key: JWT_SECRET
         sync: false
       - key: GOOGLE_CLIENT_ID
-        value: 301466670902-kcegi1b9m80lknd4s4p45v3ofdctv56h.apps.googleusercontent.com
+        sync: false
+      - key: FOUNDER_EMAIL
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
