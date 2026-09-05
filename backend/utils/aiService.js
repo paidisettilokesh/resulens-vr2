@@ -12,10 +12,11 @@ const callGroq = async (prompt) => {
     if (!key) return null;
 
     const models = [
-        "groq/compound",
-        "groq/compound-mini",
+        "qwen/qwen3.6-27b",
         "qwen/qwen3.8-27b",
-        "openai/gpt-oss-120b"
+        "groq/compound-mini",
+        "openai/gpt-oss-20b",
+        "groq/compound"
     ];
 
     for (const model of models) {
@@ -35,7 +36,7 @@ const callGroq = async (prompt) => {
                         Authorization: `Bearer ${key}`,
                         "Content-Type": "application/json"
                     },
-                    timeout: 30000
+                    timeout: 15000
                 }
             );
 
@@ -54,7 +55,7 @@ const callGroq = async (prompt) => {
             console.error(`[Groq] ${model} failed: ${status || e.message}`);
             if (status === 429) {
                 console.warn(`[Groq] Rate limited on ${model}, trying next...`);
-                await new Promise(r => setTimeout(r, 1000));
+                await new Promise(r => setTimeout(r, 400));
             }
         }
     }
@@ -62,12 +63,12 @@ const callGroq = async (prompt) => {
 };
 
 // --- OPENROUTER PROVIDER (Fallback) ---
-const callOpenRouter = async (prompt, model = "liquid/lfm-2.5-2.6b:free") => {
+const callOpenRouter = async (prompt, model = "google/gemini-2.0-flash-exp:free") => {
     const fallbacks = [
+        "google/gemini-2.0-flash-exp:free",
+        "meta-llama/llama-3.3-70b-instruct:free",
         "liquid/lfm-2.5-2.6b:free",
-        "nvidia/nemotron-3.5-lightning:free",
-        "z-ai/glm-5.2:free",
-        "minimax/minimax-m3:free"
+        "z-ai/glm-5.2:free"
     ];
 
     const tryModel = async (targetModel) => {
@@ -90,7 +91,7 @@ const callOpenRouter = async (prompt, model = "liquid/lfm-2.5-2.6b:free") => {
                         "X-Title": "ResuLens",
                         "Content-Type": "application/json"
                     },
-                    timeout: 30000
+                    timeout: 12000
                 }
             );
             const content = response.data.choices?.[0]?.message?.content;
