@@ -163,8 +163,11 @@ export default function LandingPage({ onOpenAuth }) {
                             <Zap size={18} fill="white" />
                         </div>
                         <div className="flex flex-col text-left">
-                            <span className="font-bold text-lg leading-none tracking-tight">ResuLens</span>
-                            <span className="text-[8px] font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-widest leading-none mt-1">AI Resume Intelligence</span>
+                            <div className="flex items-center gap-2">
+                                <span className="font-bold text-lg leading-none tracking-tight">ResuLens</span>
+                                <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20">v2.5 • 3D</span>
+                            </div>
+                            <span className="text-xs font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-wider leading-none mt-1">AI Resume Intelligence</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -227,9 +230,9 @@ export default function LandingPage({ onOpenAuth }) {
                         </div>
                     </div>
 
-                    {/* Right: Upload Interface (Interactive) */}
-                    <div id="upload" className="lg:col-span-6">
-                        <div className="bg-[var(--bg-surface)] rounded-[3rem] p-8 md:p-10 border border-[var(--border-primary)] shadow-2xl relative overflow-hidden">
+                    {/* Right: Upload Interface (Interactive 3D Focal Object) */}
+                    <div id="upload" className="lg:col-span-6 scene-3d">
+                        <div className="surface-3d-raised rounded-[3rem] p-8 md:p-10 relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-36 h-36 bg-cyan-500/5 rounded-full blur-3xl -translate-y-16 translate-x-16" />
                             
                             <AnimatePresence mode="wait">
@@ -252,10 +255,10 @@ export default function LandingPage({ onOpenAuth }) {
                                             onDragOver={handleDrag}
                                             onDragLeave={handleDrag}
                                             onDrop={handleDrop}
-                                            className={`block w-full border-4 border-dashed rounded-[2.5rem] p-10 text-center cursor-pointer transition-all ${
+                                            className={`block w-full border-2 border-dashed rounded-[2.5rem] p-10 text-center cursor-pointer transition-all surface-3d-inset ${
                                                 dragActive 
-                                                ? 'border-cyan-500 bg-cyan-500/5 shadow-inner' 
-                                                : 'border-[var(--border-secondary)] hover:border-cyan-500 hover:bg-cyan-500/5 hover:shadow-inner'
+                                                ? 'border-cyan-500 !bg-cyan-500/10' 
+                                                : 'border-[var(--border-secondary)] hover:border-cyan-500 hover:bg-cyan-500/5'
                                             }`}
                                         >
                                             <input id="resume-upload-landing" type="file" onChange={handleFileInput} accept=".pdf,.docx" className="hidden" />
@@ -313,7 +316,7 @@ export default function LandingPage({ onOpenAuth }) {
 
                 {/* DEMO PREVIEW SECTION */}
                 <section className="pt-24 pb-16">
-                    <div className="bg-[var(--bg-surface)] rounded-[3.5rem] border border-[var(--border-primary)] shadow-2xl p-8 md:p-14 text-center max-w-5xl mx-auto space-y-10">
+                    <div className="surface-3d rounded-[3.5rem] p-8 md:p-14 text-center max-w-5xl mx-auto space-y-10 scene-3d">
                         <div className="max-w-2xl mx-auto space-y-4">
                             <h2 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] tracking-tight">
                                 Interactive Analysis Preview
@@ -323,11 +326,11 @@ export default function LandingPage({ onOpenAuth }) {
                             </p>
                         </div>
 
-                        {/* Interactive UI Mock */}
-                        <div className="grid md:grid-cols-3 gap-8 items-stretch max-w-4xl mx-auto">
-                            {/* Score Card */}
-                            <div className="p-6 rounded-[2rem] bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] flex flex-col items-center justify-center space-y-4">
-                                <div className="text-xs font-bold text-cyan-600 uppercase tracking-widest">Calculated score</div>
+                        {/* Interactive UI Mock - Layered 3D Composition */}
+                        <div className="grid md:grid-cols-3 gap-8 items-stretch max-w-4xl mx-auto scene-3d">
+                            {/* Score Card - Front / Focal 3D Layer */}
+                            <div className="p-8 rounded-[2.2rem] surface-3d-raised flex flex-col items-center justify-center space-y-4 md:-translate-y-2 md:scale-105 z-20 border-cyan-500/20">
+                                <div className="text-xs font-bold text-cyan-800 dark:text-cyan-400 uppercase tracking-widest">Calculated score</div>
                                 <div className="relative w-28 h-28 flex items-center justify-center">
                                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                                         <circle cx="50" cy="50" r="40" stroke="var(--border-primary)" strokeWidth="8" fill="none" />
@@ -335,11 +338,11 @@ export default function LandingPage({ onOpenAuth }) {
                                     </svg>
                                     <span className="absolute text-2xl font-black text-[var(--text-primary)]">82%</span>
                                 </div>
-                                <span className="text-xs font-bold text-emerald-600 bg-emerald-500/10 px-3 py-1 rounded-full uppercase tracking-wider">Above Average</span>
+                                <span className="text-xs font-bold text-emerald-800 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full uppercase tracking-wider">Above Average</span>
                             </div>
 
-                            {/* Strengths Card */}
-                            <div className="p-6 rounded-[2rem] bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] text-left space-y-4 flex flex-col justify-between">
+                            {/* Strengths Card - Secondary Depth Layer */}
+                            <div className="p-6 rounded-[2rem] surface-3d text-left space-y-4 flex flex-col justify-between z-10">
                                 <div className="space-y-3">
                                     <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Identified Strengths</div>
                                     <ul className="space-y-2">
@@ -350,11 +353,11 @@ export default function LandingPage({ onOpenAuth }) {
                                         ))}
                                     </ul>
                                 </div>
-                                <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider block">Format passes checks</span>
+                                <span className="text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider block">Format passes checks</span>
                             </div>
 
-                            {/* Gaps Card */}
-                            <div className="p-6 rounded-[2rem] bg-[var(--bg-surface-secondary)] border border-[var(--border-primary)] text-left space-y-4 flex flex-col justify-between">
+                            {/* Gaps Card - Secondary Depth Layer */}
+                            <div className="p-6 rounded-[2rem] surface-3d text-left space-y-4 flex flex-col justify-between z-10">
                                 <div className="space-y-3">
                                     <div className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest">Detected Gaps</div>
                                     <ul className="space-y-2">
@@ -395,7 +398,7 @@ export default function LandingPage({ onOpenAuth }) {
                         {features.map((feat, idx) => (
                             <div
                                 key={idx}
-                                className="card p-8 text-left flex flex-col justify-between hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group"
+                                className="surface-3d tilt-card p-8 rounded-[2.5rem] text-left flex flex-col justify-between group"
                             >
                                 <div className="space-y-6">
                                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner ${feat.color}`}>
@@ -416,11 +419,11 @@ export default function LandingPage({ onOpenAuth }) {
                 </section>
 
                 {/* TRUST & STATISTICS SECTION */}
-                <section className="py-16 bg-[var(--bg-surface-secondary)]/50 border border-[var(--border-primary)]/40 rounded-[3.5rem] p-12 text-center space-y-16">
+                <section className="py-16 surface-3d-inset rounded-[3.5rem] p-12 text-center space-y-16">
                     <div className="grid md:grid-cols-3 gap-8">
                         {stats.map((st, idx) => (
                             <div key={idx} className="space-y-2">
-                                <div className="text-4xl sm:text-5xl font-black text-cyan-600 dark:text-cyan-400">
+                                <div className="text-4xl sm:text-5xl font-black text-cyan-700 dark:text-cyan-400">
                                     {st.count}
                                 </div>
                                 <div className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
@@ -432,7 +435,7 @@ export default function LandingPage({ onOpenAuth }) {
 
                     <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                         {testimonials.map((t, idx) => (
-                            <div key={idx} className="bg-[var(--bg-surface)] p-8 rounded-[2rem] border border-[var(--border-primary)] text-left flex flex-col justify-between relative shadow-sm">
+                            <div key={idx} className="surface-3d p-8 rounded-[2rem] text-left flex flex-col justify-between relative shadow-sm">
                                 <div className="flex gap-1 mb-4">
                                     {[1, 2, 3, 4, 5].map(i => <Star key={i} size={14} className="text-amber-700 dark:text-amber-400 fill-amber-500" />)}
                                 </div>

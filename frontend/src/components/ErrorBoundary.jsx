@@ -39,7 +39,7 @@ class ErrorBoundary extends React.Component {
                                 </p>
                             </div>
 
-                            {process.env.NODE_ENV !== 'production' && this.state.error && (
+                            {import.meta.env?.DEV && this.state.error && (
                                 <div className="text-left bg-[var(--bg-surface-secondary)] p-4 rounded-xl border border-[var(--border-primary)] overflow-auto max-h-48 text-xs font-mono text-[var(--text-muted)]">
                                     <div className="font-bold text-rose-400 mb-2">{this.state.error.toString()}</div>
                                     <div>{this.state.errorInfo?.componentStack}</div>

@@ -57,12 +57,12 @@ function App() {
     // Parse URL parameters on load
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        const token = params.get('resetToken');
-        if (token) {
-            setResetToken(token);
+        const token = params.get('token') || params.get('resetToken');
+        if (token || window.location.pathname.includes('reset-password')) {
+            if (token) setResetToken(token);
             setAuthInitialMode('reset-password');
             setAuthModalOpen(true);
-            // Clean up URL
+            // Clean up URL query parameters
             window.history.replaceState({}, document.title, window.location.pathname);
         }
     }, []);
@@ -261,6 +261,7 @@ function App() {
                 const data = await callApi('email', fd);
                 setResults(prev => ({ ...prev, email: data }));
             } else if (feature === 'roast') {
+                if (jobDescription?.trim()) fd.append('jobDescription', jobDescription);
                 const data = await callApi('roast', fd);
                 setResults(prev => ({ ...prev, roast: data }));
             } else if (feature === 'interview') {

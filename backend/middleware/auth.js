@@ -58,13 +58,39 @@ export const authMiddleware = (req, res, next) => {
     }
 };
 
+const isSessionValid = async (userId, tokenVersion) => {
+    if (!userId || String(userId).startsWith('guest_')) return true;
+    try {
+        let currentVersion = 0;
+        if (global.isMongoConnected) {
+            const user = await User.findById(userId).select('tokenVersion');
+            if (!user) return false;
+            currentVersion = user.tokenVersion || 0;
+        } else {
+            const fileData = await fs.readFile(USERS_FALLBACK_FILE, 'utf8');
+            const users = JSON.parse(fileData);
+            const user = users.find(u => u._id === userId);
+            if (!user) return false;
+            currentVersion = user.tokenVersion || 0;
+        }
+        const payloadVersion = tokenVersion ?? 0;
+        return payloadVersion >= currentVersion;
+    } catch (e) {
+        return true; // Fail open on transient read error
+    }
+};
+
 /**
  * Middleware to enforce strict authentication
  */
 export const requireAuth = (req, res, next) => {
-    authMiddleware(req, res, () => {
+    authMiddleware(req, res, async () => {
         if (!req.userId) {
             return res.status(401).json({ error: 'Authentication required' });
+        }
+        const valid = await isSessionValid(req.userId, req.user?.tokenVersion);
+        if (!valid) {
+            return res.status(401).json({ error: 'Session expired due to password reset. Please log in again.' });
         }
         next();
     });

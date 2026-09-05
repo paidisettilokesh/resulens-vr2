@@ -387,11 +387,11 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
                                                     <h5 className="font-black text-sm text-[var(--text-primary)]">
                                                         {stage.name}
                                                     </h5>
-                                                    <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${
+                                                    <span className={`text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded ${
                                                         isCompleted 
-                                                        ? 'text-emerald-600 bg-emerald-500/10' 
+                                                        ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-500/10' 
                                                         : isActive 
-                                                        ? 'text-cyan-600 bg-cyan-500/10' 
+                                                        ? 'text-cyan-700 dark:text-cyan-400 bg-cyan-500/10' 
                                                         : 'text-[var(--text-muted)] bg-[var(--border-primary)]'
                                                     }`}>
                                                         {isCompleted ? '✓ Completed' : isActive ? '● Active' : '🔒 Locked'}
@@ -443,7 +443,7 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
                                 <div className="w-full h-2 bg-[var(--border-primary)] rounded-full overflow-hidden border border-[var(--border-secondary)]">
                                     <div className="h-full bg-cyan-600 transition-all duration-500" style={{ width: `${simulatedScore}%` }} />
                                 </div>
-                                <span className="text-[8px] text-[var(--text-muted)] font-black uppercase tracking-wider block">
+                                <span className="text-xs text-[var(--text-muted)] font-black uppercase tracking-wider block">
                                     Baseline: {baseAtsScore}% | Simulated gains: +{simulatedPoints}
                                 </span>
                             </div>
@@ -514,13 +514,13 @@ const SkillsTab = ({ runFeature, skillsData, marketData, analysis, loading, sele
                                                     >
                                                         {platform.name}
                                                     </a>
-                                                    <span className="px-2.5 py-0.5 rounded text-[8px] font-black uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 whitespace-nowrap">
+                                                    <span className="px-2.5 py-0.5 rounded text-xs font-black uppercase bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 whitespace-nowrap">
                                                         +{boost} ATS Impact
                                                     </span>
                                                 </div>
 
                                                 <div>
-                                                    <span className="text-[9px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-widest block mb-0.5">
+                                                    <span className="text-xs font-black text-cyan-700 dark:text-cyan-400 uppercase tracking-widest block mb-0.5">
                                                         Focus: {item.skill}
                                                     </span>
                                                     <h5 className="font-black text-base text-[var(--text-primary)] leading-tight mb-2 group-hover:text-cyan-600 transition-colors">

@@ -13,7 +13,22 @@ export const downloadPDF = async (elementId, filename) => {
         return;
     }
     try {
-        const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+        const canvas = await html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            onclone: (clonedDoc) => {
+                // Neutralize dark theme on cloned document so export is always a crisp print document
+                if (clonedDoc.documentElement) clonedDoc.documentElement.classList.remove('dark');
+                if (clonedDoc.body) clonedDoc.body.classList.remove('dark');
+                const target = clonedDoc.getElementById(elementId);
+                if (target) {
+                    target.style.backgroundColor = '#ffffff';
+                    target.style.color = '#0f172a';
+                }
+            }
+        });
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();

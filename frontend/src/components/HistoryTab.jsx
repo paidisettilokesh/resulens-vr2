@@ -55,17 +55,59 @@ const HistoryTab = ({ user, backendUrl, setActiveTab, setAnalysis, setCandidateN
         }
     };
 
-    const getTypeConfig = (type) => {
-        switch (type) {
-            case 'analysis': return { icon: Zap, color: 'indigo', label: 'AI Audit' };
-            case 'rewrite': return { icon: Sparkles, color: 'emerald', label: 'Neural Rewrite' };
-            case 'tailor': return { icon: Target, color: 'blue', label: 'JD Alignment' };
-            case 'roast': return { icon: Flame, color: 'orange', label: 'Resume Roast' };
-            case 'interview': return { icon: MessageSquare, color: 'purple', label: 'Interview Prep' };
-            case 'market': return { icon: Briefcase, color: 'amber', label: 'Market Insight' };
-            default: return { icon: FileText, color: 'slate', label: 'Activity' };
-        }
+    const TYPE_CONFIG = {
+        analysis: {
+            icon: Zap,
+            label: 'AI Audit',
+            tag: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/10',
+            iconBg: 'bg-gradient-to-br from-indigo-500 to-indigo-600',
+            hoverBorder: 'hover:border-indigo-300 dark:hover:border-indigo-500',
+        },
+        rewrite: {
+            icon: Sparkles,
+            label: 'Neural Rewrite',
+            tag: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/10',
+            iconBg: 'bg-gradient-to-br from-emerald-500 to-emerald-600',
+            hoverBorder: 'hover:border-emerald-300 dark:hover:border-emerald-500',
+        },
+        tailor: {
+            icon: Target,
+            label: 'JD Alignment',
+            tag: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/10',
+            iconBg: 'bg-gradient-to-br from-blue-500 to-blue-600',
+            hoverBorder: 'hover:border-blue-300 dark:hover:border-blue-500',
+        },
+        roast: {
+            icon: Flame,
+            label: 'Resume Roast',
+            tag: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/10',
+            iconBg: 'bg-gradient-to-br from-orange-500 to-orange-600',
+            hoverBorder: 'hover:border-orange-300 dark:hover:border-orange-500',
+        },
+        interview: {
+            icon: MessageSquare,
+            label: 'Interview Prep',
+            tag: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/10',
+            iconBg: 'bg-gradient-to-br from-purple-500 to-purple-600',
+            hoverBorder: 'hover:border-purple-300 dark:hover:border-purple-500',
+        },
+        market: {
+            icon: Briefcase,
+            label: 'Market Insight',
+            tag: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/10',
+            iconBg: 'bg-gradient-to-br from-amber-500 to-amber-600',
+            hoverBorder: 'hover:border-amber-300 dark:hover:border-amber-500',
+        },
+        default: {
+            icon: FileText,
+            label: 'Activity',
+            tag: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/10',
+            iconBg: 'bg-gradient-to-br from-slate-500 to-slate-600',
+            hoverBorder: 'hover:border-slate-300 dark:hover:border-slate-500',
+        },
     };
+
+    const getTypeConfig = (type) => TYPE_CONFIG[type] || TYPE_CONFIG.default;
 
     const loadAnalysis = (item) => {
         // Support MongoDB schema where details stores the main object, and JSON fallbacks
@@ -132,19 +174,19 @@ const HistoryTab = ({ user, backendUrl, setActiveTab, setAnalysis, setCandidateN
                                     onClick={() => isClickable && loadAnalysis(item)}
                                     className={`
                                         relative overflow-hidden bg-[var(--bg-surface)] p-6 rounded-3xl border border-[var(--border-primary)] 
-                                        transition-all hover:shadow-2xl hover:border-${config.color}-300 dark:hover:border-${config.color}-500 group
+                                        transition-all hover:shadow-2xl ${config.hoverBorder} group
                                         ${isClickable ? 'cursor-pointer' : 'cursor-default'}
                                     `}
                                 >
                                     {/* Action Type Tag */}
-                                    <div className={`absolute top-0 right-0 px-6 py-2 bg-${config.color}-500/10 text-${config.color}-600 dark:text-${config.color}-400 text-[9px] font-black uppercase tracking-widest rounded-bl-2xl border-l border-b border-${config.color}-500/10`}>
+                                    <div className={`absolute top-0 right-0 px-6 py-2 ${config.tag} text-[9px] font-black uppercase tracking-widest rounded-bl-2xl border-l border-b`}>
                                         {config.label}
                                     </div>
 
                                     <div className="flex items-center gap-6">
                                         <div className={`
                                             w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg shrink-0
-                                            bg-gradient-to-br from-${config.color}-500 to-${config.color}-600
+                                            ${config.iconBg}
                                         `}>
                                             <config.icon size={24} />
                                         </div>
@@ -155,7 +197,7 @@ const HistoryTab = ({ user, backendUrl, setActiveTab, setAnalysis, setCandidateN
                                                     {item.role || analysisData.jobRole || (type === 'analysis' ? 'AI Audit Report' : 'Professional Profile')}
                                                 </h4>
                                                 {score !== undefined && score !== 0 && (
-                                                    <span className={`px-2 py-0.5 rounded-lg text-xs font-black ${score >= 80 ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'}`}>
+                                                    <span className={`px-2 py-0.5 rounded-lg text-xs font-black ${score >= 80 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'}`}>
                                                         {score}% Match
                                                     </span>
                                                 )}

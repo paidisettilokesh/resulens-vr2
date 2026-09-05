@@ -296,7 +296,7 @@ const UserGuideModal = ({ isOpen, onClose, user }) => {
                             </div>
                             <div className="text-left">
                                 <h3 className="font-bold text-sm text-[var(--text-primary)] tracking-tight">Onboarding Tour</h3>
-                                <p className="text-[9px] font-bold text-cyan-600 uppercase tracking-wider">Features & Guide</p>
+                                <p className="text-xs font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-wider">Features & Guide</p>
                             </div>
                         </div>
 

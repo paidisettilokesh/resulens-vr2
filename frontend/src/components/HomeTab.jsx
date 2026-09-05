@@ -51,9 +51,9 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
             </div>
 
             {/* PORTAL CORE */}
-            <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-10 items-stretch">
-                {/* 1. INPUT POD (7 cols) */}
-                <div className="lg:col-span-7 bg-[var(--bg-surface)] rounded-[4rem] p-12 border border-[var(--border-primary)] shadow-2xl relative overflow-hidden group">
+            <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-10 items-stretch scene-3d">
+                {/* 1. INPUT POD (7 cols) - Primary 3D Raised Surface */}
+                <div className="lg:col-span-7 surface-3d-raised rounded-[4rem] p-12 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl -translate-y-16 translate-x-16" />
 
                     <div className="relative z-10 space-y-10">
@@ -90,7 +90,7 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                                 <div className="w-6 h-6 rounded-lg bg-cyan-700 dark:bg-cyan-600 text-white flex items-center justify-center text-xs" aria-hidden="true">2</div>
                                 <label htmlFor="resume-upload" className="cursor-pointer">Professional Manuscript</label>
                             </div>
-                            <label htmlFor="resume-upload" className={`block w-full border-4 border-dashed rounded-[3rem] p-12 text-center cursor-pointer transition-all ${file ? 'border-emerald-500 bg-emerald-500/10' : 'border-[var(--border-secondary)] hover:border-cyan-500 hover:bg-cyan-500/5 hover:shadow-inner'}`}>
+                            <label htmlFor="resume-upload" className={`block w-full border-2 border-dashed rounded-[3rem] p-12 text-center cursor-pointer transition-all surface-3d-inset ${file ? 'border-emerald-500 !bg-emerald-500/10' : 'border-[var(--border-secondary)] hover:border-cyan-500 hover:bg-cyan-500/5'}`}>
                                 <input id="resume-upload" type="file" onChange={handleFileUpload} accept=".pdf,.docx" className="hidden" />
                                 <div className="flex flex-col items-center gap-4">
                                     {file ? (
@@ -115,9 +115,9 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                                                 {/* Supported format badges */}
                                                 <div className="flex items-center justify-center gap-2 flex-wrap pt-1">
                                                     {[
-                                                        { ext: 'PDF', tip: 'Text-based PDFs only', color: 'bg-rose-50 text-rose-600 border-rose-200' },
-                                                        { ext: 'DOCX', tip: 'Best format — recommended', color: 'bg-emerald-50 text-emerald-600 border-emerald-200' },
-                                                        { ext: 'DOC', tip: 'Legacy Word format', color: 'bg-amber-50 text-amber-600 border-amber-200' },
+                                                        { ext: 'PDF', tip: 'Text-based PDFs only', color: 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-500/30' },
+                                                        { ext: 'DOCX', tip: 'Best format — recommended', color: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30' },
+                                                        { ext: 'DOC', tip: 'Legacy Word format', color: 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/30' },
                                                     ].map(({ ext, tip, color }) => (
                                                         <span
                                                             key={ext}
@@ -158,9 +158,9 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                     </div>
                 </div>
 
-                {/* 2. INSIGHTS SIDEBAR (5 cols) */}
-                <div className="lg:col-span-5 h-full flex flex-col gap-6">
-                    <div className="bg-[var(--bg-surface-secondary)] rounded-[4rem] p-10 text-[var(--text-primary)] flex-grow relative overflow-hidden shadow-2xl border border-[var(--border-primary)]">
+                {/* 2. INSIGHTS SIDEBAR (5 cols) - Layered Companion Panel */}
+                <div className="lg:col-span-5 h-full flex flex-col gap-6 scene-3d">
+                    <div className="surface-3d rounded-[4rem] p-10 text-[var(--text-primary)] flex-grow relative overflow-hidden shadow-xl">
                         <div className="absolute top-0 right-0 p-10 opacity-[0.05] dark:opacity-[0.1]" aria-hidden="true">
                             <Shield size={120} />
                         </div>
@@ -176,7 +176,7 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                                 <button
                                     key={i}
                                     onClick={() => setActiveTab(f.id)}
-                                    className="w-full text-left flex items-center gap-5 p-6 bg-[var(--bg-surface)] backdrop-blur-sm rounded-[2rem] border border-[var(--border-secondary)] shadow-sm hover:bg-[var(--bg-surface-secondary)] transition-all cursor-pointer group focus-visible:ring-2 focus-visible:ring-cyan-700 min-h-[44px]"
+                                    className="w-full text-left flex items-center gap-5 p-6 surface-3d tilt-card rounded-[2rem] shadow-sm hover:border-cyan-500/40 transition-all cursor-pointer group focus-visible:ring-2 focus-visible:ring-cyan-700 min-h-[44px]"
                                 >
                                     <div className={`p-4 rounded-2xl ${f.bg} ${f.color} shadow-inner shrink-0`} aria-hidden="true"><f.icon size={22} /></div>
                                     <span className="font-bold text-[var(--text-primary)] text-lg tracking-tight">{f.label}</span>
@@ -185,7 +185,10 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                         </div>
                     </div>
 
-                    <button className="text-left bg-gradient-to-br from-cyan-700 to-blue-700 rounded-[3.5rem] p-10 text-white shadow-xl shadow-cyan-100/50 flex items-center gap-6 group hover:scale-[1.02] transition-transform cursor-pointer focus-visible:ring-2 focus-visible:ring-cyan-700 min-h-[44px]">
+                    <button 
+                        onClick={() => setActiveTab('interview')}
+                        className="text-left bg-gradient-to-br from-cyan-700 to-blue-700 dark:from-cyan-800 dark:to-blue-900 rounded-[3.5rem] p-10 text-white shadow-xl shadow-cyan-500/10 flex items-center gap-6 group hover:scale-[1.02] transition-transform cursor-pointer focus-visible:ring-2 focus-visible:ring-cyan-700 min-h-[44px] border border-cyan-500/20"
+                    >
                         <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center shrink-0" aria-hidden="true">
                             <Sparkles size={32} />
                         </div>

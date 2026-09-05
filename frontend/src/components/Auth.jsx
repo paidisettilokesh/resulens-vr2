@@ -39,8 +39,10 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
     const [mode, setMode] = useState(initialMode); // 'login' | 'signup' | 'forgot-password' | 'reset-password'
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [name, setName] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
@@ -53,7 +55,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
     const isForgot = mode === 'forgot-password';
     const isReset = mode === 'reset-password';
     const passwordStrength = getPasswordStrength(password);
-    const clientID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '301466670902-kcegi1b9m80lknd4s4p45v3ofdctv56h.apps.googleusercontent.com';
+    const clientID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '301466670902-h42rg1ghcnhoo109dam60hjkd4020gq5.apps.googleusercontent.com';
     const hasGoogleClientId = clientID.trim() !== '' && clientID !== 'your_google_client_id_here';
 
     // Synchronize initial mode changes
@@ -64,6 +66,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
             setSuccessMsg('');
             setEmail('');
             setPassword('');
+            setConfirmPassword('');
             setName('');
         }
     }, [isOpen, initialMode]);
@@ -143,30 +146,67 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+        setError('');
+        setSuccessMsg('');
+
+        // Email validation for login, signup, and forgot-password
+        if (!isReset) {
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+                setError('Please enter a valid email address.');
+                return;
+            }
+            if (email.length > 254) {
+                setError('Email address is too long.');
+                return;
+            }
+        }
+
+        // Password validation for signup and reset
         if (isSignup || isReset) {
+            if (!password || password.length < 8) {
+                setError('Password must be at least 8 characters long.');
+                return;
+            }
             if (getPasswordStrength(password).score < 2) {
                 setError('Please choose a stronger password.');
                 return;
             }
         }
+
+        // Specific checks for password reset mode
+        if (isReset) {
+            if (password !== confirmPassword) {
+                setError('Passwords do not match. Please ensure both passwords match.');
+                return;
+            }
+            if (!resetToken) {
+                setError('Password reset token is missing or invalid. Please request a new link.');
+                return;
+            }
+        }
         
         setLoading(true);
-        setError('');
-        setSuccessMsg('');
         
         try {
             if (isForgot) {
-                await axios.post(`${backendUrl}/auth/forgot-password`, { email });
-                setSuccessMsg('Password reset link sent to your email.');
-                setTimeout(() => setMode('login'), 2000);
+                const res = await axios.post(`${backendUrl}/auth/forgot-password`, { email: email.trim() });
+                setSuccessMsg(res.data?.message || 'If an account matches that email address, password reset instructions have been sent.');
+                setTimeout(() => {
+                    setMode('login');
+                    setSuccessMsg('');
+                }, 4000);
             } else if (isReset) {
-                await axios.post(`${backendUrl}/auth/reset-password`, { token: resetToken, password });
-                setSuccessMsg('Password updated successfully. You can now log in.');
-                setTimeout(() => setMode('login'), 2000);
+                const res = await axios.post(`${backendUrl}/auth/reset-password`, { token: resetToken, password });
+                setSuccessMsg(res.data?.message || 'Your password has been reset successfully. You can now log in.');
+                setTimeout(() => {
+                    setMode('login');
+                    setSuccessMsg('');
+                    setPassword('');
+                    setConfirmPassword('');
+                }, 3000);
             } else {
                 const endpoint = isLogin ? '/auth/login' : '/auth/signup';
-                const payload = isLogin ? { email, password } : { email, password, name };
+                const payload = isLogin ? { email: email.trim(), password } : { email: email.trim(), password, name: name.trim() };
                 const { data } = await axios.post(`${backendUrl}${endpoint}`, payload);
                 if (isSignup) {
                     setSuccessMsg('Account created! Signing you in...');
@@ -180,12 +220,17 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                 }
             }
         } catch (err) {
-            const msg = err.response?.data?.error || 'Authentication failed. Please try again.';
-            if (isSignup && msg.toLowerCase().includes('already exists')) {
-                setError('An account with this email already exists.');
-                setTimeout(() => { setMode('login'); setError(''); }, 1800);
+            const rawMsg = err.response?.data?.error;
+            // Prevent leaking internal errors like SMTP/database connection strings
+            if (rawMsg && !rawMsg.toLowerCase().includes('connect') && !rawMsg.toLowerCase().includes('sql') && !rawMsg.toLowerCase().includes('mongo') && !rawMsg.toLowerCase().includes('smtp')) {
+                if (isSignup && rawMsg.toLowerCase().includes('already exists')) {
+                    setError('An account with this email already exists.');
+                    setTimeout(() => { setMode('login'); setError(''); }, 1800);
+                } else {
+                    setError(rawMsg);
+                }
             } else {
-                setError(msg);
+                setError('We could not process your request right now. Please try again later.');
             }
         } finally {
             setLoading(false);
@@ -211,6 +256,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
         setError('');
         setSuccessMsg('');
         setPassword('');
+        setConfirmPassword('');
     };
 
     if (!isOpen) return null;
@@ -357,6 +403,40 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                             </button>
                         </div>
 
+                            {/* Confirm Password - Reset mode only */}
+                            {isReset && (
+                                <div className="mt-3">
+                                    <label htmlFor="auth-confirm-password"
+                                        className="block text-xs font-bold uppercase tracking-widest mb-1.5 text-[var(--text-muted)]">
+                                        Confirm New Password
+                                    </label>
+                                    <div className="relative">
+                                        <Lock size={16} aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]" />
+                                        <input id="auth-confirm-password"
+                                            type={showConfirmPassword ? 'text' : 'password'}
+                                            autoComplete="new-password"
+                                            required minLength={8}
+                                            value={confirmPassword}
+                                            onChange={e => setConfirmPassword(e.target.value)}
+                                            aria-invalid={!!error && isReset}
+                                            placeholder="••••••••"
+                                            className="input-field pl-10 pr-12 text-xs py-3 min-h-[44px]"
+                                            style={{ borderRadius: '14px' }} />
+                                        <button type="button" id="toggle-confirm-password-visibility"
+                                            onClick={() => setShowConfirmPassword(v => !v)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-100 text-[var(--text-muted)] opacity-80 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                                            aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}>
+                                            {showConfirmPassword ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
+                                        </button>
+                                    </div>
+                                    {confirmPassword && password !== confirmPassword && (
+                                        <p className="text-[11px] text-rose-500 font-semibold mt-1.5 flex items-center gap-1.5">
+                                            <AlertCircle size={12} /> Passwords do not match
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+
                             {/* Password strength - signup and reset only */}
                             <AnimatePresence>
                                 {(isSignup || isReset) && password && (
@@ -390,9 +470,9 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                                                     const passed = test(password);
                                                     return (
                                                         <div key={label} className="flex items-center gap-1.5">
-                                                            <CheckCircle2 size={11}
+                                                            <CheckCircle2 size={13}
                                                                 style={{ color: passed ? '#22c55e' : 'var(--text-muted)', flexShrink: 0 }} />
-                                                            <span className="text-[9px] font-semibold text-[var(--text-secondary)]">
+                                                            <span className="text-xs font-semibold text-[var(--text-secondary)]">
                                                                 {label}
                                                             </span>
                                                         </div>
@@ -451,7 +531,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                         {/* Divider */}
                         <div className="flex items-center gap-3 my-5">
                             <div className="h-px flex-1 bg-[var(--border-primary)]" />
-                            <span className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">or</span>
+                            <span className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">or</span>
                             <div className="h-px flex-1 bg-[var(--border-primary)]" />
                         </div>
 

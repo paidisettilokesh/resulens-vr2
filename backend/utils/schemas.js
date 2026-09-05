@@ -8,9 +8,22 @@ export const analyzeSchema = z.object({
     jobMatchScore: z.number().optional(),
     matchScore: z.number().optional(), // Fallback
     recruiterInterest: z.number().optional(),
+    recruiterInterestBreakdown: z.object({
+        score: z.number().optional(),
+        category: z.string().optional(),
+        seniorityAlignment: z.number().optional(),
+        scanability: z.number().optional(),
+        hiringSignals: z.number().optional()
+    }).optional(),
     educationScore: z.number().optional(),
     experienceScore: z.number().optional(),
     skillsMatch: z.number().optional(),
+    intelligenceMetrics: z.object({
+        skillDepth: z.number().optional(),
+        experienceQuality: z.number().optional(),
+        impactDensity: z.number().optional(),
+        profileStrength: z.number().optional()
+    }).optional(),
     atsScoreBreakdown: z.object({
         skillsMatch: z.number().optional(),
         keywordMatch: z.number().optional(),
@@ -86,6 +99,25 @@ export const analyzeSchema = z.object({
 }).passthrough();
 
 export const roastSchema = z.object({
+    breakdown: z.object({
+        contentScore: z.number().optional(),
+        atsScore: z.number().optional(),
+        impactScore: z.number().optional(),
+        skillsScore: z.number().optional()
+    }).optional(),
+    actionableIssues: z.array(z.object({
+        problem: z.string().optional(),
+        location: z.string().optional(),
+        whyItMatters: z.string().optional(),
+        howToFix: z.string().optional(),
+        improvedExample: z.string().optional(),
+        priority: z.string().optional()
+    })).optional(),
+    jdAlignment: z.object({
+        matchingSkills: z.array(z.string()).optional(),
+        missingSkills: z.array(z.string()).optional(),
+        alignmentSummary: z.string().optional()
+    }).optional(),
     weaknesses: z.array(z.string()).optional(),
     critique: z.string().optional(),
     priorityFixes: z.array(z.string()).optional(),

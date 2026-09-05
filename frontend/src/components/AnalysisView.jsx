@@ -94,38 +94,47 @@ const AnalysisView = ({
     const educationScore = analysis.educationScore ?? (analysis.atsScoreBreakdown?.educationMatch != null ? Math.round((analysis.atsScoreBreakdown.educationMatch / analysis.atsScoreBreakdown.educationMatchMax) * 100) : 0);
     const experienceScore = analysis.experienceScore ?? (analysis.atsScoreBreakdown?.experienceMatch != null ? Math.round((analysis.atsScoreBreakdown.experienceMatch / analysis.atsScoreBreakdown.experienceMatchMax) * 100) : 0);
     const skillsMatchScore = analysis.skillsMatch ?? (analysis.atsScoreBreakdown?.skillsMatch != null ? Math.round((analysis.atsScoreBreakdown.skillsMatch / analysis.atsScoreBreakdown.skillsMatchMax) * 100) : 0);
+
+    // Intelligence Metrics (Skill Depth, Experience Quality, Impact Density, Profile Strength)
+    const intelligenceMetrics = analysis.intelligenceMetrics || {
+        skillDepth: skillsMatchScore,
+        experienceQuality: experienceScore,
+        impactDensity: Math.round((experienceScore * 0.7) + (educationScore * 0.3)),
+        profileStrength: Math.round((skillsMatchScore * 0.35) + (experienceScore * 0.35) + (educationScore * 0.30))
+    };
     
-    // Recruiter Interest Category
-    let interestCategory = 'Moderate';
+    // Recruiter Interest Category & Breakdown
+    const recruiterBreakdown = analysis.recruiterInterestBreakdown || {};
+    let interestCategory = recruiterBreakdown.category || 'Moderate';
     let interestColor = 'text-amber-700 dark:text-amber-400';
     let interestBg = 'bg-amber-500/10';
     let interestBorder = 'border-amber-500/20';
-    let interestExplanation = '';
+    let interestExplanation = recruiterBreakdown.explanation || '';
 
     if (recruiterInterest >= 85) {
-        interestCategory = 'Excellent';
-        interestColor = 'text-cyan-700 dark:text-cyan-400 dark:text-cyan-400';
+        if (!recruiterBreakdown.category) interestCategory = 'Excellent';
+        interestColor = 'text-cyan-700 dark:text-cyan-400';
         interestBg = 'bg-cyan-500/10';
         interestBorder = 'border-cyan-500/20';
-        interestExplanation = `Your technical skill depth and experience alignment place you in the top tier.`;
+        if (!interestExplanation) interestExplanation = `High seniority fit and verified technical depth yield top recruiter callback odds.`;
     } else if (recruiterInterest >= 70) {
-        interestCategory = 'Strong';
-        interestColor = 'text-emerald-700 dark:text-emerald-400 dark:text-emerald-400';
+        if (!recruiterBreakdown.category) interestCategory = 'Strong';
+        interestColor = 'text-emerald-700 dark:text-emerald-400';
         interestBg = 'bg-emerald-500/10';
         interestBorder = 'border-emerald-500/20';
-        interestExplanation = `Your technical skills and experience are attractive to recruiters in this track.`;
+        if (!interestExplanation) interestExplanation = `Strong track alignment and 6-second scanability for technical recruiters.`;
     } else if (recruiterInterest >= 50) {
-        interestCategory = 'Moderate';
-        interestColor = 'text-amber-700 dark:text-amber-400 dark:text-amber-400';
+        if (!recruiterBreakdown.category) interestCategory = 'Moderate';
+        interestColor = 'text-amber-700 dark:text-amber-400';
         interestBg = 'bg-amber-500/10';
         interestBorder = 'border-amber-500/20';
-        interestExplanation = `You have a solid foundation, but adding missing skills will boost response rates.`;
+        if (!interestExplanation) interestExplanation = `Competent baseline profile; adding leadership and quantifiable achievements will increase engagement.`;
     } else {
-        interestCategory = 'Needs Improvement';
-        interestColor = 'text-rose-700 dark:text-rose-400 dark:text-rose-400';
+        if (!recruiterBreakdown.category) interestCategory = 'Needs Improvement';
+        interestColor = 'text-rose-700 dark:text-rose-400';
         interestBg = 'bg-rose-500/10';
         interestBorder = 'border-rose-500/20';
-        interestExplanation = `Significant adjustments are required to pass recruiter screening.`;
+        if (!interestExplanation) interestExplanation = `Resume lacks critical hiring signals and immediate scanability for recruiter review.`;
     }
 
     // ── Dynamic Achievement Badges fallbacks ───────────────────────────────────
@@ -276,7 +285,7 @@ const AnalysisView = ({
             className="pb-20 space-y-8"
         >
             {/* 1. ELITE COMMAND HEADER */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 bg-gradient-to-r from-[var(--bg-surface)] to-[var(--bg-surface-secondary)] p-6 sm:p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] border border-[var(--border-primary)] shadow-2xl relative overflow-hidden">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 surface-3d p-6 sm:p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-1/2 h-full bg-cyan-600/5 blur-[120px] -translate-y-1/2 translate-x-1/2" />
 
                 <div className="relative z-10 space-y-4">
@@ -306,12 +315,12 @@ const AnalysisView = ({
             </div>
 
             {/* 2. CORE DASHBOARD GRID */}
-            <div className="grid lg:grid-cols-12 gap-8 items-start">
+            <div className="grid lg:grid-cols-12 gap-8 items-start scene-3d">
                 
                 {/* LEFT PANEL (Profile, Recruiter Interest, Skills, Badges, Motivation, History) */}
-                <div className="lg:col-span-4 space-y-8">
+                <div className="lg:col-span-4 space-y-8 scene-3d">
                     {/* Profile Intelligence */}
-                    <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl relative overflow-hidden group">
+                    <div className="surface-3d p-8 rounded-[2.5rem] relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 rounded-full blur-3xl -translate-y-16 translate-x-16" />
                         <div className="flex items-center gap-5 relative z-10">
                             <div className="w-16 h-16 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-xl shadow-cyan-500/10 group-hover:scale-105 transition-transform shrink-0">
@@ -339,7 +348,7 @@ const AnalysisView = ({
                     </div>
 
                     {/* Recruiter Interest Score */}
-                    <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl relative overflow-hidden flex flex-col justify-between">
+                    <div className="surface-3d p-8 rounded-[2.5rem] relative overflow-hidden flex flex-col justify-between">
                         <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] mb-4 flex items-center gap-2">
                             <Star size={13} className="text-cyan-700 dark:text-cyan-400" /> Recruiter Interest
                         </h3>
@@ -366,11 +375,11 @@ const AnalysisView = ({
                                 </svg>
                                 <div className="absolute flex flex-col items-center justify-center">
                                     <span className="text-xl font-black text-[var(--text-primary)]">{recruiterInterest}%</span>
-                                    <span className="text-[8px] font-black text-[var(--text-muted)] uppercase tracking-wider">Interest</span>
+                                    <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-wider">Interest</span>
                                 </div>
                             </div>
                             <div className="space-y-1.5 min-w-0">
-                                <span className={`inline-block px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-lg ${interestBg} ${interestColor}`}>
+                                <span className={`inline-block px-2.5 py-0.5 text-xs font-black uppercase tracking-widest rounded-lg ${interestBg} ${interestColor}`}>
                                     {interestCategory}
                                 </span>
                                 <p className="text-[11px] font-bold text-[var(--text-secondary)] leading-relaxed">
@@ -378,10 +387,26 @@ const AnalysisView = ({
                                 </p>
                             </div>
                         </div>
+                        {recruiterBreakdown.seniorityAlignment != null && (
+                            <div className="mt-4 pt-3 border-t border-[var(--border-secondary)] grid grid-cols-3 gap-2 text-center">
+                                <div className="bg-[var(--bg-surface-secondary)] p-2 rounded-xl border border-[var(--border-secondary)]">
+                                    <span className="text-[var(--text-muted)] font-black block text-[8px] uppercase tracking-wider">Seniority</span>
+                                    <span className="text-xs font-black text-[var(--text-primary)]">{recruiterBreakdown.seniorityAlignment}%</span>
+                                </div>
+                                <div className="bg-[var(--bg-surface-secondary)] p-2 rounded-xl border border-[var(--border-secondary)]">
+                                    <span className="text-[var(--text-muted)] font-black block text-[8px] uppercase tracking-wider">Scanability</span>
+                                    <span className="text-xs font-black text-[var(--text-primary)]">{recruiterBreakdown.scanability}%</span>
+                                </div>
+                                <div className="bg-[var(--bg-surface-secondary)] p-2 rounded-xl border border-[var(--border-secondary)]">
+                                    <span className="text-[var(--text-muted)] font-black block text-[8px] uppercase tracking-wider">Signals</span>
+                                    <span className="text-xs font-black text-[var(--text-primary)]">{recruiterBreakdown.hiringSignals}%</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Top Skills & Badges */}
-                    <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-6">
+                    <div className="surface-3d p-8 rounded-[2.5rem] space-y-6">
                         <div>
                             <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] mb-3 flex items-center gap-2">
                                 <Zap size={13} className="text-cyan-700 dark:text-cyan-400" /> Top Skills
@@ -409,7 +434,7 @@ const AnalysisView = ({
                     </div>
 
                     {/* Personalized Motivation Card */}
-                    <div className="bg-gradient-to-br from-cyan-900 to-cyan-950 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
+                    <div className="surface-3d bg-gradient-to-br from-cyan-950 via-slate-900 to-cyan-950 p-8 rounded-[2.5rem] text-white relative overflow-hidden group border border-cyan-500/20">
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.05),transparent)]" />
                         <Sparkles className="absolute top-4 right-4 text-cyan-400 opacity-30 animate-pulse" size={20} />
                         <h4 className="text-xs font-black uppercase tracking-[0.2em] opacity-80 mb-3">AI Growth Insight</h4>
@@ -420,7 +445,7 @@ const AnalysisView = ({
 
                     {/* Resume Version History */}
                     {!loadingHistory && versions.length > 0 && (
-                        <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-5">
+                        <div className="surface-3d p-8 rounded-[2.5rem] space-y-5">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] flex items-center gap-2">
                                     <Clock size={13} className="text-cyan-700 dark:text-cyan-400" /> Version History
@@ -433,10 +458,10 @@ const AnalysisView = ({
                                         <div className="flex justify-between items-start text-xs">
                                             <div>
                                                 <h4 className="font-bold text-[var(--text-primary)] leading-tight">{ver.version}</h4>
-                                                <p className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-wider mt-0.5">{ver.date}</p>
+                                                <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mt-0.5">{ver.date}</p>
                                             </div>
                                             <div className="flex gap-1.5 shrink-0">
-                                                <span className="text-[9px] font-bold text-cyan-600 bg-cyan-500/5 px-2 py-0.5 rounded border border-cyan-500/10">{ver.atsScore}% ATS</span>
+                                                <span className="text-xs font-bold text-cyan-700 dark:text-cyan-400 bg-cyan-500/5 px-2 py-0.5 rounded border border-cyan-500/10">{ver.atsScore}% ATS</span>
                                             </div>
                                         </div>
                                     </div>
@@ -447,9 +472,9 @@ const AnalysisView = ({
                 </div>
 
                 {/* CENTER PANEL (Summary, Intelligence Metrics Grid, Roadmap, Career Coach) */}
-                <div className="lg:col-span-5 space-y-8">
+                <div className="lg:col-span-5 space-y-8 scene-3d">
                     {/* Executive Summary */}
-                    <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl relative overflow-hidden group">
+                    <div className="surface-3d p-8 rounded-[2.5rem] relative overflow-hidden group">
                         <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] mb-4 flex items-center gap-2">
                             <FileText size={13} className="text-cyan-700 dark:text-cyan-400" /> Executive Summary
                         </h3>
@@ -459,32 +484,32 @@ const AnalysisView = ({
                     </div>
 
                     {/* Intelligence Metrics Grid */}
-                    <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-5">
+                    <div className="surface-3d p-8 rounded-[2.5rem] space-y-5">
                         <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] flex items-center gap-2">
                             <BarChart3 size={13} className="text-cyan-700 dark:text-cyan-400" /> Intelligence Metrics
                         </h3>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="p-4 bg-[var(--bg-surface-secondary)] border border-[var(--border-secondary)] rounded-2xl text-center">
-                                <span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Education Score</span>
-                                <span className="text-2xl font-black text-[var(--text-primary)]">{educationScore}%</span>
+                                <span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Skill Depth</span>
+                                <span className="text-2xl font-black text-[var(--text-primary)]">{intelligenceMetrics.skillDepth ?? skillsMatchScore}%</span>
                             </div>
                             <div className="p-4 bg-[var(--bg-surface-secondary)] border border-[var(--border-secondary)] rounded-2xl text-center">
-                                <span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Experience Score</span>
-                                <span className="text-2xl font-black text-[var(--text-primary)]">{experienceScore}%</span>
+                                <span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Experience Quality</span>
+                                <span className="text-2xl font-black text-[var(--text-primary)]">{intelligenceMetrics.experienceQuality ?? experienceScore}%</span>
                             </div>
                             <div className="p-4 bg-[var(--bg-surface-secondary)] border border-[var(--border-secondary)] rounded-2xl text-center">
-                                <span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Skills Match</span>
-                                <span className="text-2xl font-black text-[var(--text-primary)]">{skillsMatchScore}%</span>
+                                <span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Impact & Metrics</span>
+                                <span className="text-2xl font-black text-[var(--text-primary)]">{intelligenceMetrics.impactDensity ?? educationScore}%</span>
                             </div>
                             <div className="p-4 bg-[var(--bg-surface-secondary)] border border-[var(--border-secondary)] rounded-2xl text-center">
-                                <span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Overall ATS</span>
-                                <span className="text-2xl font-black text-cyan-600">{atsScore}%</span>
+                                <span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Profile Strength</span>
+                                <span className="text-2xl font-black text-cyan-600">{intelligenceMetrics.profileStrength ?? atsScore}%</span>
                             </div>
                         </div>
                     </div>
 
                     {/* ATS Improvement Roadmap */}
-                    <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-5">
+                    <div className="surface-3d p-8 rounded-[2.5rem] space-y-5">
                         <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] flex items-center gap-2">
                             <Target size={13} className="text-cyan-700 dark:text-cyan-400" /> ATS Improvement Roadmap
                         </h3>
@@ -498,7 +523,7 @@ const AnalysisView = ({
                                     <div key={idx} className="p-4 bg-[var(--bg-surface-secondary)] rounded-2xl border border-[var(--border-secondary)] flex items-start justify-between gap-4">
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-2">
-                                                <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${priorityColor}`}>
+                                                <span className={`px-2 py-0.5 rounded text-xs font-black uppercase tracking-widest border ${priorityColor}`}>
                                                     {item.priority}
                                                 </span>
                                                 <span className="text-xs font-bold text-[var(--text-primary)]">{item.text}</span>
@@ -515,8 +540,8 @@ const AnalysisView = ({
                     </div>
 
                     {/* AI Career Coach */}
-                    <div className="bg-[var(--bg-surface)] p-8 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-5">
-                        <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] flex items-center gap-2">
+                    <div className="surface-3d p-8 rounded-[2.5rem] space-y-5">
+                        <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.25em] flex items-center gap-2">
                             <Sparkles size={13} className="text-cyan-700 dark:text-cyan-400" /> AI Career Coach
                         </h3>
                         <div className="space-y-3">
@@ -526,7 +551,7 @@ const AnalysisView = ({
                                         {idx + 1}
                                     </div>
                                     <div className="space-y-0.5">
-                                        {rec.priority && <span className="text-[8px] font-black text-cyan-600 uppercase tracking-widest">Priority: {rec.priority}</span>}
+                                        {rec.priority && <span className="text-xs font-black text-cyan-700 dark:text-cyan-400 uppercase tracking-widest">Priority: {rec.priority}</span>}
                                         <p className="text-xs font-bold text-[var(--text-primary)] leading-relaxed">{rec.text || rec}</p>
                                     </div>
                                 </div>
@@ -536,21 +561,21 @@ const AnalysisView = ({
                 </div>
 
                 {/* RIGHT PANEL (ATS Score, Market Fit, AI Verdict, Scoring Transparency, CTAs) */}
-                <div className="lg:col-span-3 space-y-8">
-                    {/* ATS & Market Fit Score Blocks */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="p-6 bg-[var(--bg-surface)] border border-[var(--border-primary)] rounded-[2.5rem] shadow-xl text-center">
+                <div className="lg:col-span-3 space-y-8 scene-3d">
+                    {/* ATS & Market Fit Score Blocks - Highest Visual Priority */}
+                    <div className="grid grid-cols-2 gap-4 scene-3d">
+                        <div className="p-6 surface-3d-raised rounded-[2.5rem] text-center border-cyan-500/30 md:scale-105 transition-transform z-10">
                             <span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">ATS Score</span>
                             <span className="text-3xl font-black text-cyan-600">{atsScore}%</span>
                         </div>
-                        <div className="p-6 bg-[var(--bg-surface)] border border-[var(--border-primary)] rounded-[2.5rem] shadow-xl text-center">
+                        <div className="p-6 surface-3d-raised rounded-[2.5rem] text-center border-emerald-500/30 transition-transform z-10">
                             <span className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-wider block mb-1">Market Fit</span>
                             <span className="text-3xl font-black text-emerald-700 dark:text-emerald-400">{jobMatchScore}%</span>
                         </div>
                     </div>
 
                     {/* AI Verdict Card */}
-                    <div className="bg-[var(--bg-surface)] p-6 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-3">
+                    <div className="surface-3d p-6 rounded-[2.5rem] space-y-3">
                         <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em] flex items-center gap-1.5">
                             <Shield size={12} className="text-cyan-700 dark:text-cyan-400" /> AI Verdict
                         </h3>
@@ -564,7 +589,7 @@ const AnalysisView = ({
 
                     {/* Scoring Transparency Breakdown */}
                     {analysis.atsScoreBreakdown && (
-                        <div className="bg-[var(--bg-surface)] p-6 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-4">
+                        <div className="surface-3d p-6 rounded-[2.5rem] space-y-4">
                             <h3 className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">Scoring Transparency</h3>
                             
                             <div className="h-64 w-full">
@@ -587,7 +612,7 @@ const AnalysisView = ({
                     )}
 
                     {/* Resume Optimization CTA */}
-                    <div className="bg-[var(--bg-surface)] p-6 rounded-[2.5rem] border border-[var(--border-primary)] shadow-xl space-y-3">
+                    <div className="surface-3d p-6 rounded-[2.5rem] space-y-3">
                         <button onClick={() => downloadPDF('analysis-report', `Analysis-${candidateName}`)} className="w-full btn-primary !rounded-xl !py-3 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider shadow-sm">
                             <Download size={14} /> Download Report
                         </button>

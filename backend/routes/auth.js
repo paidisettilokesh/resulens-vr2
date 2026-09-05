@@ -7,11 +7,11 @@ import path from 'path';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { getSecureStorageDir } from '../utils/storage.js';
-import { sendEmail } from '../utils/email.js';
+import { sendEmail, sendPasswordResetEmail, sendPasswordChangedEmail } from '../utils/email.js';
 import { logAudit } from '../utils/auditLogger.js';
 
 const router = express.Router();
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '301466670902-kcegi1b9m80lknd4s4p45v3ofdctv56h.apps.googleusercontent.com');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '301466670902-h42rg1ghcnhoo109dam60hjkd4020gq5.apps.googleusercontent.com');
 
 // ── Fallback Storage Helpers ──────────────────────────────────────────────────
 const FALLBACK_DIR = path.join(getSecureStorageDir(), 'talentsync-v2-data');
@@ -45,12 +45,12 @@ const saveLocalUsers = async (users) => {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const generateToken = (userId, email, name, role = 'user') => {
+const generateToken = (userId, email, name, role = 'user', tokenVersion = 0) => {
     if (!process.env.JWT_SECRET) {
         throw new Error('JWT_SECRET is missing from environment variables');
     }
     return jwt.sign(
-        { id: userId, email, name, role },
+        { id: userId, email, name, role, tokenVersion },
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRY || '7d' }
     );
@@ -109,7 +109,7 @@ router.post('/signup', async (req, res) => {
                 userAgent: req.headers['user-agent']
             }).catch(err => console.error("Audit log error:", err));
 
-            const token = generateToken(user._id, user.email, user.name, user.role);
+            const token = generateToken(user._id, user.email, user.name, user.role, user.tokenVersion || 0);
 
             return res.status(201).json({
                 token,
@@ -157,7 +157,7 @@ router.post('/signup', async (req, res) => {
                 userAgent: req.headers['user-agent']
             }).catch(err => console.error("Audit log error:", err));
 
-            const token = generateToken(mockId, newUser.email, newUser.name, newUser.role);
+            const token = generateToken(mockId, newUser.email, newUser.name, newUser.role, newUser.tokenVersion || 0);
 
             return res.status(201).json({
                 token,
@@ -271,7 +271,7 @@ router.post('/login', async (req, res) => {
                 userAgent: req.headers['user-agent']
             }).catch(err => console.error("Audit log error:", err));
 
-            const token = generateToken(user._id, user.email, user.name, user.role);
+            const token = generateToken(user._id, user.email, user.name, user.role, user.tokenVersion || 0);
 
             return res.json({
                 token,
@@ -353,7 +353,7 @@ router.post('/login', async (req, res) => {
                 userAgent: req.headers['user-agent']
             }).catch(err => console.error("Audit log error:", err));
 
-            const token = generateToken(user._id, user.email, user.name, user.role || 'user');
+            const token = generateToken(user._id, user.email, user.name, user.role || 'user', user.tokenVersion || 0);
 
             return res.json({
                 token,
@@ -379,7 +379,7 @@ router.post('/google', async (req, res) => {
         }
 
         let payload;
-        const googleClientId = process.env.GOOGLE_CLIENT_ID || '301466670902-kcegi1b9m80lknd4s4p45v3ofdctv56h.apps.googleusercontent.com';
+        const googleClientId = process.env.GOOGLE_CLIENT_ID || '301466670902-h42rg1ghcnhoo109dam60hjkd4020gq5.apps.googleusercontent.com';
         const isProduction = process.env.NODE_ENV === 'production';
 
         if (googleClientId) {
@@ -545,7 +545,7 @@ router.post('/google', async (req, res) => {
                 userAgent: req.headers['user-agent']
             }).catch(err => console.error("Audit log error:", err));
 
-            const token = generateToken(user._id, user.email, user.name, user.role || 'user');
+            const token = generateToken(user._id, user.email, user.name, user.role || 'user', user.tokenVersion || 0);
 
             return res.json({
                 token,
@@ -600,67 +600,93 @@ router.post('/forgot-password', async (req, res) => {
         }
 
         const emailClean = email.toLowerCase().trim();
+        const GENERIC_RESPONSE = {
+            success: true,
+            message: 'If an account exists for this email address, password reset instructions have been sent.'
+        };
 
         if (global.isMongoConnected) {
-            const user = await User.findOne({ email: emailClean });
+            const emailRegex = new RegExp('^' + escapeRegex(emailClean) + '$', 'i');
+            const user = await User.findOne({ email: emailRegex });
+            
+            // Anti-account enumeration: Return generic success if user not found
             if (!user) {
-                return res.status(404).json({ error: 'No account with that email found.' });
+                return res.status(200).json(GENERIC_RESPONSE);
             }
 
-            const resetToken = crypto.randomBytes(20).toString('hex');
+            // Generate 32-byte cryptographically secure random reset token
+            const resetToken = crypto.randomBytes(32).toString('hex');
+            // Store ONLY the SHA-256 hash of the token in the database
             user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-            user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+            user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 minutes expiration
             await user.save();
 
-            const resetUrl = `${process.env.APP_URL || 'http://localhost:5173'}?resetToken=${resetToken}`;
-            const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a POST request to: \n\n ${resetUrl}`;
-
+            // Dispatch transactional reset email
             try {
-                await sendEmail({
+                await sendPasswordResetEmail({
                     email: user.email,
-                    subject: 'Password Reset Token',
-                    message
+                    name: user.name,
+                    resetToken
                 });
-                res.status(200).json({ success: true, message: 'Email sent' });
-            } catch (err) {
+
+                logAudit({
+                    userId: user._id,
+                    userEmail: user.email,
+                    action: 'FORGOT_PASSWORD_REQUESTED',
+                    ipAddress: req.ip,
+                    userAgent: req.headers['user-agent']
+                }).catch(err => console.error("Audit log error:", err));
+            } catch (emailErr) {
+                console.error("❌ Password reset email dispatch failed:", emailErr.message);
+                // Invalidate the token if email dispatch genuinely failed
                 user.resetPasswordToken = undefined;
                 user.resetPasswordExpires = undefined;
                 await user.save();
-                return res.status(500).json({ error: 'Email could not be sent' });
-            }
-        } else {
-            // Local JSON fallback
-            const users = await getLocalUsers();
-            const user = users.find(u => u.email === emailClean);
-            if (!user) {
-                return res.status(404).json({ error: 'No account with that email found.' });
+                return res.status(500).json({ error: 'We could not send the password reset email. Please try again later.' });
             }
 
-            const resetToken = crypto.randomBytes(20).toString('hex');
+            return res.status(200).json(GENERIC_RESPONSE);
+        } else {
+            // Local JSON fallback storage
+            const users = await getLocalUsers();
+            const user = users.find(u => u.email && u.email.toLowerCase().trim() === emailClean);
+            
+            if (!user) {
+                return res.status(200).json(GENERIC_RESPONSE);
+            }
+
+            const resetToken = crypto.randomBytes(32).toString('hex');
             user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-            user.resetPasswordExpires = new Date(Date.now() + 3600000).toISOString();
+            user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000).toISOString();
             await saveLocalUsers(users);
 
-            const resetUrl = `${process.env.APP_URL || 'http://localhost:5173'}?resetToken=${resetToken}`;
-            const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a POST request to: \n\n ${resetUrl}`;
-
             try {
-                await sendEmail({
+                await sendPasswordResetEmail({
                     email: user.email,
-                    subject: 'Password Reset Token',
-                    message
+                    name: user.name,
+                    resetToken
                 });
-                res.status(200).json({ success: true, message: 'Email sent' });
-            } catch (err) {
+
+                logAudit({
+                    userId: user._id,
+                    userEmail: user.email,
+                    action: 'FORGOT_PASSWORD_REQUESTED',
+                    ipAddress: req.ip,
+                    userAgent: req.headers['user-agent']
+                }).catch(err => console.error("Audit log error:", err));
+            } catch (emailErr) {
+                console.error("❌ Password reset email dispatch failed:", emailErr.message);
                 user.resetPasswordToken = undefined;
                 user.resetPasswordExpires = undefined;
                 await saveLocalUsers(users);
-                return res.status(500).json({ error: 'Email could not be sent' });
+                return res.status(500).json({ error: 'We could not send the password reset email. Please try again later.' });
             }
+
+            return res.status(200).json(GENERIC_RESPONSE);
         }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Server Error' });
+        console.error("Forgot password route error:", error);
+        res.status(500).json({ error: 'We could not process your request right now. Please try again later.' });
     }
 });
 
@@ -669,8 +695,12 @@ router.post('/reset-password', async (req, res) => {
     try {
         const { token, password } = req.body;
         
-        if (!token) return res.status(400).json({ error: 'Token is required' });
-        if (!validatePassword(password)) return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+        if (!token) {
+            return res.status(400).json({ error: 'Reset token is required.' });
+        }
+        if (!validatePassword(password)) {
+            return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+        }
 
         const resetPasswordToken = crypto.createHash('sha256').update(token).digest('hex');
 
@@ -681,34 +711,72 @@ router.post('/reset-password', async (req, res) => {
             });
 
             if (!user) {
-                return res.status(400).json({ error: 'Invalid or expired token' });
+                return res.status(400).json({ error: 'This password reset link is invalid or has expired. Please request a new one.' });
             }
 
+            // Update password — hashed automatically by pre-save hook in User.js
             user.password = password;
             user.resetPasswordToken = undefined;
             user.resetPasswordExpires = undefined;
+            // Invalidate all existing active JWT sessions across all devices
+            user.tokenVersion = (user.tokenVersion || 0) + 1;
+            user.passwordChangedAt = new Date();
             await user.save();
 
-            res.status(200).json({ success: true, message: 'Password updated successfully' });
+            // Send confirmation alert email (fire-and-forget)
+            sendPasswordChangedEmail({
+                email: user.email,
+                name: user.name,
+                ip: req.ip
+            }).catch(err => console.error("Confirmation email error:", err.message));
+
+            // Log security audit event
+            logAudit({
+                userId: user._id,
+                userEmail: user.email,
+                action: 'PASSWORD_RESET_SUCCESS',
+                ipAddress: req.ip,
+                userAgent: req.headers['user-agent']
+            }).catch(err => console.error("Audit log error:", err));
+
+            res.status(200).json({ success: true, message: 'Your password has been reset successfully.' });
         } else {
             const users = await getLocalUsers();
             const user = users.find(u => u.resetPasswordToken === resetPasswordToken && new Date(u.resetPasswordExpires) > new Date());
             
             if (!user) {
-                return res.status(400).json({ error: 'Invalid or expired token' });
+                return res.status(400).json({ error: 'This password reset link is invalid or has expired. Please request a new one.' });
             }
 
             const salt = await bcrypt.genSalt(10);
             user.password = await bcrypt.hash(password, salt);
             user.resetPasswordToken = undefined;
             user.resetPasswordExpires = undefined;
+            user.tokenVersion = (user.tokenVersion || 0) + 1;
+            user.passwordChangedAt = new Date().toISOString();
             await saveLocalUsers(users);
 
-            res.status(200).json({ success: true, message: 'Password updated successfully' });
+            // Send confirmation alert email
+            sendPasswordChangedEmail({
+                email: user.email,
+                name: user.name,
+                ip: req.ip
+            }).catch(err => console.error("Confirmation email error:", err.message));
+
+            // Log security audit event
+            logAudit({
+                userId: user._id,
+                userEmail: user.email,
+                action: 'PASSWORD_RESET_SUCCESS',
+                ipAddress: req.ip,
+                userAgent: req.headers['user-agent']
+            }).catch(err => console.error("Audit log error:", err));
+
+            res.status(200).json({ success: true, message: 'Your password has been reset successfully.' });
         }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Server Error' });
+        console.error("Reset password route error:", error);
+        res.status(500).json({ error: 'We could not process your request right now. Please try again later.' });
     }
 });
 

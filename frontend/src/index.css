@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,7 +10,7 @@
         --bg-surface-secondary: #F1F5F9;
         --text-primary: #0F172A;
         --text-secondary: #334155;
-        --text-muted: #64748B;
+        --text-muted: #475569;
         --border-primary: #E2E8F0;
         --border-secondary: #CBD5E1;
         --accent-primary: #0E7490;
@@ -20,6 +18,17 @@
         --shadow-color: rgba(14, 116, 144, 0.04);
         --glass-bg: rgba(255, 255, 255, 0.8);
         --glass-border: rgba(226, 232, 240, 0.8);
+
+        /* ── 3D Depth System (Light Mode) ─────────────────── */
+        --surface-3d: #ffffff;
+        --surface-3d-raised: #ffffff;
+        --surface-3d-inset: #F8FAFC;
+        --shadow-3d: 0 1px 3px rgba(15, 23, 42, 0.04), 0 8px 24px -4px rgba(14, 116, 144, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+        --shadow-3d-raised: 0 2px 4px rgba(15, 23, 42, 0.04), 0 16px 36px -6px rgba(14, 116, 144, 0.09), 0 4px 12px -2px rgba(15, 23, 42, 0.05);
+        --shadow-3d-hover: 0 4px 8px rgba(15, 23, 42, 0.06), 0 20px 40px -8px rgba(14, 116, 144, 0.13), 0 6px 16px -2px rgba(15, 23, 42, 0.06);
+        --glow-3d: 0 0 30px rgba(14, 116, 144, 0.07);
+        --border-3d: #E2E8F0;
+        --border-3d-highlight: rgba(255, 255, 255, 0.9);
     }
 
     .dark {
@@ -37,6 +46,17 @@
         --shadow-color: rgba(0, 0, 0, 0.5);
         --glass-bg: rgba(11, 15, 25, 0.85);
         --glass-border: rgba(255, 255, 255, 0.07);
+
+        /* ── 3D Depth System (Dark Mode) ──────────────────── */
+        --surface-3d: #0B1120;
+        --surface-3d-raised: #111B2E;
+        --surface-3d-inset: #070B14;
+        --shadow-3d: 0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
+        --shadow-3d-raised: 0 8px 30px -4px rgba(0, 0, 0, 0.65), 0 2px 8px rgba(0, 0, 0, 0.5);
+        --shadow-3d-hover: 0 14px 38px -6px rgba(0, 0, 0, 0.75), 0 0 22px rgba(34, 211, 238, 0.12);
+        --glow-3d: 0 0 35px rgba(34, 211, 238, 0.08);
+        --border-3d: rgba(255, 255, 255, 0.08);
+        --border-3d-highlight: rgba(255, 255, 255, 0.14);
     }
 
     body {
@@ -48,6 +68,7 @@
             radial-gradient(at 0% 100%, rgba(139, 92, 246, 0.05) 0px, transparent 40%);
     }
 
+    /* Scope app typography so document sheets remain insulated */
     h1, h2, h3, h4, h5, h6 {
         @apply font-display tracking-tighter font-black leading-tight;
         color: var(--text-primary);
@@ -55,6 +76,30 @@
 
     p {
         @apply leading-relaxed text-[var(--text-secondary)];
+    }
+
+    /* ── Resume Preview & Document Isolation ─────────────────── */
+    /* Prevents dark mode theme variables from washing out white-sheet resume templates */
+    #resume-preview,
+    .resume-sheet {
+        --text-primary: #0f172a !important;
+        --text-secondary: #334155 !important;
+        --text-muted: #64748b !important;
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+    }
+
+    #resume-preview h1, #resume-preview h2, #resume-preview h3,
+    #resume-preview h4, #resume-preview h5, #resume-preview h6,
+    .resume-sheet h1, .resume-sheet h2, .resume-sheet h3,
+    .resume-sheet h4, .resume-sheet h5, .resume-sheet h6 {
+        color: inherit;
+        letter-spacing: inherit;
+    }
+
+    #resume-preview p,
+    .resume-sheet p {
+        color: inherit;
     }
 
     /* Accessibility focus rings */
@@ -69,12 +114,77 @@
             transition-duration: 0.01ms !important;
             scroll-behavior: auto !important;
         }
+
+        .scene-3d {
+            perspective: none !important;
+            transform-style: flat !important;
+        }
+
+        .tilt-card,
+        .tilt-card:hover,
+        .surface-3d,
+        .surface-3d-raised {
+            transform: none !important;
+            box-shadow: var(--shadow-3d) !important;
+        }
     }
 }
 
 @layer components {
     .container-custom {
         @apply max-w-7xl mx-auto px-6 sm:px-8 lg:px-12;
+    }
+
+    /* ── 3D Surface & Depth Architecture ─────────────────────── */
+    .scene-3d {
+        perspective: 1200px;
+        transform-style: preserve-3d;
+    }
+
+    .surface-3d {
+        background-color: var(--surface-3d);
+        border: 1px solid var(--border-3d);
+        box-shadow: var(--shadow-3d);
+        transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+    }
+
+    .surface-3d-raised {
+        background-color: var(--surface-3d-raised);
+        border: 1px solid var(--border-3d);
+        border-top: 1px solid var(--border-3d-highlight);
+        box-shadow: var(--shadow-3d-raised), var(--glow-3d);
+        transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+    }
+
+    .surface-3d-inset {
+        background-color: var(--surface-3d-inset);
+        border: 1px solid var(--border-primary);
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05), inset 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+    /* Pointer-only micro-tilt: max 1.5° rotation, 4-6px lift, fine pointer only */
+    @media (hover: hover) and (pointer: fine) {
+        .tilt-card {
+            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+
+        .tilt-card:hover {
+            transform: translateY(-5px) translateZ(8px) rotateX(1deg) rotateY(-1deg);
+            box-shadow: var(--shadow-3d-hover);
+            border-color: var(--accent-primary);
+        }
+    }
+
+    /* Ambient low-opacity decorative glow orb */
+    .glow-orb {
+        position: absolute;
+        border-radius: 9999px;
+        filter: blur(80px);
+        pointer-events: none;
+        user-select: none;
+        opacity: 0.6;
     }
 
     /* ── Primary Button ─────────────────────────────────────── */
@@ -98,9 +208,9 @@
     /* ── Cards ──────────────────────────────────────────────── */
     .card {
         @apply rounded-[2.5rem] transition-all duration-500 overflow-hidden;
-        background-color: var(--bg-surface);
-        border: 1px solid var(--border-primary);
-        box-shadow: 0 8px 30px var(--shadow-color);
+        background-color: var(--surface-3d);
+        border: 1px solid var(--border-3d);
+        box-shadow: var(--shadow-3d);
     }
 
     .card-premium {

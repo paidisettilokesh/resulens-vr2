@@ -3,7 +3,11 @@ export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 export const ALLOWED_EXTENSIONS = ['.pdf', '.docx'];
 export const ALLOWED_MIME_TYPES = [
     'application/pdf',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/msword',
+    'application/zip',
+    'application/x-zip-compressed',
+    'application/octet-stream'
 ];
 
 export const validateResumeFile = (file) => {

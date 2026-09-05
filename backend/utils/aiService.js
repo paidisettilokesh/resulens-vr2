@@ -14,8 +14,8 @@ const callGroq = async (prompt) => {
     const models = [
         "groq/compound",
         "groq/compound-mini",
-        "openai/gpt-oss-20b",
-        "qwen/qwen3.8-27b"
+        "qwen/qwen3.8-27b",
+        "openai/gpt-oss-120b"
     ];
 
     for (const model of models) {
@@ -26,16 +26,16 @@ const callGroq = async (prompt) => {
                 {
                     model,
                     messages: [{ role: "user", content: prompt + "\n\nRETURN VALID JSON ONLY. No preamble, no markdown." }],
-                    temperature: 0,
+                    temperature: 0.1,
                     top_p: 1,
-                    max_tokens: 1500
+                    max_tokens: 4096
                 },
                 {
                     headers: {
                         Authorization: `Bearer ${key}`,
                         "Content-Type": "application/json"
                     },
-                    timeout: 15000
+                    timeout: 30000
                 }
             );
 
@@ -62,14 +62,12 @@ const callGroq = async (prompt) => {
 };
 
 // --- OPENROUTER PROVIDER (Fallback) ---
-const callOpenRouter = async (prompt, model = "google/gemini-2.0-flash-lite-preview-02-05:free") => {
+const callOpenRouter = async (prompt, model = "liquid/lfm-2.5-2.6b:free") => {
     const fallbacks = [
-        "google/gemini-2.0-flash-lite-preview-02-05:free",
-        "google/gemma-3-4b-it:free",
-        "google/gemma-3-12b-it:free",
-        "qwen/qwen3-4b:free",
-        "mistralai/mistral-small-3.1-24b-instruct:free",
-        "meta-llama/llama-3.2-3b-instruct:free"
+        "liquid/lfm-2.5-2.6b:free",
+        "nvidia/nemotron-3.5-lightning:free",
+        "z-ai/glm-5.2:free",
+        "minimax/minimax-m3:free"
     ];
 
     const tryModel = async (targetModel) => {
@@ -81,9 +79,9 @@ const callOpenRouter = async (prompt, model = "google/gemini-2.0-flash-lite-prev
                 {
                     model: targetModel,
                     messages: [{ role: "user", content: prompt + "\n\nRETURN VALID JSON ONLY. No preamble, no markdown." }],
-                    temperature: 0,
+                    temperature: 0.1,
                     top_p: 1,
-                    max_tokens: 1500
+                    max_tokens: 4096
                 },
                 {
                     headers: {
@@ -92,7 +90,7 @@ const callOpenRouter = async (prompt, model = "google/gemini-2.0-flash-lite-prev
                         "X-Title": "ResuLens",
                         "Content-Type": "application/json"
                     },
-                    timeout: 20000
+                    timeout: 30000
                 }
             );
             const content = response.data.choices?.[0]?.message?.content;
@@ -142,8 +140,6 @@ export const callAI = async (prompt) => {
     const hash = getPromptHash(prompt);
 
     // 1. Check local in-memory cache first (ultrafast)
-    // TEMPORARILY DISABLED to force fresh analysis
-    /*
     if (localCache.has(hash)) {
         const cached = localCache.get(hash);
         if (cached.expiresAt > Date.now()) {
@@ -152,7 +148,6 @@ export const callAI = async (prompt) => {
         }
         localCache.delete(hash); // Expired
     }
-    */
 
     // 2. Check MongoDB cache if connected
     if (global.isMongoConnected) {
@@ -190,7 +185,11 @@ export const callAI = async (prompt) => {
         const expiryDuration = 48 * 60 * 60 * 1000; // 48 Hours
         const expiresAt = Date.now() + expiryDuration;
 
-        // Save in memory
+        // Save in memory (cap size at 200 to prevent memory leak)
+        if (localCache.size >= 200) {
+            const oldestKey = localCache.keys().next().value;
+            localCache.delete(oldestKey);
+        }
         localCache.set(hash, { response: result, expiresAt });
 
         // Save in MongoDB if connected
@@ -241,18 +240,45 @@ const normalizeAnalysis = (data) => {
         ds = calculateDeterministicScores({
             ...data.extractedFeatures,
             skillMatch: data.jobMatchAnalysis?.skillMatch
-        });
+        }, data);
     }
+
+    const atsScore = ds ? ds.overallAts : parseScore(data.atsScore || data.score);
+    const jobMatchScore = parseScore(data.jobMatchScore || data.matchScore);
+    const recruiterInterest = ds?.recruiterInterest != null 
+        ? ds.recruiterInterest 
+        : (data.recruiterInterest != null ? parseScore(data.recruiterInterest) : Math.round((atsScore * 0.4) + (jobMatchScore * 0.6)));
+
+    const educationScore = ds ? ds.educationScore : parseScore(data.educationScore);
+    const experienceScore = ds ? ds.experienceScore : parseScore(data.experienceScore);
+    const skillsMatch = ds ? ds.skillsMatch : parseScore(data.skillsMatch);
+
+    const intelligenceMetrics = ds?.intelligenceMetrics || {
+        skillDepth: Math.round(skillsMatch * 0.8),
+        experienceQuality: Math.round(experienceScore * 0.85),
+        impactDensity: Math.round(experienceScore * 0.7),
+        profileStrength: Math.round((skillsMatch * 0.35) + (experienceScore * 0.35) + (educationScore * 0.30))
+    };
+
+    const recruiterInterestBreakdown = ds?.recruiterInterestBreakdown || {
+        score: recruiterInterest,
+        category: recruiterInterest >= 85 ? 'Excellent' : recruiterInterest >= 70 ? 'Strong' : recruiterInterest >= 50 ? 'Moderate' : 'Needs Improvement',
+        seniorityAlignment: Math.round(experienceScore * 0.9),
+        scanability: 80,
+        hiringSignals: Math.round((skillsMatch * 0.5) + (experienceScore * 0.5))
+    };
 
     return {
         candidateName: data.candidateName || data.name || 'Candidate',
         location: data.location || 'N/A',
-        atsScore: ds ? ds.overallAts : parseScore(data.atsScore || data.score),
-        jobMatchScore: parseScore(data.jobMatchScore || data.matchScore),
-        recruiterInterest: parseScore(data.recruiterInterest),
-        educationScore: ds ? ds.educationScore : parseScore(data.educationScore),
-        experienceScore: ds ? ds.experienceScore : parseScore(data.experienceScore),
-        skillsMatch: ds ? ds.skillsMatch : parseScore(data.skillsMatch),
+        atsScore,
+        jobMatchScore,
+        recruiterInterest,
+        recruiterInterestBreakdown,
+        educationScore,
+        experienceScore,
+        skillsMatch,
+        intelligenceMetrics,
         atsScoreBreakdown: ds ? {
             educationMatch: ds.educationScore,
             educationMatchMax: 100,
@@ -260,10 +286,11 @@ const normalizeAnalysis = (data) => {
             experienceMatchMax: 100,
             skillsMatch: ds.skillsMatch,
             skillsMatchMax: 100,
-            keywordMatch: Math.round(ds.skillsMatch * 0.8), // Placeholder logic if extractedFeatures lacks keyword relevance
+            keywordMatch: ds.keywordMatch,
             keywordMatchMax: 100,
             formattingMatch: ds.formattingScore,
-            formattingMatchMax: 100
+            formattingMatchMax: 100,
+            total: ds.overallAts
         } : data.atsScoreBreakdown || null,
         summary: data.summary || '',
         competencyMatrix: ensureArray(data.competencyMatrix).map(c => ({
@@ -304,13 +331,32 @@ const normalizeAnalysis = (data) => {
 };
 
 const normalizeRoast = (data) => ({
+    breakdown: data.breakdown || (data.roastScore ? {
+        contentScore: Math.round(data.roastScore * 0.25),
+        atsScore: Math.round(data.roastScore * 0.25),
+        impactScore: Math.round(data.roastScore * 0.25),
+        skillsScore: Math.round(data.roastScore * 0.25)
+    } : null),
+    actionableIssues: ensureArray(data.actionableIssues).map(issue => ({
+        problem: issue.problem || "Unquantified task statement.",
+        location: issue.location || "Professional Experience",
+        whyItMatters: issue.whyItMatters || "Fails to provide measurable proof of competency.",
+        howToFix: issue.howToFix || "Add metrics and action verbs.",
+        improvedExample: issue.improvedExample || "",
+        priority: issue.priority || "High"
+    })),
+    jdAlignment: data.jdAlignment || null,
+    weaknesses: ensureArray(data.weaknesses),
+    priorityFixes: ensureArray(data.priorityFixes),
+    rejectionRisks: ensureArray(data.rejectionRisks),
+    brutalTruth: data.brutalTruth || data.overallVerdict || "",
     sections: [
         { title: "Visual & Structural Gaps", critique: safeJoin(data.weaknesses) || data.critique || "Formatting needs more executive breathability.", fix: safeJoin(data.priorityFixes) },
         { title: "Recruiter Dismissal Risks", critique: safeJoin(data.rejectionRisks) || "Generic bullets dilute the impact.", fix: "Optimize for high-speed scanning." },
         { title: "Executive Polish", critique: data.brutalTruth || "Decent foundation, lacks elite-grade punch.", fix: "Implement quantitative impact metrics." }
     ],
     overallVerdict: data.brutalTruth || "Decent foundation, lacks elite-grade punch.",
-    roastScore: data.roastScore || data.burnScore || 45
+    roastScore: data.roastScore ?? data.burnScore ?? 50
 });
 
 const normalizeOptimization = (data, url) => {
@@ -351,9 +397,13 @@ const normalizeOptimization = (data, url) => {
     }
 
     if (url.includes('evaluate')) {
+        const rawScore = data.score;
+        const parsedScore = typeof rawScore === 'string'
+            ? (parseInt(rawScore.replace(/[^0-9]/g, ''), 10) || 0)
+            : (Number(rawScore) || 0);
         return {
-            score: data.score || 0,
-            verdict: data.verdict || "Analysis Pending",
+            score: Math.min(100, Math.max(0, parsedScore)),
+            verdict: data.verdict || (parsedScore >= 70 ? "Strong" : parsedScore >= 40 ? "Satisfactory" : "Needs Improvement"),
             feedback: data.feedback || "",
             missingKeywords: ensureArray(data.missingKeywords),
             improvementAreas: ensureArray(data.improvementAreas),

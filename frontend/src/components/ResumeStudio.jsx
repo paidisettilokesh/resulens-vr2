@@ -57,10 +57,10 @@ const ResumeStudio = (props) => {
                             </div>
 
                             <div className="text-left">
-                                <h4 className={`text-sm font-black uppercase tracking-widest ${activeSection === section.id ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>
+                                <h4 className={`text-sm font-bold uppercase tracking-wider ${activeSection === section.id ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>
                                     {section.label}
                                 </h4>
-                                <p className="text-xs font-bold text-[var(--text-secondary)] opacity-70">
+                                <p className="text-xs font-medium text-[var(--text-secondary)] opacity-70">
                                     {section.desc}
                                 </p>
                             </div>
@@ -92,7 +92,7 @@ const ResumeStudio = (props) => {
                     {activeSection === 'builder' ? (
                         <div className="animate-fade-in relative">
                             {/* Decorative Badge for Builder */}
-                            <div className="absolute -top-4 right-10 z-20 px-4 py-1.5 bg-cyan-600 text-white text-[9px] font-black rounded-full uppercase tracking-[0.2em] shadow-lg border-2 border-white dark:border-slate-900">
+                            <div className="absolute -top-4 right-10 z-20 px-4 py-1.5 bg-cyan-600 text-white text-xs font-semibold rounded-full uppercase tracking-wider shadow-lg border-2 border-white dark:border-slate-900">
                                 Document Architect v3.0
                             </div>
                             <ResumeBuilder {...props} />
@@ -100,7 +100,7 @@ const ResumeStudio = (props) => {
                     ) : (
                         <div className="animate-fade-in relative">
                             {/* Decorative Badge for Optimization */}
-                            <div className="absolute -top-4 right-10 z-20 px-4 py-1.5 bg-emerald-600 text-white text-[9px] font-black rounded-full uppercase tracking-[0.2em] shadow-lg border-2 border-white dark:border-slate-900">
+                            <div className="absolute -top-4 right-10 z-20 px-4 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded-full uppercase tracking-wider shadow-lg border-2 border-white dark:border-slate-900">
                                 Neural Optimization active
                             </div>
                             <OptimizeTab {...props} />

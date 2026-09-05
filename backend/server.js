@@ -142,11 +142,29 @@ const adminLimiter = rateLimit({
     message: { error: 'Too many requests to admin panel. Please try again after 5 minutes.' }
 });
 
+const forgotPasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: parseInt(process.env.API_LIMITS_FORGOT_PW || (process.env.NODE_ENV === 'production' ? '5' : '50'), 10),
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many password recovery requests from this IP. Please wait 15 minutes before trying again.' }
+});
+
+const resetPasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: parseInt(process.env.API_LIMITS_RESET_PW || (process.env.NODE_ENV === 'production' ? '10' : '100'), 10),
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many password reset attempts. Please wait 15 minutes before trying again.' }
+});
+
 app.use('/api/', globalLimiter);
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/signup', authLimiter);
 app.use('/api/auth/google', authLimiter);
 app.use('/api/auth/guest', authLimiter);
+app.use('/api/auth/forgot-password', forgotPasswordLimiter);
+app.use('/api/auth/reset-password', resetPasswordLimiter);
 app.use('/api/admin', adminLimiter);
 app.use('/api/analyze', aiLimiter);
 app.use('/api/rewrite', aiLimiter);
@@ -161,12 +179,13 @@ app.use('/api/email', aiLimiter);
 app.use('/api/salary', aiLimiter);
 
 // ── Health Check ──────────────────────────────────────────────────────────────
-app.get('/', (req, res) => {
+const healthHandler = (req, res) => {
     res.json({
         status: 'operational',
         service: 'ResuLens API',
         version: '2.0.0',
         timestamp: new Date().toISOString(),
+        uptime: Math.floor(process.uptime()),
         databaseConnected: !!global.isMongoConnected,
         databaseError: global.mongoError || null,
         providers: {
@@ -174,7 +193,11 @@ app.get('/', (req, res) => {
             openRouter: !!process.env.OPENROUTER_API_KEY
         }
     });
-});
+};
+
+app.get('/', healthHandler);
+app.get('/health', healthHandler);
+app.get('/api/health', healthHandler);
 
 // ── API Routes ────────────────────────────────────────────────────────────────
 const aiTimeout = timeoutMiddleware(120); // 120 seconds for AI endpoints

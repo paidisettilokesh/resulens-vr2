@@ -192,7 +192,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                                 <Activity size={18} />
                             </div>
                             <div>
-                                <h4 className="text-xs font-black uppercase text-[var(--text-muted)] tracking-widest">Resume Health</h4>
+                                <h4 className="text-xs font-bold uppercase text-[var(--text-muted)] tracking-wider">Resume Health</h4>
                                 <div className="text-sm font-bold text-[var(--text-primary)]">
                                     {healthLoading ? 'Evaluating...' : (healthScore ? `ATS Ready: ${healthScore.atsScore}%` : 'Awaiting Data')}
                                 </div>
@@ -201,11 +201,11 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                         {healthScore && (
                             <div className="flex gap-4">
                                 <div className="text-center">
-                                    <div className="text-xs font-black uppercase text-[var(--text-muted)]">Keywords</div>
+                                    <div className="text-xs font-semibold uppercase text-[var(--text-muted)]">Keywords</div>
                                     <div className="text-sm font-bold text-cyan-700 dark:text-cyan-400">{healthScore.keywordScore}%</div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-xs font-black uppercase text-[var(--text-muted)]">Readability</div>
+                                    <div className="text-xs font-semibold uppercase text-[var(--text-muted)]">Readability</div>
                                     <div className="text-sm font-bold text-amber-700 dark:text-amber-400">{healthScore.readabilityScore}%</div>
                                 </div>
                             </div>
@@ -215,8 +215,8 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                     {/* Header + Actions */}
                     <div className="flex justify-between items-center bg-[var(--bg-surface)] p-6 rounded-[2rem] border border-[var(--border-primary)] shadow-sm">
                         <div>
-                            <h2 className="text-2xl font-black text-[var(--text-primary)] tracking-tighter">Resume Builder</h2>
-                            <p className="text-[var(--text-muted)] text-xs font-bold mt-1 uppercase tracking-widest">Live Editor</p>
+                            <h2 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">Resume Builder</h2>
+                            <p className="text-[var(--text-muted)] text-xs font-semibold mt-1 uppercase tracking-wider">Live Editor</p>
                         </div>
                         <button onClick={saveResume} disabled={loading} className="p-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-2xl transition-all shadow-lg flex items-center gap-2">
                             {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
@@ -227,7 +227,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                     {/* Target Job Generator */}
                     <div className="bg-[var(--bg-surface)] rounded-[2rem] border border-[var(--border-primary)] overflow-hidden shadow-sm">
                         <button onClick={() => toggleSection('target')} className="w-full flex justify-between items-center p-6 bg-gradient-to-r from-cyan-500/5 to-transparent hover:from-cyan-500/10 transition-colors">
-                            <h3 className="text-sm font-black text-[var(--text-primary)] flex items-center gap-3"><Target size={18} className="text-cyan-700 dark:text-cyan-400" /> Target Job Blueprint</h3>
+                            <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-3"><Target size={18} className="text-cyan-700 dark:text-cyan-400" /> Target Job Blueprint</h3>
                             {expandedSection === 'target' ? <ChevronUp size={16} className="text-[var(--text-muted)]" /> : <ChevronDown size={16} className="text-[var(--text-muted)]" />}
                         </button>
                         <AnimatePresence>
@@ -236,7 +236,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                                     <div className="p-6 pt-0 space-y-4">
                                         <p className="text-xs text-[var(--text-muted)] leading-relaxed">Paste the description of the job you are targeting. Our AI Architect will instantly generate a structural blueprint perfectly matched to the ATS criteria of this role.</p>
                                         <textarea placeholder="Paste Job Description here..." value={targetJob} onChange={e => setTargetJob(e.target.value)} className="w-full bg-[var(--bg-surface-secondary)] text-[var(--text-primary)] border border-[var(--border-secondary)] rounded-2xl p-4 h-32 text-xs" />
-                                        <button onClick={generateBlueprint} disabled={blueprintLoading} className="w-full py-3 bg-cyan-600 text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-cyan-700 transition-all shadow-md flex justify-center items-center gap-2">
+                                        <button onClick={generateBlueprint} disabled={blueprintLoading} className="w-full py-3 bg-cyan-600 text-white text-xs font-bold uppercase tracking-wider rounded-2xl hover:bg-cyan-700 transition-all shadow-md flex justify-center items-center gap-2">
                                             {blueprintLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                                             {blueprintLoading ? 'Generating Blueprint...' : 'Generate Blueprint Resume'}
                                         </button>
@@ -249,7 +249,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                     {/* Templates */}
                     <div className="bg-[var(--bg-surface)] rounded-[2rem] border border-[var(--border-primary)] overflow-hidden shadow-sm">
                         <button onClick={() => toggleSection('templates')} className="w-full flex justify-between items-center p-6 hover:bg-[var(--bg-surface-secondary)] transition-colors">
-                            <h3 className="text-sm font-black text-[var(--text-primary)] flex items-center gap-3"><LayoutTemplate size={18} className="text-indigo-500" /> Professional Templates</h3>
+                            <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-3"><LayoutTemplate size={18} className="text-indigo-500" /> Professional Templates</h3>
                             {expandedSection === 'templates' ? <ChevronUp size={16} className="text-[var(--text-muted)]" /> : <ChevronDown size={16} className="text-[var(--text-muted)]" />}
                         </button>
                         <AnimatePresence>
@@ -269,7 +269,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                                                 onClick={() => setTemplate(t.id)}
                                                 className={`py-3 px-2 rounded-2xl border-2 transition-all ${template === t.id ? 'bg-[var(--bg-surface)] border-indigo-500 text-indigo-500 shadow-md' : 'bg-[var(--bg-surface-secondary)] border-[var(--border-secondary)] text-[var(--text-muted)] hover:border-indigo-300 hover:text-indigo-500'}`}
                                             >
-                                                <span className="text-[9px] font-bold uppercase tracking-tighter block text-center">{t.label}</span>
+                                                <span className="text-xs font-semibold uppercase tracking-wider block text-center">{t.label}</span>
                                             </button>
                                         ))}
                                     </div>
@@ -281,7 +281,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                     {/* Identity */}
                     <div className="bg-[var(--bg-surface)] rounded-[2rem] border border-[var(--border-primary)] overflow-hidden shadow-sm">
                         <button onClick={() => toggleSection('identity')} className="w-full flex justify-between items-center p-6 hover:bg-[var(--bg-surface-secondary)] transition-colors">
-                            <h3 className="text-sm font-black text-[var(--text-primary)] flex items-center gap-3"><MapPin size={18} className="text-emerald-700 dark:text-emerald-400" /> Identity & Profile</h3>
+                            <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-3"><MapPin size={18} className="text-emerald-700 dark:text-emerald-400" /> Identity & Profile</h3>
                             {expandedSection === 'identity' ? <ChevronUp size={16} className="text-[var(--text-muted)]" /> : <ChevronDown size={16} className="text-[var(--text-muted)]" />}
                         </button>
                         <AnimatePresence>
@@ -290,25 +290,25 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                                     <div className="p-6 pt-0 space-y-4">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-1">
-                                                <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest px-1">Full Name</label>
+                                                <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider px-1">Full Name</label>
                                                 <input type="text" placeholder="Johnathan Doe" value={builderData.personal.fullName} onChange={(e) => setBuilderData({ ...builderData, personal: { ...builderData.personal, fullName: e.target.value } })} className="w-full bg-[var(--bg-surface-secondary)] text-[var(--text-primary)] border border-[var(--border-secondary)] rounded-xl px-4 py-2.5 text-xs" />
                                             </div>
                                             <div className="space-y-1">
-                                                <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest px-1">Email</label>
+                                                <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider px-1">Email</label>
                                                 <input type="email" placeholder="j.doe@example.com" value={builderData.personal.email} onChange={(e) => setBuilderData({ ...builderData, personal: { ...builderData.personal, email: e.target.value } })} className="w-full bg-[var(--bg-surface-secondary)] text-[var(--text-primary)] border border-[var(--border-secondary)] rounded-xl px-4 py-2.5 text-xs" />
                                             </div>
                                             <div className="space-y-1">
-                                                <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest px-1">Phone</label>
+                                                <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider px-1">Phone</label>
                                                 <input type="text" placeholder="+1 555-000-0000" value={builderData.personal.phone} onChange={(e) => setBuilderData({ ...builderData, personal: { ...builderData.personal, phone: e.target.value } })} className="w-full bg-[var(--bg-surface-secondary)] text-[var(--text-primary)] border border-[var(--border-secondary)] rounded-xl px-4 py-2.5 text-xs" />
                                             </div>
                                             <div className="space-y-1">
-                                                <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest px-1">Location</label>
+                                                <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider px-1">Location</label>
                                                 <input type="text" placeholder="London, UK" value={builderData.personal.location} onChange={(e) => setBuilderData({ ...builderData, personal: { ...builderData.personal, location: e.target.value } })} className="w-full bg-[var(--bg-surface-secondary)] text-[var(--text-primary)] border border-[var(--border-secondary)] rounded-xl px-4 py-2.5 text-xs" />
                                             </div>
                                         </div>
                                         <div className="space-y-2 pt-2">
                                             <div className="flex justify-between items-center">
-                                                <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest px-1">Professional Summary</label>
+                                                <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider px-1">Professional Summary</label>
                                                 <button onClick={async () => {
                                                     setBioError('');
                                                     setBioLoading(true);
@@ -321,7 +321,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                                                         }, { headers: { 'x-user-id': user?.id || 'guest', ...(user?.token ? { 'Authorization': `Bearer ${user.token}` } : {}) } });
                                                         if (res.data.bio) setBuilderData(prev => ({ ...prev, personal: { ...prev.personal, bio: res.data.bio } }));
                                                     } catch (e) { setBioError('AI unavailable.'); } finally { setBioLoading(false); }
-                                                }} disabled={bioLoading} className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 hover:text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                                                }} disabled={bioLoading} className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-400 uppercase tracking-wider flex items-center gap-1">
                                                     {bioLoading ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />} Auto-Write
                                                 </button>
                                             </div>
@@ -337,7 +337,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                     {/* Experience */}
                     <div className="bg-[var(--bg-surface)] rounded-[2rem] border border-[var(--border-primary)] overflow-hidden shadow-sm">
                         <button onClick={() => toggleSection('experience')} className="w-full flex justify-between items-center p-6 hover:bg-[var(--bg-surface-secondary)] transition-colors">
-                            <h3 className="text-sm font-black text-[var(--text-primary)] flex items-center gap-3"><Briefcase size={18} className="text-amber-700 dark:text-amber-400" /> Career History</h3>
+                            <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-3"><Briefcase size={18} className="text-amber-700 dark:text-amber-400" /> Career History</h3>
                             {expandedSection === 'experience' ? <ChevronUp size={16} className="text-[var(--text-muted)]" /> : <ChevronDown size={16} className="text-[var(--text-muted)]" />}
                         </button>
                         <AnimatePresence>
@@ -353,21 +353,21 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div className="space-y-1">
-                                                        <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest px-1">Company</label>
+                                                        <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider px-1">Company</label>
                                                         <input type="text" placeholder="Global Tech Corp" value={exp.company} onChange={(e) => { const n = [...builderData.experience]; n[index].company = e.target.value; setBuilderData({ ...builderData, experience: n }); }} className="w-full bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-secondary)] rounded-xl px-4 py-2 text-xs" />
                                                     </div>
                                                     <div className="space-y-1">
-                                                        <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest px-1">Job Title</label>
+                                                        <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider px-1">Job Title</label>
                                                         <input type="text" placeholder="Director of Engineering" value={exp.role} onChange={(e) => { const n = [...builderData.experience]; n[index].role = e.target.value; setBuilderData({ ...builderData, experience: n }); }} className="w-full bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-secondary)] rounded-xl px-4 py-2 text-xs" />
                                                     </div>
                                                 </div>
                                                 <div className="space-y-1">
-                                                    <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest px-1">Dates</label>
+                                                    <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider px-1">Dates</label>
                                                     <input type="text" placeholder="Mar 2018 - Present" value={exp.period} onChange={(e) => { const n = [...builderData.experience]; n[index].period = e.target.value; setBuilderData({ ...builderData, experience: n }); }} className="w-full bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-secondary)] rounded-xl px-4 py-2 text-xs" />
                                                 </div>
                                                 <div className="space-y-1">
                                                     <div className="flex justify-between items-center">
-                                                        <label className="text-[9px] font-black text-[var(--text-muted)] uppercase tracking-widest px-1">Achievements (bullet points)</label>
+                                                        <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider px-1">Achievements (bullet points)</label>
                                                     </div>
                                                     <textarea placeholder="• Increased revenue by 22% ($4.5M)..." value={exp.details} onChange={(e) => { const n = [...builderData.experience]; n[index].details = e.target.value; setBuilderData({ ...builderData, experience: n }); }} className="w-full bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-secondary)] rounded-xl px-4 py-3 h-32 text-xs leading-relaxed" />
                                                     <div className="flex justify-end pt-2">
@@ -385,7 +385,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                                                                 } catch (e) { setPolishError('AI Polish failed.'); } finally { setPolishingId(null); }
                                                             }}
                                                             disabled={polishingId === exp.id}
-                                                            className="bg-amber-500 text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-2 shadow-sm hover:bg-amber-600 transition-all disabled:opacity-80"
+                                                            className="bg-amber-500 text-white px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center gap-2 shadow-sm hover:bg-amber-600 transition-all disabled:opacity-80"
                                                         >
                                                             {polishingId === exp.id ? <Loader2 size={12} className="animate-spin" /> : <Zap size={12} />}
                                                             AI Polish
@@ -406,7 +406,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                     {/* Skills */}
                     <div className="bg-[var(--bg-surface)] rounded-[2rem] border border-[var(--border-primary)] overflow-hidden shadow-sm">
                         <button onClick={() => toggleSection('skills')} className="w-full flex justify-between items-center p-6 hover:bg-[var(--bg-surface-secondary)] transition-colors">
-                            <h3 className="text-sm font-black text-[var(--text-primary)] flex items-center gap-3"><Settings size={18} className="text-rose-700 dark:text-rose-400" /> Core Competencies</h3>
+                            <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-3"><Settings size={18} className="text-rose-700 dark:text-rose-400" /> Core Competencies</h3>
                             {expandedSection === 'skills' ? <ChevronUp size={16} className="text-[var(--text-muted)]" /> : <ChevronDown size={16} className="text-[var(--text-muted)]" />}
                         </button>
                         <AnimatePresence>
@@ -427,7 +427,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                     <div className="w-full flex justify-between items-center mb-4 px-2">
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                            <span className="text-xs font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">Live Rendering</span>
+                            <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">Live Rendering</span>
                         </div>
                         <div className="flex gap-2">
                             <button 

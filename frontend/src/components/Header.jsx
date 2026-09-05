@@ -50,9 +50,9 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
         <header className={`fixed top-0 left-0 md:left-20 right-0 z-[100] transition-all duration-500 ${scrolled ? 'py-4' : 'py-8'}`}>
             <div className="container-custom">
                 <div className={`
-                    relative bg-[var(--glass-bg)] backdrop-blur-2xl px-6 py-4 rounded-[2.5rem] border border-[var(--glass-border)] shadow-2xl flex items-center justify-between
-                    ${scrolled ? 'shadow-premium' : ''}
-                `} style={{ boxShadow: `0 8px 30px var(--shadow-color)` }}>
+                    relative surface-3d px-6 py-4 rounded-[2.5rem] flex items-center justify-between
+                    ${scrolled ? '!shadow-2xl backdrop-blur-xl' : ''}
+                `}>
                     {/* Brand Section */}
                     <div className="flex items-center gap-4 md:gap-10">
                         {/* Mobile Hamburger */}
@@ -85,8 +85,11 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
                                 </svg>
                             </div>
                             <div className="flex flex-col">
-                                <span className="font-bold text-xl text-slate-800 tracking-tighter leading-none dark:text-white">ResuLens</span>
-                                <span className="text-[9px] font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-[0.2em] leading-none mt-0.5">AI Resume Intelligence</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-bold text-xl text-slate-800 tracking-tighter leading-none dark:text-white">ResuLens</span>
+                                    <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20">v2.5 • 3D</span>
+                                </div>
+                                <span className="text-xs font-bold text-cyan-700 dark:text-cyan-400 uppercase tracking-wider leading-none mt-1">AI Resume Intelligence</span>
                             </div>
                         </button>
 
@@ -130,14 +133,14 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
                         {analysis && activeTab !== 'home' && (
                             <div className="flex items-center gap-3">
                                 {candidateName && (
-                                    <div className="hidden xl:flex flex-col items-end px-4 border-r border-slate-200">
-                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Profile</span>
-                                        <span className="text-xs font-bold text-cyan-600 italic">@{candidateName.replace(/\s+/g, '').toLowerCase()}</span>
+                                    <div className="hidden xl:flex flex-col items-end px-4 border-r border-slate-200 dark:border-slate-800">
+                                        <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Active Profile</span>
+                                        <span className="text-xs font-bold text-cyan-700 dark:text-cyan-400 italic">@{candidateName.replace(/\s+/g, '').toLowerCase()}</span>
                                     </div>
                                 )}
                                 <button
                                     onClick={triggerNewUpload}
-                                    className="hidden sm:flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm min-w-[44px] min-h-[44px]"
+                                    className="hidden sm:flex items-center gap-2 px-6 py-3 surface-3d rounded-2xl text-xs font-bold text-[var(--text-primary)] hover:border-cyan-500/40 transition-all shadow-sm min-w-[44px] min-h-[44px]"
                                 >
                                     <RotateCcw size={14} aria-hidden="true" /> New Audit
                                 </button>
@@ -150,7 +153,7 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
                                 aria-expanded={showProfileMenu}
                                 aria-haspopup="true"
                                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                                className="flex items-center gap-3 p-1.5 pr-4 bg-[var(--bg-surface)] border border-[var(--border-secondary)] rounded-2xl shadow-sm hover:scale-[1.02] transition-all min-h-[44px]"
+                                className="flex items-center gap-3 p-1.5 pr-4 surface-3d rounded-2xl shadow-sm hover:scale-[1.02] transition-all min-h-[44px]"
                             >
                                 <div className="w-9 h-9 bg-gradient-to-br from-cyan-600 to-blue-700 rounded-xl flex items-center justify-center text-white font-bold text-sm border border-white/20" aria-hidden="true">
                                     {user?.name?.charAt(0) || 'G'}
@@ -172,7 +175,7 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
                                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        className="absolute right-0 mt-4 w-60 bg-[var(--bg-surface)] rounded-[2rem] shadow-2xl border border-[var(--border-primary)] p-3 z-50 overflow-hidden"
+                                        className="absolute right-0 mt-4 w-60 surface-3d-raised rounded-[2rem] shadow-2xl p-3 z-50 overflow-hidden"
                                     >
                                         <div className="p-4 border-b border-[var(--border-primary)] mb-2">
                                             <p className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-widest mb-1">Signed in as</p>
@@ -207,7 +210,7 @@ const Header = ({ activeTab, setActiveTab, candidateName, analysis, resetAnalysi
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="md:hidden bg-[var(--bg-surface)] border-b border-[var(--border-primary)] shadow-2xl overflow-hidden mt-4 mx-4 rounded-2xl"
+                        className="md:hidden surface-3d shadow-2xl overflow-hidden mt-4 mx-4 rounded-2xl"
                     >
                         <div className="flex flex-col p-4 gap-2">
                             {tabs.map(tab => {

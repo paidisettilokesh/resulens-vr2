@@ -174,7 +174,7 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                         <span className="text-xs font-black uppercase tracking-widest text-[var(--text-primary)]">Score: {sessionStats.totalScore}</span>
                                     </div>
-                                    <button onClick={() => setStep('setup')} className="p-3 bg-cyan-600/10 text-cyan-600 rounded-xl hover:bg-cyan-600 hover:text-white transition-all">
+                                    <button onClick={() => setStep('setup')} className="p-3 bg-cyan-600/10 text-cyan-600 dark:text-cyan-400 rounded-xl hover:bg-cyan-600 hover:text-white transition-all">
                                         <RotateCcw size={20} />
                                     </button>
                                 </div>
@@ -197,7 +197,7 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                         {interviewPrep.sections?.flatMap(s => s.questions).map((q, idx) => {
                                             const questionEval = evaluations?.[q.id];
                                             return (
-                                                <tr key={q.id} className={`group hover:bg-slate-50 transition-colors ${activeQuestion?.id === q.id ? 'bg-cyan-50/50' : ''}`}>
+                                                <tr key={q.id} className={`group hover:bg-[var(--bg-surface-secondary)] dark:hover:bg-slate-800/60 transition-colors ${activeQuestion?.id === q.id ? 'bg-cyan-500/10 dark:bg-cyan-500/20' : ''}`}>
                                                     <td className="px-8 py-6 align-top">
                                                         <span className="w-8 h-8 rounded-lg bg-[var(--bg-surface-secondary)] flex items-center justify-center font-black text-xs text-[var(--text-primary)]">
                                                             {idx + 1}
@@ -206,7 +206,7 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                                     <td className="px-8 py-6 align-top">
                                                         <p className="font-bold text-[var(--text-primary)] text-sm leading-relaxed max-w-md">{q.question}</p>
                                                         <div className="flex gap-2 mt-2">
-                                                            <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 bg-cyan-500/10 text-cyan-600 rounded-md border border-cyan-500/20">{q.difficulty}</span>
+                                                            <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-md border border-cyan-500/20">{q.difficulty}</span>
                                                         </div>
                                                     </td>
                                                     <td className="px-8 py-6 align-top">
@@ -227,9 +227,11 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                                         ) : '-'}
                                                     </td>
                                                     <td className="px-8 py-6 align-top">
-                                                        {questionEval?.score ? (
-                                                            <span className="text-xl font-black text-cyan-600">{questionEval.score}</span>
-                                                        ) : '-'}
+                                                        {questionEval?.score !== undefined ? (() => {
+                                                            const s = parseInt(questionEval.score, 10);
+                                                            const color = s >= 70 ? 'text-emerald-600 dark:text-emerald-400' : s >= 40 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400';
+                                                            return <span className={`text-xl font-black ${color}`}>{s}</span>;
+                                                        })() : '-'}
                                                     </td>
                                                     <td className="px-8 py-6 align-top">
                                                         {questionEval?.feedback ? (
@@ -266,7 +268,7 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                     >
                                         <div className="p-8 border-b border-[var(--border-secondary)] bg-[var(--bg-surface-secondary)] flex justify-between items-center">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-cyan-600"><Zap size={20} /></div>
+                                                <div className="w-10 h-10 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-cyan-600 dark:text-cyan-400"><Zap size={20} /></div>
                                                 <h4 className="font-black text-[var(--text-primary)]">Practicing Question</h4>
                                             </div>
                                             <button onClick={() => setActiveQuestion(null)} className="p-3 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-secondary)] text-[var(--text-muted)] hover:text-rose-700 dark:text-rose-400 transition-all">
@@ -292,37 +294,55 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                             </div>
 
                                             {evaluating && (
-                                                <div className="mt-8 flex items-center gap-4 text-cyan-600 font-bold">
+                                                <div className="mt-8 flex items-center gap-4 text-cyan-600 dark:text-cyan-400 font-bold">
                                                     <Loader2 className="animate-spin" />
                                                     <span>Neural engine evaluating response...</span>
                                                 </div>
                                             )}
 
                                             {evalError && !evaluating && (
-                                                <div className="mt-6 flex items-center gap-3 p-4 bg-rose-500/10 rounded-2xl border border-rose-500/20 text-rose-600">
+                                                <div className="mt-6 flex items-center gap-3 p-4 bg-rose-500/10 rounded-2xl border border-rose-500/20 text-rose-600 dark:text-rose-400">
                                                     <AlertTriangle size={18} />
                                                     <p className="text-sm font-bold">{evalError}</p>
                                                 </div>
                                             )}
 
                                             {/* IN-MODAL FEEDBACK IF ALREADY EVALUATED */}
-                                            {evaluations?.[activeQuestion.id] && !evaluating && (
-                                                <div className="mt-10 p-8 bg-emerald-500/5 rounded-[2.5rem] border border-emerald-500/10 space-y-6">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-2xl font-black text-emerald-600">Score: {evaluations[activeQuestion.id].score}</span>
-                                                        <span className="text-xs font-black uppercase text-emerald-700 dark:text-emerald-400">{evaluations[activeQuestion.id].verdict}</span>
-                                                    </div>
-                                                    <p className="text-sm font-medium text-[var(--text-secondary)] leading-relaxed italic">
-                                                        "{evaluations[activeQuestion.id].feedback}"
-                                                    </p>
-                                                    <div className="p-6 bg-[var(--bg-surface)] rounded-2xl border border-emerald-500/10">
-                                                        <h5 className="text-xs font-black uppercase text-cyan-600 mb-3 tracking-widest">Global Model Answer</h5>
-                                                        <p className="text-xs font-serif text-[var(--text-primary)] leading-relaxed italic">
-                                                            {evaluations[activeQuestion.id].improvedVersion}
+                                            {evaluations?.[activeQuestion.id] && !evaluating && (() => {
+                                                const currentEval = evaluations[activeQuestion.id];
+                                                const scoreVal = parseInt(currentEval.score ?? 0, 10);
+                                                const isStrong = scoreVal >= 70;
+                                                const isSatisfactory = scoreVal >= 40 && scoreVal < 70;
+                                                const cardBg = isStrong ? 'bg-emerald-500/5 border-emerald-500/10' : isSatisfactory ? 'bg-amber-500/5 border-amber-500/10' : 'bg-rose-500/5 border-rose-500/10';
+                                                const scoreColor = isStrong ? 'text-emerald-600 dark:text-emerald-400' : isSatisfactory ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600 dark:text-rose-400';
+                                                const verdictBadge = isStrong
+                                                    ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                                                    : isSatisfactory
+                                                        ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20'
+                                                        : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20';
+
+                                                return (
+                                                    <div className={`mt-10 p-8 rounded-[2.5rem] border space-y-6 ${cardBg}`}>
+                                                        <div className="flex items-center justify-between">
+                                                            <span className={`text-2xl font-black ${scoreColor}`}>Score: {currentEval.score} / 100</span>
+                                                            <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border ${verdictBadge}`}>
+                                                                {currentEval.verdict || (isStrong ? 'Strong' : isSatisfactory ? 'Satisfactory' : 'Needs Improvement')}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-sm font-medium text-[var(--text-secondary)] leading-relaxed italic">
+                                                            "{currentEval.feedback}"
                                                         </p>
+                                                        {currentEval.improvedVersion && (
+                                                            <div className="p-6 bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-secondary)]">
+                                                                <h5 className="text-xs font-black uppercase text-cyan-600 dark:text-cyan-400 mb-3 tracking-widest">Model Reference Answer</h5>
+                                                                <p className="text-xs font-serif text-[var(--text-primary)] leading-relaxed italic">
+                                                                    {currentEval.improvedVersion}
+                                                                </p>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                </div>
-                                            )}
+                                                );
+                                            })()}
                                         </div>
 
                                         <div className="p-10 border-t border-[var(--border-secondary)] bg-[var(--bg-surface-secondary)] flex gap-4">
@@ -334,7 +354,9 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                                         const res = await axios.post(`${API_BASE}/interview/evaluate`, {
                                                             question: activeQuestion.question,
                                                             answer: userAnswer,
-                                                            jobRole: selectedRole || 'Professional'
+                                                            jobRole: selectedRole || 'Professional',
+                                                            criteria: activeQuestion.criteria || '',
+                                                            difficulty: activeQuestion.difficulty || 'Medium'
                                                         }, {
                                                             headers: {
                                                                 'x-user-id': user?.id || 'guest',
@@ -357,7 +379,7 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                                     }
                                                     setEvaluating(false);
                                                 }}
-                                                disabled={evaluating || !userAnswer}
+                                                disabled={evaluating || !userAnswer?.trim()}
                                                 className="btn-primary flex-grow !rounded-2.5xl !py-4 shadow-xl shadow-cyan-500/20"
                                             >
                                                 Submit Mission Response
@@ -369,11 +391,11 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                                     const nextQ = allQuestions[currentIndex + 1] || allQuestions[0];
                                                     setActiveQuestion(nextQ);
                                                 }}
-                                                className="px-8 bg-[var(--bg-surface)] border border-[var(--border-secondary)] rounded-2.5xl font-bold uppercase text-xs tracking-widest text-cyan-600 hover:bg-cyan-50 transition-all flex items-center gap-2"
+                                                className="px-8 bg-[var(--bg-surface)] border border-[var(--border-secondary)] rounded-2.5xl font-bold uppercase text-xs tracking-widest text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/10 dark:hover:bg-cyan-500/20 transition-all flex items-center gap-2"
                                             >
                                                 Next <ChevronRight size={14} />
                                             </button>
-                                            <button onClick={() => setActiveQuestion(null)} className="px-8 bg-white border border-[var(--border-secondary)] rounded-2.5xl font-bold uppercase text-xs tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all">
+                                            <button onClick={() => setActiveQuestion(null)} className="px-8 bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-secondary)] border border-[var(--border-secondary)] rounded-2.5xl font-bold uppercase text-xs tracking-widest text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all">
                                                 Close Grid
                                             </button>
                                         </div>

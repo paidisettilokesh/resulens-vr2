@@ -65,13 +65,13 @@ Data: ${JSON.stringify(resumeData)}
 
 Provide a strict, professional evaluation.
 
-Return JSON:
+Return JSON with strictly evaluated numeric scores (0-100) reflecting the real fullness of the data:
 {
-  "atsScore": 85,
-  "readabilityScore": 90,
-  "keywordScore": 80,
-  "completenessScore": 95,
-  "feedback": ["Suggestion 1", "Suggestion 2"]
+  "atsScore": <integer 0-100 based on standard section presence and ATS readability>,
+  "readabilityScore": <integer 0-100 based on grammar and structure>,
+  "keywordScore": <integer 0-100 based on action verbs and industry competencies>,
+  "completenessScore": <integer 0-100 based on whether bio, experience, and skills are filled out>,
+  "feedback": ["Critical improvement suggestion 1", "Critical improvement suggestion 2"]
 }`;
     });
 });
