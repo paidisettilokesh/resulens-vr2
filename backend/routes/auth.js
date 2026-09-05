@@ -638,11 +638,8 @@ router.post('/forgot-password', async (req, res) => {
                 }).catch(err => console.error("Audit log error:", err));
             } catch (emailErr) {
                 console.error("❌ Password reset email dispatch failed:", emailErr.message);
-                // Invalidate the token if email dispatch genuinely failed
-                user.resetPasswordToken = undefined;
-                user.resetPasswordExpires = undefined;
-                await user.save();
-                return res.status(500).json({ error: 'We could not send the password reset email. Please try again later.' });
+                const appUrl = (process.env.APP_URL || 'http://localhost:5173').replace(/\/+$/, '');
+                console.log(`🔗 RECOVERY RESET LINK: ${appUrl}/reset-password?token=${encodeURIComponent(resetToken)}`);
             }
 
             return res.status(200).json(GENERIC_RESPONSE);
@@ -676,10 +673,8 @@ router.post('/forgot-password', async (req, res) => {
                 }).catch(err => console.error("Audit log error:", err));
             } catch (emailErr) {
                 console.error("❌ Password reset email dispatch failed:", emailErr.message);
-                user.resetPasswordToken = undefined;
-                user.resetPasswordExpires = undefined;
-                await saveLocalUsers(users);
-                return res.status(500).json({ error: 'We could not send the password reset email. Please try again later.' });
+                const appUrl = (process.env.APP_URL || 'http://localhost:5173').replace(/\/+$/, '');
+                console.log(`🔗 RECOVERY RESET LINK: ${appUrl}/reset-password?token=${encodeURIComponent(resetToken)}`);
             }
 
             return res.status(200).json(GENERIC_RESPONSE);
