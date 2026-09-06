@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -195,9 +196,18 @@ const healthHandler = (req, res) => {
     });
 };
 
-app.get('/', healthHandler);
 app.get('/health', healthHandler);
 app.get('/api/health', healthHandler);
+
+// ── Serve Frontend Static Files (Single Host) ─────────────────────────────────
+const frontendDist = path.join(__dirname, '../frontend/dist');
+const hasFrontendBuild = fs.existsSync(path.join(frontendDist, 'index.html'));
+
+if (hasFrontendBuild) {
+    app.use(express.static(frontendDist));
+} else {
+    app.get('/', healthHandler);
+}
 
 // ── API Routes ────────────────────────────────────────────────────────────────
 const aiTimeout = timeoutMiddleware(120); // 120 seconds for AI endpoints
@@ -241,6 +251,14 @@ app.delete('/api/history', requireAuth, async (req, res) => {
         res.status(500).json({ error: 'Failed to clear history' });
     }
 });
+
+// ── SPA Fallback (Single Host) ────────────────────────────────────────────────
+if (hasFrontendBuild) {
+    app.get('*', (req, res, next) => {
+        if (req.path.startsWith('/api') || req.path === '/health') return next();
+        res.sendFile(path.join(frontendDist, 'index.html'));
+    });
+}
 
 // ── 404 Handler ───────────────────────────────────────────────────────────────
 app.use((req, res) => {

@@ -216,12 +216,6 @@ export default function LandingPage({ onOpenAuth }) {
                             >
                                 Analyze My Resume Now <ArrowRight size={16} aria-hidden="true" />
                             </a>
-                            <button
-                                onClick={() => onOpenAuth('guest')}
-                                className="px-8 py-4 bg-[var(--bg-surface)] text-cyan-700 dark:text-cyan-400 border border-[var(--border-secondary)] hover:bg-[var(--bg-surface-secondary)] font-bold rounded-2xl shadow-sm active:scale-[0.97] transition-all text-sm focus-visible:ring-4 focus-visible:ring-cyan-500/50 min-h-[44px]"
-                            >
-                                Explore Guest Demo
-                            </button>
                         </div>
 
                         <div className="flex items-center gap-6 pt-4 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">

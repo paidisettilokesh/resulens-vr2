@@ -237,19 +237,6 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
         }
     };
 
-    const handleGuestLogin = async () => {
-        setLoading(true);
-        setError('');
-        try {
-            const { data } = await axios.post(`${backendUrl}/auth/guest`);
-            onLogin(data);
-            onClose();
-        } catch {
-            setError('Failed to start a guest session. Is the backend running?');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const switchMode = (newMode) => {
         setMode(newMode);
@@ -526,7 +513,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                 </form>
 
                 {/* Third Party Auth (Only for login/signup) */}
-                {(isLogin || isSignup) && (
+                {(isLogin || isSignup) && hasGoogleClientId && (
                     <>
                         {/* Divider */}
                         <div className="flex items-center gap-3 my-5">
@@ -536,20 +523,8 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                         </div>
 
                         <div className="space-y-3">
-                            {hasGoogleClientId && (
-                                <div ref={googleBtnRef} id="google-signin-btn"
-                                    className="w-full flex justify-center overflow-hidden rounded-full" />
-                            )}
-
-                            {/* Guest Login */}
-                            <button type="button" id="guest-access-btn"
-                                onClick={handleGuestLogin}
-                                disabled={loading}
-                                className="w-full py-3 px-4 rounded-full font-bold text-[12px] flex items-center justify-center gap-2 transition-all duration-200 hover:opacity-80 text-[var(--text-muted)] focus-visible:ring-2 focus-visible:ring-cyan-700 min-h-[44px]"
-                            >
-                                Continue as Guest
-                                <ArrowRight size={13} aria-hidden="true" />
-                            </button>
+                            <div ref={googleBtnRef} id="google-signin-btn"
+                                className="w-full flex justify-center overflow-hidden rounded-full" />
                         </div>
                     </>
                 )}
