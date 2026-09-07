@@ -142,8 +142,13 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                         </div>
 
                         <button
-                            onClick={() => { setActiveTab('analyzer'); analyzeResume(); }}
-                            disabled={!file || !selectedRole || loading}
+                            onClick={() => {
+                                // Default to 'Professional' if the user hasn't selected a role
+                                if (!selectedRole) setSelectedRole('Professional');
+                                setActiveTab('analyzer');
+                                analyzeResume();
+                            }}
+                            disabled={!file || loading}
                             className="btn-primary w-full !rounded-[2rem] group min-h-[44px]"
                         >
                             {loading ? (

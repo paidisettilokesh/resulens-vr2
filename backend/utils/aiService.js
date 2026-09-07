@@ -29,14 +29,15 @@ const callGroq = async (prompt) => {
                     messages: [{ role: "user", content: prompt + "\n\nRETURN VALID JSON ONLY. No preamble, no markdown." }],
                     temperature: 0.1,
                     top_p: 1,
-                    max_tokens: 4096
+                    max_tokens: 4096,
+                    response_format: { type: "json_object" }
                 },
                 {
                     headers: {
                         Authorization: `Bearer ${key}`,
                         "Content-Type": "application/json"
                     },
-                    timeout: 15000
+                    timeout: 25000
                 }
             );
 
@@ -63,12 +64,12 @@ const callGroq = async (prompt) => {
 };
 
 // --- OPENROUTER PROVIDER (Fallback) ---
-const callOpenRouter = async (prompt, model = "google/gemini-2.0-flash-exp:free") => {
+const callOpenRouter = async (prompt, model = "google/gemma-4-31b-it:free") => {
     const fallbacks = [
-        "google/gemini-2.0-flash-exp:free",
-        "meta-llama/llama-3.3-70b-instruct:free",
-        "liquid/lfm-2.5-2.6b:free",
-        "z-ai/glm-5.2:free"
+        "google/gemma-4-31b-it:free",
+        "nvidia/nemotron-3.5-lightning:free",
+        "minimax/minimax-m2.7:free",
+        "liquid/lfm-2.5-2.6b:free"
     ];
 
     const tryModel = async (targetModel) => {

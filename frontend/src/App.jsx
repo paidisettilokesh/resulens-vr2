@@ -152,15 +152,22 @@ function App() {
             setFile(uploaded);
             setPendingResumeFile(null);
             setActiveTab('analyzer');
-            
-            // Execute automated analysis if a target role was already chosen
+
+            // Execute automated analysis — default to 'Professional' if the
+            // new user never picked a role on the landing page.
             const autoAnalyze = async () => {
-                const targetRole = selectedRole === 'Other' ? customRole : selectedRole;
-                if (!targetRole) {
-                    // Fallback to home if no role was chosen
-                    setActiveTab('home');
-                    return;
+                const targetRole = (selectedRole === 'Other' ? customRole : selectedRole) || 'Professional';
+
+                // Keep the role state in sync so the rest of the UI reflects
+                // the defaulted value (e.g. AnalysisView header, feature tabs).
+                if (!selectedRole) {
+                    setSelectedRole('Professional');
                 }
+
+                // Suppress onboarding tour while a live analysis is running —
+                // the modal would otherwise cover the ProgressiveLoader.
+                setShowOnboarding(false);
+
                 const fd = new FormData();
                 fd.append('resume', uploaded);
                 fd.append('jobRole', targetRole);
@@ -168,12 +175,15 @@ function App() {
                     const data = await callApi('analyze', fd);
                     setAnalysis(data);
                 } catch (err) {
-                    console.error("Auto analysis failed:", err);
+                    console.error('Auto analysis failed:', err);
+                    // Surface the error so the user sees feedback instead of a stuck loader
+                    setError('Analysis failed. Please try again — upload your resume and select a role below.');
+                    setActiveTab('home');
                 }
             };
             autoAnalyze();
         }
-    }, [user, pendingResumeFile, selectedRole, customRole, setFile, setAnalysis, callApi, setActiveTab]);
+    }, [user, pendingResumeFile, selectedRole, setSelectedRole, customRole, setFile, setAnalysis, callApi, setActiveTab]);
 
     // Role-based Access Control Guard for Admin Panel
     useEffect(() => {
@@ -205,10 +215,13 @@ function App() {
     };
 
     const analyzeResume = async () => {
-        if (!file || !selectedRole) { setError('Upload resume and select a target role first.'); return; }
+        if (!file) { setError('Please upload a resume first.'); return; }
+        // Default to 'Professional' if the user hasn't explicitly picked a role
+        const targetRole = (selectedRole === 'Other' ? customRole : selectedRole) || 'Professional';
+        if (!selectedRole) setSelectedRole('Professional');
         const fd = new FormData();
         fd.append('resume', file);
-        fd.append('jobRole', selectedRole === 'Other' ? customRole : selectedRole);
+        fd.append('jobRole', targetRole);
 
         try {
             const data = await callApi('analyze', fd);
