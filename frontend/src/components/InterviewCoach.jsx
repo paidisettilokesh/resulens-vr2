@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient, { classifyApiError } from '../utils/apiClient';
 import { useUser } from '../context/UserContext';
 import {
     HelpCircle, Mic, MicOff, MessageSquare, Volume2, FileText,
@@ -7,9 +7,6 @@ import {
     Brain, Star, Award, RotateCcw, ShieldCheck, AlertTriangle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-// Build the API base URL once — same logic as ResumeContext
-const API_BASE = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '') + '/api';
 
 const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, setJobDescription, selectedRole }) => {
     const { user, logout } = useUser();
@@ -351,17 +348,12 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                                     setEvaluating(true);
                                                     setEvalError('');
                                                     try {
-                                                        const res = await axios.post(`${API_BASE}/interview/evaluate`, {
+                                                        const res = await apiClient.post('/interview/evaluate', {
                                                             question: activeQuestion.question,
                                                             answer: userAnswer,
                                                             jobRole: selectedRole || 'Professional',
                                                             criteria: activeQuestion.criteria || '',
                                                             difficulty: activeQuestion.difficulty || 'Medium'
-                                                        }, {
-                                                            headers: {
-                                                                'x-user-id': user?.id || 'guest',
-                                                                ...(user?.token ? { 'Authorization': `Bearer ${user.token}` } : {})
-                                                            }
                                                         });
                                                         setEvaluations(prev => ({
                                                             ...prev,
@@ -372,10 +364,11 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
                                                             totalScore: prev.totalScore + parseInt(res.data.score || 0)
                                                         }));
                                                     } catch (err) {
-                                                        if (err.response?.status === 401) {
+                                                        const classified = classifyApiError(err);
+                                                        if (classified.isAuth) {
                                                             logout();
                                                         }
-                                                        setEvalError(err.response?.data?.error || 'Evaluation failed. Please try again.');
+                                                        setEvalError(classified.message || 'Evaluation failed. Please try again.');
                                                     }
                                                     setEvaluating(false);
                                                 }}

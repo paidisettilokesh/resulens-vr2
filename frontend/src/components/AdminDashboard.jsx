@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient, { classifyApiError } from '../utils/apiClient';
 import {
     Users, Activity, Server, Shield, TrendingUp, CheckCircle,
     AlertTriangle, RefreshCw, Search, ShieldAlert, Cpu, HardDrive, Clock, Key,
@@ -72,25 +72,21 @@ export default function AdminDashboard({ user, backendUrl }) {
         setLoading(true);
         setError('');
         try {
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${user.token}`
-                }
-            };
-            const analyticsRes = await axios.get(`${backendUrl}/admin/analytics`, config);
+            const analyticsRes = await apiClient.get('/admin/analytics');
             setAnalytics(analyticsRes.data);
 
-            const usersRes = await axios.get(`${backendUrl}/admin/users`, config);
+            const usersRes = await apiClient.get('/admin/users');
             setUsersList(usersRes.data);
 
-            const auditRes = await axios.get(`${backendUrl}/admin/audit-logs`, config);
+            const auditRes = await apiClient.get('/admin/audit-logs');
             setAuditLogs(auditRes.data);
 
-            const sysRes = await axios.get(`${backendUrl}/admin/system/logs`, config);
+            const sysRes = await apiClient.get('/admin/system/logs');
             setSystemLogs(sysRes.data.logs || []);
         } catch (err) {
             console.error("Failed to load admin data:", err);
-            setError(err.response?.data?.error || "Unauthorized or connection to admin routes failed.");
+            const classified = classifyApiError(err);
+            setError(classified.message || err.response?.data?.error || "Unauthorized or connection to admin routes failed.");
         } finally {
             setLoading(false);
         }
@@ -108,16 +104,12 @@ export default function AdminDashboard({ user, backendUrl }) {
         setAuthLoading(true);
         setAuthError('');
         try {
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${user.token}`
-                }
-            };
-            await axios.post(`${backendUrl}/admin/verify-password`, { password: confirmPassword }, config);
+            await apiClient.post('/admin/verify-password', { password: confirmPassword });
             sessionStorage.setItem('admin_unlocked_at', Date.now().toString());
             setIsUnlocked(true);
         } catch (err) {
-            setAuthError(err.response?.data?.error || "Invalid password. Re-authentication failed.");
+            const classified = classifyApiError(err);
+            setAuthError(classified.message || err.response?.data?.error || "Invalid password. Re-authentication failed.");
         } finally {
             setAuthLoading(false);
         }
@@ -135,17 +127,13 @@ export default function AdminDashboard({ user, backendUrl }) {
         const newRole = currentRole === 'admin' ? 'user' : 'admin';
         setActionLoading(targetUserId);
         try {
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${user.token}`
-                }
-            };
-            await axios.put(`${backendUrl}/admin/users/${targetUserId}/role`, { role: newRole }, config);
+            await apiClient.put(`/admin/users/${targetUserId}/role`, { role: newRole });
             
             // Reload logs and tables
             fetchAdminData();
         } catch (err) {
-            alert(err.response?.data?.error || "Failed to update role.");
+            const classified = classifyApiError(err);
+            alert(classified.message || err.response?.data?.error || "Failed to update role.");
         } finally {
             setActionLoading(null);
         }
@@ -154,17 +142,13 @@ export default function AdminDashboard({ user, backendUrl }) {
     const handleStatusChange = async (targetUserId, newStatus) => {
         setActionLoading(`${targetUserId}-status`);
         try {
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${user.token}`
-                }
-            };
-            await axios.put(`${backendUrl}/admin/users/${targetUserId}/status`, { status: newStatus }, config);
+            await apiClient.put(`/admin/users/${targetUserId}/status`, { status: newStatus });
             
             // Reload logs and tables
             fetchAdminData();
         } catch (err) {
-            alert(err.response?.data?.error || "Failed to update account status.");
+            const classified = classifyApiError(err);
+            alert(classified.message || err.response?.data?.error || "Failed to update account status.");
         } finally {
             setActionLoading(null);
         }
@@ -176,17 +160,13 @@ export default function AdminDashboard({ user, backendUrl }) {
         }
         setActionLoading(`${targetUserId}-delete`);
         try {
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${user.token}`
-                }
-            };
-            await axios.delete(`${backendUrl}/admin/users/${targetUserId}`, config);
+            await apiClient.delete(`/admin/users/${targetUserId}`);
             
             // Reload logs and tables
             fetchAdminData();
         } catch (err) {
-            alert(err.response?.data?.error || "Failed to delete user account.");
+            const classified = classifyApiError(err);
+            alert(classified.message || err.response?.data?.error || "Failed to delete user account.");
         } finally {
             setActionLoading(null);
         }

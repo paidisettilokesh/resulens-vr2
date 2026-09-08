@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 import {
     Loader2, AlertTriangle, Download, Zap, Briefcase, FileText,
     ArrowRight, Edit3, BookOpen, CheckCircle, Globe, Layout,
     ShieldCheck, Target, Award, TrendingUp, BarChart3, Fingerprint, MapPin, 
-    MessageSquare, ChevronRight, Clock, Star, Sparkles, Flame, Shield, ArrowUpRight, TrendingDown
+    MessageSquare, ChevronRight, Clock, Star, Sparkles, Flame, Shield, ArrowUpRight, TrendingDown,
+    RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { downloadPDF, downloadTextFile, copyToClipboard, getJobLinks, getCourseLink } from '../utils/helpers';
@@ -13,29 +14,22 @@ import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tool
 
 const AnalysisView = ({
     analysis, loading, error, file, selectedRole, customRole, candidateName,
-    setActiveTab, isHistoryView, onBack, user, backendUrl
+    setActiveTab, isHistoryView, onBack, user, backendUrl, onRetry
 }) => {
     const [history, setHistory] = useState([]);
     const [loadingHistory, setLoadingHistory] = useState(true);
 
-    const apiBaseUrl = backendUrl || 'http://localhost:5000/api';
-
     useEffect(() => {
-        if (!user || !apiBaseUrl) {
+        if (!user) {
             setLoadingHistory(false);
             return;
         }
         const fetchHistory = async () => {
             try {
-                const { data } = await axios.get(`${apiBaseUrl}/history`, {
-                    headers: {
-                        'x-user-id': user?.id || 'guest',
-                        ...(user?.token ? { 'Authorization': `Bearer ${user.token}` } : {})
-                    }
-                });
+                const { data } = await apiClient.get('/history');
                 
                 // Filter only analysis records
-                const analysisRecords = data
+                const analysisRecords = (data || [])
                     .filter(item => {
                         const type = item.type || item.details?.type || (item.details ? 'analysis' : undefined);
                         return type === 'analysis';
@@ -47,7 +41,7 @@ const AnalysisView = ({
                             timestamp: item.timestamp || rec.timestamp || item.createdAt
                         };
                     })
-                    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); // V1 -> V2 -> V3...
+                    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
                 
                 setHistory(analysisRecords);
             } catch (err) {
@@ -57,18 +51,19 @@ const AnalysisView = ({
             }
         };
         fetchHistory();
-    }, [user, apiBaseUrl, analysis]);
+    }, [user, analysis]);
 
     if (!analysis) {
         return (
-            <div className="min-h-[600px] flex flex-col items-center justify-center bg-[var(--bg-surface-secondary)] rounded-[4rem] border-2 border-dashed border-[var(--border-secondary)]">
+            <div className="min-h-[600px] flex flex-col items-center justify-center bg-[var(--bg-surface-secondary)] rounded-[4rem] border-2 border-dashed border-[var(--border-secondary)] p-6">
                 {loading ? (
                     <ProgressiveLoader active={loading} />
                 ) : error ? (
                     (() => {
-                        const isScannedError = error.toLowerCase().includes('image') ||
-                            error.toLowerCase().includes('scanned') ||
-                            error.toLowerCase().includes('selectable text');
+                        const errorLower = String(error).toLowerCase();
+                        const isScannedError = errorLower.includes('image') ||
+                            errorLower.includes('scanned') ||
+                            errorLower.includes('selectable text');
 
                         if (isScannedError) {
                             return (
@@ -105,16 +100,42 @@ const AnalysisView = ({
                             );
                         }
 
+                        const isColdStartOrNet = errorLower.includes('network') ||
+                            errorLower.includes('waking up') ||
+                            errorLower.includes('unavailable') ||
+                            errorLower.includes('timeout') ||
+                            errorLower.includes('initializing');
+
                         return (
-                            <div className="text-rose-700 dark:text-rose-400 text-center p-12 max-w-xl">
-                                <div className="w-20 h-20 bg-rose-50 dark:bg-rose-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-rose-100 shadow-xl shadow-rose-200/50">
-                                    <AlertTriangle size={40} />
+                            <div className="text-center p-8 md:p-12 max-w-xl mx-auto">
+                                <div className="w-20 h-20 bg-amber-50 dark:bg-amber-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-amber-200 dark:border-amber-500/20 shadow-xl shadow-amber-200/50">
+                                    <AlertTriangle size={40} className="text-amber-600 dark:text-amber-400" />
                                 </div>
-                                <h2 className="text-3xl font-black text-[var(--text-primary)] mb-4 tracking-tight">Analysis Interrupted</h2>
-                                <div className="bg-[var(--bg-surface)] p-6 rounded-3xl border border-rose-100 shadow-sm mb-8 text-sm font-bold text-[var(--text-secondary)] leading-relaxed italic">
-                                    "{error}"
+                                <h2 className="text-3xl font-black text-[var(--text-primary)] mb-3 tracking-tight">
+                                    {isColdStartOrNet ? 'Service Interrupted' : 'Analysis Interrupted'}
+                                </h2>
+                                <p className="text-xs text-[var(--text-secondary)] uppercase tracking-widest font-bold mb-4">
+                                    {isColdStartOrNet ? 'Backend Service Connection' : 'Diagnostic Notice'}
+                                </p>
+                                <div className="bg-[var(--bg-surface)] p-6 rounded-3xl border border-[var(--border-secondary)] shadow-sm mb-8 text-sm font-medium text-[var(--text-secondary)] leading-relaxed">
+                                    {error}
                                 </div>
-                                <button onClick={() => setActiveTab('home')} className="btn-primary !py-4 !px-10 !rounded-2xl shadow-xl shadow-cyan-200 active:scale-95 transition-all">Re-initialize Session</button>
+                                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                    {onRetry && (
+                                        <button 
+                                            onClick={onRetry} 
+                                            className="btn-primary w-full sm:w-auto !py-4 !px-8 !rounded-2xl shadow-xl shadow-cyan-200 active:scale-95 transition-all inline-flex items-center justify-center gap-2"
+                                        >
+                                            <RefreshCw size={18} /> Retry Analysis
+                                        </button>
+                                    )}
+                                    <button 
+                                        onClick={() => setActiveTab('home')} 
+                                        className="btn-secondary w-full sm:w-auto !py-4 !px-8 !rounded-2xl border border-[var(--border-secondary)] hover:bg-[var(--bg-surface-secondary)] transition-all inline-flex items-center justify-center gap-2"
+                                    >
+                                        Change Resume
+                                    </button>
+                                </div>
                             </div>
                         );
                     })()

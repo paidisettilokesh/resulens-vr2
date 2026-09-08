@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import axios from 'axios';
+import apiClient from './utils/apiClient';
 import './index.css';
 
 const Confetti = React.lazy(() => import('react-confetti'));
@@ -79,51 +79,50 @@ function App() {
 
     const [toastMsg, setToastMsg] = useState('');
 
+    // Automatically dismiss temporary error toasts so they don't block the mobile UI
+    useEffect(() => {
+        if (!error) return;
+        const timer = setTimeout(() => {
+            setError('');
+        }, 7000);
+        return () => clearTimeout(timer);
+    }, [error, setError]);
+
     // Fetch latest saved resume session on load/user change
     useEffect(() => {
-        if (!user) return;
+        if (!user || !user.token) return;
         const loadLatestResume = async () => {
             try {
-                const config = {
-                    headers: {
-                        'x-user-id': user?.id || 'guest',
-                        ...(user?.token ? { 'Authorization': `Bearer ${user.token}` } : {})
-                    }
-                };
-                const { data } = await axios.get(`${backendUrl}/user-resumes/latest`, config);
+                const { data } = await apiClient.get('/user-resumes/latest');
                 if (data && data.content) {
                     setBuilderData(data.content);
                 }
             } catch (err) {
-                console.error("Failed to load latest resume:", err);
-                if (err.response?.status === 401) {
+                console.warn("Failed to load latest resume:", err.message);
+                const code = err.response?.data?.code;
+                if (err.response?.status === 401 && (code === 'TOKEN_EXPIRED' || code === 'SESSION_INVALID' || code === 'USER_NOT_FOUND')) {
                     handleLogout();
                 }
             }
         };
         loadLatestResume();
-    }, [user, backendUrl]);
+    }, [user, handleLogout]);
 
     const saveResume = async () => {
         try {
             setError('');
             setToastMsg('');
-            const config = {
-                headers: {
-                    'x-user-id': user?.id || 'guest',
-                    ...(user?.token ? { 'Authorization': `Bearer ${user.token}` } : {})
-                }
-            };
-            const { data } = await axios.post(`${backendUrl}/user-resumes/save`, {
+            const { data } = await apiClient.post('/user-resumes/save', {
                 userId: user?.id || 'guest',
                 resumeData: builderData
-            }, config);
+            });
             if (data.success) {
                 setToastMsg('Resume Saved Successfully');
-                setTimeout(() => setToastMsg(''), 2000);
+                setTimeout(() => setToastMsg(''), 2500);
             }
         } catch (err) {
-            if (err.response?.status === 401) {
+            const code = err.response?.data?.code;
+            if (err.response?.status === 401 && (code === 'TOKEN_EXPIRED' || code === 'SESSION_INVALID')) {
                 handleLogout();
             }
             setError(err.response?.data?.error || err.message || 'Failed to save resume session');
@@ -200,9 +199,9 @@ function App() {
                     setAnalysis(data);
                 } catch (err) {
                     pendingAnalysisKey.current = null;
-                    console.error('Auto analysis failed:', err);
-                    // Error message is already set in context — just navigate home
-                    setActiveTab('home');
+                    console.warn('Auto analysis encountered error:', err.message);
+                    // Retain analyzer tab to show diagnostic screen with 1-click retry
+                    setActiveTab('analyzer');
                 }
             };
             autoAnalyze();
@@ -429,6 +428,7 @@ function App() {
                                     isHistoryView={isHistoryView} user={user}
                                     backendUrl={backendUrl}
                                     onBack={() => setIsHistoryView(false)}
+                                    onRetry={analyzeResume}
                                 />
                             )}
 

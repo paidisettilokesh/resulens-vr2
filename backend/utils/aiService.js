@@ -542,7 +542,7 @@ const normalizeOptimization = (data, url) => {
 
 // ── UNIFIED HANDLER ───────────────────────────────────────────────────────────
 export const handleResumeRequest = async (req, res, promptBuilder, onSuccess) => {
-    const requestId = generateRequestId();
+    const requestId = req.id || generateRequestId();
     const requestStart = Date.now();
 
     // Structured per-request log — written to Winston on completion/failure
@@ -593,6 +593,12 @@ export const handleResumeRequest = async (req, res, promptBuilder, onSuccess) =>
         let currentPrompt = basePrompt;
 
         while (retries >= 0) {
+            // Check if connection was closed or timed out before calling AI
+            if ((req.isTimedOut && req.isTimedOut()) || req.isClientClosed || res.headersSent || res.writableEnded) {
+                logger.warn(`[AI] [${requestId}] Client disconnected or timed out. Halting AI processing.`);
+                return;
+            }
+
             result = await callAI(currentPrompt, requestLog);
 
             if (!result || result.error) {
@@ -655,6 +661,11 @@ export const handleResumeRequest = async (req, res, promptBuilder, onSuccess) =>
             }
         }
 
+        if ((req.isTimedOut && req.isTimedOut()) || req.isClientClosed || res.headersSent || res.writableEnded) {
+            logger.warn(`[AI] [${requestId}] Skipping response delivery: client disconnected or timed out.`);
+            return;
+        }
+
         if (url.includes('analyze')) {
             result = normalizeAnalysis(result);
 
@@ -685,13 +696,19 @@ export const handleResumeRequest = async (req, res, promptBuilder, onSuccess) =>
             requestLog.requestId, requestLog.totalDurationMs,
             requestLog.providerAttempts.length, requestLog.cacheHit || 'none');
 
-        res.json({ ...result, raw: resumeText });
+        if (!res.headersSent && !res.writableEnded) {
+            res.json({ ...result, raw: resumeText, requestId: requestLog.requestId });
+        }
 
     } catch (error) {
         requestLog.totalDurationMs = Date.now() - requestStart;
         logger.error('[Request Failed] requestId=%s error=%s duration=%dms attempts=%d',
             requestLog.requestId, error.message, requestLog.totalDurationMs,
             requestLog.providerAttempts.length);
+
+        if (res.headersSent || res.writableEnded) {
+            return;
+        }
 
         const isClientFileError = error.message && (
             error.message.includes('PDF') ||
@@ -704,7 +721,11 @@ export const handleResumeRequest = async (req, res, promptBuilder, onSuccess) =>
         );
 
         const httpStatus = isClientFileError ? 400 : 500;
-        res.status(httpStatus).json({ error: error.message });
+        res.status(httpStatus).json({
+            error: error.message,
+            code: isClientFileError ? 'UNSUPPORTED_OR_SCANNED_FILE' : 'AI_PROCESSING_ERROR',
+            requestId: requestLog.requestId
+        });
     } finally {
         if (filePath && fs.existsSync(filePath)) {
             setTimeout(() => fs.unlink(filePath, () => {}), 1000);

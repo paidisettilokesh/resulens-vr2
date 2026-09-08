@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import apiClient, { classifyApiError } from '../utils/apiClient';
 import { useUser } from '../context/UserContext';
 import {
     Clock, ChevronRight, AlertTriangle, Loader2,
     Trash2, Zap, Sparkles, MessageSquare,
-    Briefcase, Target, Flame, FileText
+    Briefcase, Target, Flame, FileText, RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -19,19 +19,17 @@ const HistoryTab = ({ user, backendUrl, setActiveTab, setAnalysis, setCandidateN
     }, []);
 
     const fetchHistory = async () => {
+        setLoading(true);
+        setError('');
         try {
-            const { data } = await axios.get(`${backendUrl}/history`, {
-                headers: { 
-                    'x-user-id': user?.id || 'guest',
-                    ...(user?.token ? { 'Authorization': `Bearer ${user.token}` } : {})
-                }
-            });
-            setHistory(data);
+            const { data } = await apiClient.get('/history');
+            setHistory(Array.isArray(data) ? data : []);
         } catch (err) {
-            if (err.response?.status === 401) {
+            const classified = classifyApiError(err);
+            if (classified.isAuth) {
                 logout();
             }
-            setError('Failed to load history');
+            setError(classified.message || 'Failed to load history.');
         } finally {
             setLoading(false);
         }
@@ -40,18 +38,14 @@ const HistoryTab = ({ user, backendUrl, setActiveTab, setAnalysis, setCandidateN
     const clearHistory = async () => {
         if (!confirm('Are you sure you want to clear all history?')) return;
         try {
-            await axios.delete(`${backendUrl}/history`, {
-                headers: { 
-                    'x-user-id': user?.id || 'guest',
-                    ...(user?.token ? { 'Authorization': `Bearer ${user.token}` } : {})
-                }
-            });
+            await apiClient.delete('/history');
             setHistory([]);
         } catch (err) {
-            if (err.response?.status === 401) {
+            const classified = classifyApiError(err);
+            if (classified.isAuth) {
                 logout();
             }
-            alert('Failed to clear history');
+            alert(classified.message || 'Failed to clear history.');
         }
     };
 
@@ -122,6 +116,19 @@ const HistoryTab = ({ user, backendUrl, setActiveTab, setAnalysis, setCandidateN
     };
 
     if (loading) return <div className="text-center py-32"><Loader2 className="animate-spin text-cyan-600 mx-auto w-10 h-10" /></div>;
+
+    if (error && history.length === 0) {
+        return (
+            <div className="max-w-md mx-auto text-center py-20 bg-[var(--bg-surface)] rounded-3xl border border-rose-500/20 p-8 space-y-4 my-8">
+                <AlertTriangle className="w-12 h-12 text-rose-500 mx-auto" />
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">Unable to Load History</h3>
+                <p className="text-xs text-[var(--text-secondary)]">{error}</p>
+                <button onClick={fetchHistory} className="btn-primary !py-2 !px-6 text-xs flex items-center gap-2 mx-auto">
+                    <RefreshCw size={14} /> Retry
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-5xl mx-auto space-y-10 animate-fade-in py-4">

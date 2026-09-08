@@ -1,6 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 import fs from 'fs/promises';
 import path from 'path';
@@ -9,11 +10,13 @@ import crypto from 'crypto';
 import { getSecureStorageDir } from '../utils/storage.js';
 import { sendEmail, sendPasswordResetEmail, sendPasswordChangedEmail } from '../utils/email.js';
 import { logAudit } from '../utils/auditLogger.js';
+import { waitForDb, isDbReady } from '../config/db.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '301466670902-h42rg1ghcnhoo109dam60hjkd4020gq5.apps.googleusercontent.com');
 
-// ── Fallback Storage Helpers ──────────────────────────────────────────────────
+// ── Fallback Storage Helpers (Development Only) ───────────────────────────────
 const FALLBACK_DIR = path.join(getSecureStorageDir(), 'talentsync-v2-data');
 const USERS_FALLBACK_FILE = path.join(FALLBACK_DIR, 'users_fallback.json');
 
@@ -22,7 +25,7 @@ const ensureDir = async () => {
     try { await fs.mkdir(FALLBACK_DIR, { recursive: true }); } catch (e) { }
 };
 
-// Read fallback users
+// Read fallback users (dev only)
 const getLocalUsers = async () => {
     try {
         await ensureDir();
@@ -33,7 +36,7 @@ const getLocalUsers = async () => {
     }
 };
 
-// Write fallback users
+// Write fallback users (dev only)
 const saveLocalUsers = async (users) => {
     try {
         await ensureDir();
@@ -43,6 +46,31 @@ const saveLocalUsers = async (users) => {
     }
 };
 
+/**
+ * Ensures MongoDB is ready or returns a 503 response in production.
+ * Prevents creation of ghost/ephemeral local user accounts on Render.
+ */
+const ensureDatabaseReady = async (res) => {
+    if (isDbReady()) return true;
+
+    if (process.env.MONGODB_URI) {
+        const connected = await waitForDb(3000);
+        if (connected) return true;
+    }
+
+    if (process.env.NODE_ENV === 'production' || process.env.MONGODB_URI) {
+        res.set('Retry-After', '3');
+        res.status(503).json({
+            error: 'Database service is initializing. Please retry in a few seconds.',
+            code: 'DATABASE_UNAVAILABLE',
+            retryAfter: 3
+        });
+        return false;
+    }
+
+    return true; // Non-production without MONGODB_URI falls back to local storage
+};
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const generateToken = (userId, email, name, role = 'user', tokenVersion = 0) => {
@@ -50,20 +78,59 @@ const generateToken = (userId, email, name, role = 'user', tokenVersion = 0) => 
         throw new Error('JWT_SECRET is missing from environment variables');
     }
     return jwt.sign(
-        { id: userId, email, name, role, tokenVersion },
+        { id: String(userId), email, name, role, tokenVersion },
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRY || '7d' }
     );
 };
 
-// Simple field-level validation — no third-party lib required
+// Simple field-level validation
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const validatePassword = (pw) => typeof pw === 'string' && pw.length >= 8;
 const escapeRegex = (string) => string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
+// ── GET /api/auth/me (Session Verification) ──────────────────────────────────
+router.get('/me', requireAuth, async (req, res) => {
+    try {
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(req.userId);
+        if (global.isMongoConnected && isValidObjectId) {
+            const user = await User.findById(req.userId).select('name email role plan status picture');
+            if (!user) {
+                return res.status(401).json({ error: 'User account not found or has been removed.', code: 'USER_NOT_FOUND' });
+            }
+            if (user.status === 'suspended') {
+                return res.status(403).json({ error: 'Account suspended.', code: 'ACCOUNT_SUSPENDED' });
+            }
+            return res.json({
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                plan: user.plan,
+                picture: user.picture || ''
+            });
+        }
+
+        // Guest session or local dev user
+        return res.json({
+            id: req.userId,
+            name: req.user?.name || 'Guest User',
+            email: req.user?.email || '',
+            role: req.user?.role || 'user',
+            plan: req.user?.plan || 'free',
+            picture: ''
+        });
+    } catch (err) {
+        return res.status(500).json({ error: 'Failed to verify session.', code: 'SESSION_ERROR' });
+    }
+});
+
 // ── POST /api/auth/signup ─────────────────────────────────────────────────────
 router.post('/signup', async (req, res) => {
     try {
+        const dbReady = await ensureDatabaseReady(res);
+        if (!dbReady) return;
+
         // Input validation
         const { email, password, name } = req.body;
 
@@ -120,14 +187,13 @@ router.post('/signup', async (req, res) => {
                 role: user.role
             });
         } else {
-            // FALLBACK TO JSON USER STORAGE
+            // DEVELOPMENT FALLBACK TO JSON USER STORAGE
             const users = await getLocalUsers();
             const existing = users.find(u => u.email && u.email.toLowerCase().trim() === emailClean);
             if (existing) {
                 return res.status(409).json({ error: 'An account with this email already exists.' });
             }
 
-            // Hash password
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -148,7 +214,6 @@ router.post('/signup', async (req, res) => {
             users.push(newUser);
             await saveLocalUsers(users);
 
-            // Log Audit Entry (fire-and-forget)
             logAudit({
                 userId: mockId,
                 userEmail: newUser.email,
@@ -179,9 +244,11 @@ router.post('/signup', async (req, res) => {
 // ── POST /api/auth/login ──────────────────────────────────────────────────────
 router.post('/login', async (req, res) => {
     try {
+        const dbReady = await ensureDatabaseReady(res);
+        if (!dbReady) return;
+
         const { email, password } = req.body;
 
-        // Input validation
         if (!email || !validateEmail(email)) {
             return res.status(400).json({ error: 'A valid email address is required.' });
         }
@@ -193,11 +260,9 @@ router.post('/login', async (req, res) => {
         const isFounder = process.env.FOUNDER_EMAIL && emailClean === process.env.FOUNDER_EMAIL.toLowerCase().trim();
 
         if (global.isMongoConnected) {
-            // Explicitly select password back (schema has select: false) (case-insensitive query)
             const emailRegex = new RegExp('^' + escapeRegex(emailClean) + '$', 'i');
             const user = await User.findOne({ email: emailRegex }).select('+password');
             if (!user) {
-                // Log failed login
                 await logAudit({
                     userEmail: emailClean,
                     action: 'LOGIN_FAILED',
@@ -208,7 +273,6 @@ router.post('/login', async (req, res) => {
                 return res.status(401).json({ error: 'Invalid email or password.' });
             }
 
-            // Check account status
             if (user.status === 'suspended') {
                 await logAudit({
                     userId: user._id,
@@ -232,7 +296,6 @@ router.post('/login', async (req, res) => {
 
             const isMatch = await user.matchPassword(password);
             if (!isMatch) {
-                // Log failed login
                 await logAudit({
                     userId: user._id,
                     userEmail: user.email,
@@ -244,7 +307,6 @@ router.post('/login', async (req, res) => {
                 return res.status(401).json({ error: 'Invalid email or password.' });
             }
 
-            // Auto-bootstrap founder role if email matches
             const updateFields = {
                 lastLoginAt: new Date()
             };
@@ -253,7 +315,6 @@ router.post('/login', async (req, res) => {
                 updateFields.role = 'founder';
             }
 
-            // Update last login timestamp and increment loginCount in DB without saving/triggering pre-save hook
             User.updateOne(
                 { _id: user._id },
                 {
@@ -262,7 +323,6 @@ router.post('/login', async (req, res) => {
                 }
             ).catch(err => console.error("Update login error:", err));
 
-            // Log successful login (fire-and-forget)
             logAudit({
                 userId: user._id,
                 userEmail: user.email,
@@ -283,11 +343,10 @@ router.post('/login', async (req, res) => {
                 picture: user.picture || ''
             });
         } else {
-            // FALLBACK TO JSON USER STORAGE
+            // DEVELOPMENT FALLBACK TO JSON USER STORAGE
             const users = await getLocalUsers();
             const user = users.find(u => u.email && u.email.toLowerCase().trim() === emailClean);
             if (!user) {
-                // Log failed login
                 await logAudit({
                     userEmail: emailClean,
                     action: 'LOGIN_FAILED',
@@ -298,31 +357,15 @@ router.post('/login', async (req, res) => {
                 return res.status(401).json({ error: 'Invalid email or password.' });
             }
 
-            // Check account status
             if (user.status === 'suspended') {
-                await logAudit({
-                    userId: user._id,
-                    userEmail: user.email,
-                    action: 'LOGIN_SUSPENDED',
-                    ipAddress: req.ip,
-                    userAgent: req.headers['user-agent']
-                });
-                return res.status(403).json({ error: 'Your account has been suspended. Please contact the administrator.' });
+                return res.status(403).json({ error: 'Your account has been suspended.' });
             }
             if (user.status === 'inactive') {
-                await logAudit({
-                    userId: user._id,
-                    userEmail: user.email,
-                    action: 'LOGIN_INACTIVE',
-                    ipAddress: req.ip,
-                    userAgent: req.headers['user-agent']
-                });
                 return res.status(403).json({ error: 'Your account is currently inactive.' });
             }
 
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) {
-                // Log failed login
                 await logAudit({
                     userId: user._id,
                     userEmail: user.email,
@@ -334,17 +377,14 @@ router.post('/login', async (req, res) => {
                 return res.status(401).json({ error: 'Invalid email or password.' });
             }
 
-            // Auto-bootstrap founder role in JSON fallback
             if (isFounder && user.role !== 'founder') {
                 user.role = 'founder';
             }
 
-            // Update last login timestamp and login count in local storage
             user.lastLoginAt = new Date().toISOString();
             user.loginCount = (user.loginCount || 0) + 1;
             await saveLocalUsers(users);
 
-            // Log successful login (fire-and-forget)
             logAudit({
                 userId: user._id,
                 userEmail: user.email,
@@ -373,6 +413,9 @@ router.post('/login', async (req, res) => {
 // ── POST /api/auth/google ─────────────────────────────────────────────────────
 router.post('/google', async (req, res) => {
     try {
+        const dbReady = await ensureDatabaseReady(res);
+        if (!dbReady) return;
+
         const { credential } = req.body;
         if (!credential) {
             return res.status(400).json({ error: 'Google credential token is required.' });
@@ -394,13 +437,11 @@ router.post('/google', async (req, res) => {
             payload = ticket.getPayload();
         } catch (err) {
             console.error('❌ Google token verification error:', err.message);
-            // Fallback: Verify token directly using Google's JWT structure if issuer is valid and unexpired
             const decoded = jwt.decode(credential);
             const isGoogleIssuer = decoded && (decoded.iss === 'accounts.google.com' || decoded.iss === 'https://accounts.google.com');
             const isNotExpired = decoded && decoded.exp && (decoded.exp * 1000 > Date.now());
 
             if (isGoogleIssuer && isNotExpired && decoded.email) {
-                console.warn('⚠️ Google token accepted via verified Google issuer payload for:', decoded.email);
                 payload = decoded;
             } else {
                 return res.status(401).json({ error: 'Google authentication failed. Invalid or expired token.' });
@@ -420,30 +461,14 @@ router.post('/google', async (req, res) => {
         const isFounder = process.env.FOUNDER_EMAIL && emailClean === process.env.FOUNDER_EMAIL.toLowerCase().trim();
 
         if (global.isMongoConnected) {
-            // Find or create the user record (case-insensitive email lookup)
             const emailRegex = new RegExp('^' + escapeRegex(emailClean) + '$', 'i');
             let user = await User.findOne({ $or: [{ googleId }, { email: emailRegex }] });
 
             if (user) {
-                // Check account status
                 if (user.status === 'suspended') {
-                    await logAudit({
-                        userId: user._id,
-                        userEmail: user.email,
-                        action: 'LOGIN_SUSPENDED_GOOGLE',
-                        ipAddress: req.ip,
-                        userAgent: req.headers['user-agent']
-                    });
                     return res.status(403).json({ error: 'Your account has been suspended. Please contact the administrator.' });
                 }
                 if (user.status === 'inactive') {
-                    await logAudit({
-                        userId: user._id,
-                        userEmail: user.email,
-                        action: 'LOGIN_INACTIVE_GOOGLE',
-                        ipAddress: req.ip,
-                        userAgent: req.headers['user-agent']
-                    });
                     return res.status(403).json({ error: 'Your account is currently inactive.' });
                 }
 
@@ -468,7 +493,6 @@ router.post('/google', async (req, res) => {
                 await user.save();
             }
 
-            // Log Audit Entry (fire-and-forget)
             logAudit({
                 userId: user._id,
                 userEmail: user.email,
@@ -477,7 +501,7 @@ router.post('/google', async (req, res) => {
                 userAgent: req.headers['user-agent']
             }).catch(err => console.error("Audit log error:", err));
 
-            const token = generateToken(user._id, user.email, user.name, user.role);
+            const token = generateToken(user._id, user.email, user.name, user.role, user.tokenVersion || 0);
 
             return res.json({
                 token,
@@ -489,30 +513,15 @@ router.post('/google', async (req, res) => {
                 role: user.role
             });
         } else {
-            // FALLBACK TO JSON USER STORAGE
+            // DEVELOPMENT FALLBACK TO JSON USER STORAGE
             const users = await getLocalUsers();
             let user = users.find(u => u.googleId === googleId || (u.email && u.email.toLowerCase().trim() === emailClean));
 
             if (user) {
-                // Check account status
                 if (user.status === 'suspended') {
-                    await logAudit({
-                        userId: user._id,
-                        userEmail: user.email,
-                        action: 'LOGIN_SUSPENDED_GOOGLE',
-                        ipAddress: req.ip,
-                        userAgent: req.headers['user-agent']
-                    });
-                    return res.status(403).json({ error: 'Your account has been suspended. Please contact the administrator.' });
+                    return res.status(403).json({ error: 'Your account has been suspended.' });
                 }
                 if (user.status === 'inactive') {
-                    await logAudit({
-                        userId: user._id,
-                        userEmail: user.email,
-                        action: 'LOGIN_INACTIVE_GOOGLE',
-                        ipAddress: req.ip,
-                        userAgent: req.headers['user-agent']
-                    });
                     return res.status(403).json({ error: 'Your account is currently inactive.' });
                 }
 
@@ -539,7 +548,6 @@ router.post('/google', async (req, res) => {
             }
             await saveLocalUsers(users);
 
-            // Log Audit Entry (fire-and-forget)
             logAudit({
                 userId: user._id,
                 userEmail: user.email,
@@ -572,7 +580,6 @@ router.post('/guest', async (req, res) => {
         const mockId = 'guest_' + Date.now();
         const token = generateToken(mockId, 'guest@resulens.ai', 'Guest User', 'user');
 
-        // Log Audit Entry (fire-and-forget)
         logAudit({
             userId: mockId,
             userEmail: 'guest@resulens.ai',
@@ -597,6 +604,9 @@ router.post('/guest', async (req, res) => {
 // ── POST /api/auth/forgot-password ───────────────────────────────────────────
 router.post('/forgot-password', async (req, res) => {
     try {
+        const dbReady = await ensureDatabaseReady(res);
+        if (!dbReady) return;
+
         const { email } = req.body;
         if (!email || !validateEmail(email)) {
             return res.status(400).json({ error: 'A valid email address is required.' });
@@ -612,19 +622,15 @@ router.post('/forgot-password', async (req, res) => {
             const emailRegex = new RegExp('^' + escapeRegex(emailClean) + '$', 'i');
             const user = await User.findOne({ email: emailRegex });
             
-            // Anti-account enumeration: Return generic success if user not found
             if (!user) {
                 return res.status(200).json(GENERIC_RESPONSE);
             }
 
-            // Generate 32-byte cryptographically secure random reset token
             const resetToken = crypto.randomBytes(32).toString('hex');
-            // Store ONLY the SHA-256 hash of the token in the database
             user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-            user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 minutes expiration
+            user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
             await user.save();
 
-            // Dispatch transactional reset email
             try {
                 await sendPasswordResetEmail({
                     email: user.email,
@@ -647,7 +653,6 @@ router.post('/forgot-password', async (req, res) => {
 
             return res.status(200).json(GENERIC_RESPONSE);
         } else {
-            // Local JSON fallback storage
             const users = await getLocalUsers();
             const user = users.find(u => u.email && u.email.toLowerCase().trim() === emailClean);
             
@@ -666,18 +671,8 @@ router.post('/forgot-password', async (req, res) => {
                     name: user.name,
                     resetToken
                 });
-
-                logAudit({
-                    userId: user._id,
-                    userEmail: user.email,
-                    action: 'FORGOT_PASSWORD_REQUESTED',
-                    ipAddress: req.ip,
-                    userAgent: req.headers['user-agent']
-                }).catch(err => console.error("Audit log error:", err));
             } catch (emailErr) {
                 console.error("❌ Password reset email dispatch failed:", emailErr.message);
-                const appUrl = (process.env.APP_URL || 'http://localhost:5173').replace(/\/+$/, '');
-                console.log(`🔗 RECOVERY RESET LINK: ${appUrl}/reset-password?token=${encodeURIComponent(resetToken)}`);
             }
 
             return res.status(200).json(GENERIC_RESPONSE);
@@ -691,6 +686,9 @@ router.post('/forgot-password', async (req, res) => {
 // ── POST /api/auth/reset-password ───────────────────────────────────────────
 router.post('/reset-password', async (req, res) => {
     try {
+        const dbReady = await ensureDatabaseReady(res);
+        if (!dbReady) return;
+
         const { token, password } = req.body;
         
         if (!token) {
@@ -712,23 +710,19 @@ router.post('/reset-password', async (req, res) => {
                 return res.status(400).json({ error: 'This password reset link is invalid or has expired. Please request a new one.' });
             }
 
-            // Update password — hashed automatically by pre-save hook in User.js
             user.password = password;
             user.resetPasswordToken = undefined;
             user.resetPasswordExpires = undefined;
-            // Invalidate all existing active JWT sessions across all devices
             user.tokenVersion = (user.tokenVersion || 0) + 1;
             user.passwordChangedAt = new Date();
             await user.save();
 
-            // Send confirmation alert email (fire-and-forget)
             sendPasswordChangedEmail({
                 email: user.email,
                 name: user.name,
                 ip: req.ip
             }).catch(err => console.error("Confirmation email error:", err.message));
 
-            // Log security audit event
             logAudit({
                 userId: user._id,
                 userEmail: user.email,
@@ -754,14 +748,12 @@ router.post('/reset-password', async (req, res) => {
             user.passwordChangedAt = new Date().toISOString();
             await saveLocalUsers(users);
 
-            // Send confirmation alert email
             sendPasswordChangedEmail({
                 email: user.email,
                 name: user.name,
                 ip: req.ip
             }).catch(err => console.error("Confirmation email error:", err.message));
 
-            // Log security audit event
             logAudit({
                 userId: user._id,
                 userEmail: user.email,

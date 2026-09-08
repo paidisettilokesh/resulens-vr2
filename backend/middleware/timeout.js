@@ -1,26 +1,67 @@
-export const timeoutMiddleware = (seconds) => (req, res, next) => {
+/**
+ * Robust Request Timeout Middleware
+ * Prevents hanging connections and eliminates "ERR_HTTP_HEADERS_SENT" race conditions
+ * by guarding response methods if the timeout handler has already terminated the response.
+ */
+export const timeoutMiddleware = (seconds = 90) => (req, res, next) => {
     let timedOut = false;
+    let timer = null;
     const timeoutMs = seconds * 1000;
 
-    // A timed-out request may still finish its AI work in the background. Guard
-    // against calling the error handler a second time after a response has been
-    // sent, which otherwise produces "headers already sent" errors.
-    const onTimeout = () => {
-        if (timedOut || res.headersSent || res.writableEnded) return;
-        timedOut = true;
-        const error = new Error('Request Timeout');
-        error.status = 408;
-        next(error);
+    req.isTimedOut = () => timedOut;
+    req.isClientClosed = false;
+
+    // Track client aborts (e.g. user closed tab or mobile carrier dropped socket)
+    req.on('close', () => {
+        if (!res.writableEnded) {
+            req.isClientClosed = true;
+        }
+    });
+
+    const cleanup = () => {
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+        }
     };
 
-    res.setTimeout(timeoutMs, onTimeout);
-    req.setTimeout(timeoutMs, onTimeout);
-    const clearTimeouts = () => {
-        res.setTimeout(0);
-        req.setTimeout(0);
+    res.once('finish', cleanup);
+    res.once('close', cleanup);
+
+    // Patch res.json and res.send to prevent double responses if timed out
+    const originalJson = res.json.bind(res);
+    const originalSend = res.send.bind(res);
+
+    res.json = (data) => {
+        if (timedOut || res.headersSent || res.writableEnded) {
+            return res;
+        }
+        cleanup();
+        return originalJson(data);
     };
-    res.once('finish', clearTimeouts);
-    res.once('close', clearTimeouts);
+
+    res.send = (data) => {
+        if (timedOut || res.headersSent || res.writableEnded) {
+            return res;
+        }
+        cleanup();
+        return originalSend(data);
+    };
+
+    timer = setTimeout(() => {
+        if (timedOut || res.headersSent || res.writableEnded) return;
+        timedOut = true;
+        cleanup();
+
+        try {
+            res.status(408).json({
+                error: 'Request timed out — the analysis service is taking longer than expected. Please try again.',
+                code: 'REQUEST_TIMEOUT'
+            });
+        } catch (e) {
+            // Already sent or connection reset
+        }
+    }, timeoutMs);
 
     next();
 };

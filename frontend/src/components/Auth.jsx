@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import axios from 'axios';
+import apiClient, { classifyApiError } from '../utils/apiClient';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Eye, EyeOff, Mail, Lock, User, Loader2,
@@ -71,20 +71,20 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
         }
     }, [isOpen, initialMode]);
 
-    // Stable callback reference for the Google SDK — must not change between renders
     const handleGoogleResponse = useCallback(async (response) => {
         setLoading(true);
         setError('');
         try {
-            const res = await axios.post(`${backendUrl}/auth/google`, { credential: response.credential });
+            const res = await apiClient.post('/auth/google', { credential: response.credential });
             onLogin(res.data);
             onClose();
         } catch (err) {
-            setError(err.response?.data?.error || 'Google Sign-in failed. Please try again.');
+            const classified = classifyApiError(err);
+            setError(classified.message || 'Google Sign-in failed. Please try again.');
         } finally {
             setLoading(false);
         }
-    }, [backendUrl, onLogin, onClose]);
+    }, [onLogin, onClose]);
 
     // Initialize / re-render the Google Sign-In button whenever the modal opens,
     // the active tab (mode) changes, or the theme toggles between light and dark.
@@ -189,14 +189,14 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
         
         try {
             if (isForgot) {
-                const res = await axios.post(`${backendUrl}/auth/forgot-password`, { email: email.trim() });
+                const res = await apiClient.post('/auth/forgot-password', { email: email.trim() });
                 setSuccessMsg(res.data?.message || 'If an account matches that email address, password reset instructions have been sent.');
                 setTimeout(() => {
                     setMode('login');
                     setSuccessMsg('');
                 }, 4000);
             } else if (isReset) {
-                const res = await axios.post(`${backendUrl}/auth/reset-password`, { token: resetToken, password });
+                const res = await apiClient.post('/auth/reset-password', { token: resetToken, password });
                 setSuccessMsg(res.data?.message || 'Your password has been reset successfully. You can now log in.');
                 setTimeout(() => {
                     setMode('login');
@@ -207,7 +207,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
             } else {
                 const endpoint = isLogin ? '/auth/login' : '/auth/signup';
                 const payload = isLogin ? { email: email.trim(), password } : { email: email.trim(), password, name: name.trim() };
-                const { data } = await axios.post(`${backendUrl}${endpoint}`, payload);
+                const { data } = await apiClient.post(endpoint, payload);
                 if (isSignup) {
                     setSuccessMsg('Account created! Signing you in...');
                     setTimeout(() => {
@@ -220,17 +220,14 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                 }
             }
         } catch (err) {
+            const classified = classifyApiError(err);
             const rawMsg = err.response?.data?.error;
-            // Prevent leaking internal errors like SMTP/database connection strings
-            if (rawMsg && !rawMsg.toLowerCase().includes('connect') && !rawMsg.toLowerCase().includes('sql') && !rawMsg.toLowerCase().includes('mongo') && !rawMsg.toLowerCase().includes('smtp')) {
-                if (isSignup && rawMsg.toLowerCase().includes('already exists')) {
-                    setError('An account with this email already exists.');
-                    setTimeout(() => { setMode('login'); setError(''); }, 1800);
-                } else {
-                    setError(rawMsg);
-                }
+
+            if (isSignup && rawMsg && rawMsg.toLowerCase().includes('already exists')) {
+                setError('An account with this email already exists.');
+                setTimeout(() => { setMode('login'); setError(''); }, 1800);
             } else {
-                setError('We could not process your request right now. Please try again later.');
+                setError(classified.message);
             }
         } finally {
             setLoading(false);

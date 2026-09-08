@@ -4,17 +4,17 @@ import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getSecureStorageDir } from './storage.js';
+import { isDbReady, waitForDb } from '../config/db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const historyCache = new Map();
 
-// Move fallback and uploads outside project to prevent watch-mode restarts
+// Fallback directory for local development
 const FALLBACK_DIR = path.join(getSecureStorageDir(), 'talentsync-v2-data');
 const FALLBACK_FILE = path.join(FALLBACK_DIR, 'history_fallback.json');
 
-// Ensure fallback directory exists
 const ensureDir = async () => {
     try { await fs.mkdir(FALLBACK_DIR, { recursive: true }); } catch (e) { }
 };
@@ -22,6 +22,11 @@ const ensureDir = async () => {
 export const saveHistory = async (data, userId = 'guest') => {
     try {
         historyCache.delete(userId); // Invalidate cache
+
+        if (!isDbReady() && process.env.MONGODB_URI) {
+            await waitForDb(2000);
+        }
+
         const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
         if (global.isMongoConnected && isValidObjectId) {
             const newEntry = new Analysis({
@@ -36,27 +41,34 @@ export const saveHistory = async (data, userId = 'guest') => {
             });
             await newEntry.save();
             return newEntry;
-        } else {
-            // FALLBACK TO JSON
-            await ensureDir();
-            let history = [];
-            try {
-                const fileData = await fs.readFile(FALLBACK_FILE, 'utf8');
-                history = JSON.parse(fileData);
-            } catch (e) { }
-
-            const newEntry = {
-                _id: Date.now().toString(),
-                userId,
-                timestamp: new Date().toISOString(),
-                ...data
-            };
-            history.unshift(newEntry);
-            await fs.writeFile(FALLBACK_FILE, JSON.stringify(history.slice(0, 50), null, 2));
-            return newEntry;
         }
+
+        // In production with MongoDB, don't write to local ephemeral disk
+        if (process.env.NODE_ENV === 'production' && process.env.MONGODB_URI) {
+            console.warn("⚠️ HISTORY: MongoDB unavailable during saveHistory in production.");
+            return null;
+        }
+
+        // Local development fallback
+        await ensureDir();
+        let history = [];
+        try {
+            const fileData = await fs.readFile(FALLBACK_FILE, 'utf8');
+            history = JSON.parse(fileData);
+        } catch (e) { }
+
+        const newEntry = {
+            _id: Date.now().toString(),
+            userId,
+            timestamp: new Date().toISOString(),
+            ...data
+        };
+        history.unshift(newEntry);
+        await fs.writeFile(FALLBACK_FILE, JSON.stringify(history.slice(0, 50), null, 2));
+        return newEntry;
     } catch (error) {
-        console.error("Failed to save history:", error);
+        console.error("Failed to save history:", error.message);
+        return null;
     }
 };
 
@@ -66,11 +78,15 @@ export const getHistory = async (userId = 'guest') => {
             return historyCache.get(userId);
         }
 
+        if (!isDbReady() && process.env.MONGODB_URI) {
+            await waitForDb(2000);
+        }
+
         const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
         let result = [];
         if (global.isMongoConnected && isValidObjectId) {
             result = await Analysis.find({ userId }).sort({ timestamp: -1 }).limit(50);
-        } else {
+        } else if (process.env.NODE_ENV !== 'production' || !process.env.MONGODB_URI) {
             try {
                 const fileData = await fs.readFile(FALLBACK_FILE, 'utf8');
                 const history = JSON.parse(fileData);
@@ -81,7 +97,7 @@ export const getHistory = async (userId = 'guest') => {
         historyCache.set(userId, result);
         return result;
     } catch (e) {
-        console.error("Failed to fetch history:", e);
+        console.error("Failed to fetch history:", e.message);
         return [];
     }
 };
@@ -89,10 +105,15 @@ export const getHistory = async (userId = 'guest') => {
 export const clearHistory = async (userId = 'guest') => {
     try {
         historyCache.delete(userId); // Invalidate cache
+
+        if (!isDbReady() && process.env.MONGODB_URI) {
+            await waitForDb(2000);
+        }
+
         const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
         if (global.isMongoConnected && isValidObjectId) {
             await Analysis.deleteMany({ userId });
-        } else {
+        } else if (process.env.NODE_ENV !== 'production' || !process.env.MONGODB_URI) {
             try {
                 const fileData = await fs.readFile(FALLBACK_FILE, 'utf8');
                 const history = JSON.parse(fileData);
@@ -104,7 +125,7 @@ export const clearHistory = async (userId = 'guest') => {
         }
         return true;
     } catch (e) {
-        console.error("Failed to clear history:", e);
+        console.error("Failed to clear history:", e.message);
         return false;
     }
 };

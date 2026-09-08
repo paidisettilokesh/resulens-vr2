@@ -1,6 +1,5 @@
-
-import React, { createContext, useState, useContext, useCallback } from 'react';
-import axios from 'axios';
+import React, { createContext, useState, useContext, useCallback, useRef } from 'react';
+import apiClient, { getApiBaseUrl, classifyApiError } from '../utils/apiClient';
 import { useUser } from './UserContext';
 
 const ResumeContext = createContext(null);
@@ -13,6 +12,7 @@ export const ResumeProvider = ({ children }) => {
     const [analysis, setAnalysis] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [errorDetail, setErrorDetail] = useState(null);
 
     // Metadata / Form Inputs
     const [selectedRole, setSelectedRole] = useState('');
@@ -35,64 +35,56 @@ export const ResumeProvider = ({ children }) => {
         tailor: null
     });
 
-    const backendUrl = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '') + '/api';
+    const backendUrl = getApiBaseUrl();
+    const lastRequestRef = useRef(null);
 
     const callApi = useCallback(async (endpoint, formData) => {
         setLoading(true);
         setError('');
+        setErrorDetail(null);
+        lastRequestRef.current = { endpoint, formData };
+
         try {
             const config = {
-                headers: { 
+                headers: {
                     'x-user-id': user?.id || 'guest',
                     ...(user?.token ? { 'Authorization': `Bearer ${user.token}` } : {})
                 },
-                timeout: 300000 // 5 mins
+                timeout: 85000 // 85s timeout strictly under 100s proxy drop
             };
-            const response = await axios.post(`${backendUrl}/${endpoint}`, formData, config);
+
+            const response = await apiClient.post(`/${endpoint.replace(/^\/+/, '')}`, formData, config);
 
             let data = response.data;
             if (response.data.analysis && endpoint === 'analyze') data = response.data.analysis;
 
             if (data?.candidateName) setCandidateName(data.candidateName);
 
+            setError('');
+            setErrorDetail(null);
             return data;
         } catch (err) {
-            const status = err.response?.status;
-            const serverMsg = err.response?.data?.error || '';
+            const classified = classifyApiError(err);
+            setErrorDetail(classified);
+            setError(classified.message);
 
-            let userMsg;
-            if (status === 429) {
-                userMsg = 'AI service rate limit reached. Please wait a moment and try again.';
-            } else if (status === 408 || err.code === 'ECONNABORTED') {
-                userMsg = 'Request timed out — the AI service may be busy. Please try again.';
-            } else if (status === 413) {
-                userMsg = 'File too large. Please upload a resume under 5MB.';
-            } else if (status === 400 && serverMsg) {
-                // 400 errors carry specific, safe user-facing messages (e.g. scanned PDF)
-                userMsg = serverMsg;
-            } else if (status === 401) {
-                console.warn('Unauthorized API call, logging out:', serverMsg);
+            // Only log out the user on authenticated endpoints if the token was explicitly invalid/expired
+            if (classified.type === 'AUTH_EXPIRED') {
+                console.warn('Authentication token expired during API call, clearing session:', classified.message);
                 logout();
-                userMsg = 'Your session has expired. Please log in again.';
-            } else if (status === 403) {
-                userMsg = 'Access denied. Please check your account permissions.';
-            } else if (status === 502 || status === 503) {
-                userMsg = 'Analysis service temporarily unavailable. Please try again in a moment.';
-            } else if (status >= 500) {
-                // Show server message only if it is safe (no internal paths / stack traces)
-                userMsg = serverMsg && serverMsg.length < 300 && !serverMsg.includes('at ')
-                    ? serverMsg
-                    : 'Analysis failed. Please try again.';
-            } else {
-                userMsg = serverMsg || err.message || 'Operation failed. Please try again.';
             }
 
-            setError(userMsg);
             throw err;
         } finally {
             setLoading(false);
         }
-    }, [user, backendUrl]);
+    }, [user, logout]);
+
+    const retryLastApiCall = useCallback(async () => {
+        if (!lastRequestRef.current) return null;
+        const { endpoint, formData } = lastRequestRef.current;
+        return callApi(endpoint, formData);
+    }, [callApi]);
 
     const resetResume = () => {
         setFile(null);
@@ -102,6 +94,9 @@ export const ResumeProvider = ({ children }) => {
         setCustomRole('');
         setCompanyName('');
         setJobDescription('');
+        setError('');
+        setErrorDetail(null);
+        lastRequestRef.current = null;
         setResults({
             rewrite: null,
             coverLetter: null,
@@ -120,6 +115,7 @@ export const ResumeProvider = ({ children }) => {
         analysis, setAnalysis,
         loading, setLoading,
         error, setError,
+        errorDetail, setErrorDetail,
         selectedRole, setSelectedRole,
         customRole, setCustomRole,
         companyName, setCompanyName,
@@ -127,7 +123,8 @@ export const ResumeProvider = ({ children }) => {
         location, setLocation,
         candidateName, setCandidateName,
         results, setResults,
-        callApi, resetResume, backendUrl
+        callApi, resetResume, backendUrl,
+        retryLastApiCall
     };
 
     return (
@@ -142,4 +139,3 @@ export const useResume = () => {
     if (!context) throw new Error("useResume must be used within a ResumeProvider");
     return context;
 };
-

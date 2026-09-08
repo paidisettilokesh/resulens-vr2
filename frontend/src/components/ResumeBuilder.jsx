@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 import { useUser } from '../context/UserContext';
 import {
     Loader2, Save, Trash, Plus,
@@ -19,8 +19,6 @@ import Executive from './resume-templates/Executive';
 import Graduate from './resume-templates/Graduate';
 import Creative from './resume-templates/Creative';
 import Technical from './resume-templates/Technical';
-
-const BACKEND = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '');
 
 const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => {
     const { user, logout } = useUser();
@@ -55,10 +53,8 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
     const checkHealth = async () => {
         setHealthLoading(true);
         try {
-            const res = await axios.post(`${BACKEND}/api/builder/evaluate-health`, {
+            const res = await apiClient.post('/builder/evaluate-health', {
                 resumeData: builderData
-            }, {
-                headers: { 'x-user-id': user?.id || 'guest', ...(user?.token ? { 'Authorization': `Bearer ${user.token}` } : {}) }
             });
             if (res.data) setHealthScore(res.data);
         } catch (e) {
@@ -72,11 +68,9 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
         if (!targetJob) return alert('Please enter a target job description.');
         setBlueprintLoading(true);
         try {
-            const res = await axios.post(`${BACKEND}/api/builder/blueprint-generator`, {
+            const res = await apiClient.post('/builder/blueprint-generator', {
                 jobDescription: targetJob,
                 userSummary: builderData.personal.bio || builderData.skills || "N/A"
-            }, {
-                headers: { 'x-user-id': user?.id || 'guest', ...(user?.token ? { 'Authorization': `Bearer ${user.token}` } : {}) }
             });
             
             if (res.data) {
@@ -313,12 +307,12 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                                                     setBioError('');
                                                     setBioLoading(true);
                                                     try {
-                                                        const res = await axios.post(`${BACKEND}/api/builder/suggest-bio`, {
+                                                        const res = await apiClient.post('/builder/suggest-bio', {
                                                             name: builderData.personal.fullName,
                                                             role: builderData.experience[0]?.role || 'Professional',
                                                             skills: builderData.skills,
                                                             experienceSummary: builderData.experience.map(e => e.role).join(', ')
-                                                        }, { headers: { 'x-user-id': user?.id || 'guest', ...(user?.token ? { 'Authorization': `Bearer ${user.token}` } : {}) } });
+                                                        });
                                                         if (res.data.bio) setBuilderData(prev => ({ ...prev, personal: { ...prev.personal, bio: res.data.bio } }));
                                                     } catch (e) { setBioError('AI unavailable.'); } finally { setBioLoading(false); }
                                                 }} disabled={bioLoading} className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-400 uppercase tracking-wider flex items-center gap-1">
@@ -376,7 +370,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                                                                 setPolishError('');
                                                                 setPolishingId(exp.id);
                                                                 try {
-                                                                    const res = await axios.post(`${BACKEND}/api/builder/optimize-experience`, { role: exp.role, company: exp.company, details: exp.details }, { headers: { 'x-user-id': user?.id || 'guest', ...(user?.token ? { 'Authorization': `Bearer ${user.token}` } : {}) } });
+                                                                    const res = await apiClient.post('/builder/optimize-experience', { role: exp.role, company: exp.company, details: exp.details });
                                                                     if (res.data.optimized) {
                                                                         const n = [...builderData.experience];
                                                                         n[index].details = res.data.optimized;

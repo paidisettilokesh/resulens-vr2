@@ -1,9 +1,26 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import Auth from '../components/Auth.jsx';
-import axios from 'axios';
+import apiClient from '../utils/apiClient';
 
-vi.mock('axios');
+vi.mock('../utils/apiClient', () => {
+    const mockPost = vi.fn();
+    const mockGet = vi.fn();
+    return {
+        default: {
+            post: mockPost,
+            get: mockGet
+        },
+        apiClient: {
+            post: mockPost,
+            get: mockGet
+        },
+        classifyApiError: vi.fn((err) => ({
+            message: err?.response?.data?.error || err?.message || 'Login failed',
+            canRetry: true
+        }))
+    };
+});
 
 describe('Auth Component', () => {
     const mockOnClose = vi.fn();
@@ -25,7 +42,7 @@ describe('Auth Component', () => {
     });
 
     it('calls login API correctly', async () => {
-        axios.post.mockResolvedValueOnce({ data: { token: '123', email: 'test@example.com' } });
+        apiClient.post.mockResolvedValueOnce({ data: { token: '123', email: 'test@example.com' } });
 
         render(<Auth isOpen={true} onClose={mockOnClose} onLogin={mockOnLogin} backendUrl="http://localhost:5000/api" />);
         
@@ -39,7 +56,7 @@ describe('Auth Component', () => {
         fireEvent.click(submitBtn);
 
         await waitFor(() => {
-            expect(axios.post).toHaveBeenCalledWith('http://localhost:5000/api/auth/login', {
+            expect(apiClient.post).toHaveBeenCalledWith('/auth/login', {
                 email: 'test@example.com',
                 password: 'password123'
             });

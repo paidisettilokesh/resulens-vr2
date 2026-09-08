@@ -4,18 +4,19 @@ import mongoose from 'mongoose';
 import fs from 'fs/promises';
 import path from 'path';
 import { getSecureStorageDir } from '../utils/storage.js';
+import { waitForDb, isDbReady } from '../config/db.js';
 
 const router = express.Router();
 
 const FALLBACK_DIR = path.join(getSecureStorageDir(), 'talentsync-v2-data');
 const RESUMES_FALLBACK_FILE = path.join(FALLBACK_DIR, 'resumes_fallback.json');
 
-// Ensure fallback directory exists
+// Ensure fallback directory exists (dev only)
 const ensureDir = async () => {
     try { await fs.mkdir(FALLBACK_DIR, { recursive: true }); } catch (e) { }
 };
 
-// Save local fallback resume
+// Save local fallback resume (dev only)
 const saveLocalResume = async (userId, resumeData) => {
     try {
         await ensureDir();
@@ -31,7 +32,7 @@ const saveLocalResume = async (userId, resumeData) => {
     }
 };
 
-// Get local fallback resume
+// Get local fallback resume (dev only)
 const getLocalResume = async (userId) => {
     try {
         const fileData = await fs.readFile(RESUMES_FALLBACK_FILE, 'utf8');
@@ -49,27 +50,39 @@ router.post('/save', async (req, res) => {
         const { resumeData } = req.body;
         const title = resumeData?.personal?.fullName || 'My Resume';
 
-        const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
-        if (!global.isMongoConnected || !isValidObjectId) {
-            console.warn("⚠️ BUILDER: Mongo offline. Saving to persistent JSON file.");
-            await saveLocalResume(userId, resumeData);
-            return res.json({ success: true, id: 'local_fallback_id' });
+        if (!isDbReady() && process.env.MONGODB_URI) {
+            await waitForDb(2500);
         }
 
-        const resume = await Resume.findOneAndUpdate(
-            { userId, type: 'builder' },
-            {
-                title,
-                content: resumeData,
-                userId
-            },
-            { new: true, upsert: true }
-        );
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
+        if (global.isMongoConnected && isValidObjectId) {
+            const resume = await Resume.findOneAndUpdate(
+                { userId, type: 'builder' },
+                {
+                    title,
+                    content: resumeData,
+                    userId
+                },
+                { new: true, upsert: true }
+            );
+            return res.json({ success: true, id: resume._id });
+        }
 
-        res.json({ success: true, id: resume._id });
+        if (process.env.NODE_ENV === 'production' || process.env.MONGODB_URI) {
+            res.set('Retry-After', '3');
+            return res.status(503).json({
+                error: 'Database is currently unavailable. Please retry saving in a few moments.',
+                code: 'DATABASE_UNAVAILABLE',
+                retryAfter: 3
+            });
+        }
+
+        // Dev fallback
+        await saveLocalResume(userId, resumeData);
+        res.json({ success: true, id: 'local_fallback_id' });
     } catch (err) {
-        console.error("Resume Save Error:", err);
-        res.status(500).json({ error: err.message });
+        console.error("Resume Save Error:", err.message);
+        res.status(500).json({ error: 'Failed to save resume' });
     }
 });
 
@@ -78,17 +91,31 @@ router.get('/latest', async (req, res) => {
     try {
         const userId = req.userId;
 
-        const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
-        if (!global.isMongoConnected || !isValidObjectId) {
-            const localContent = await getLocalResume(userId);
-            return res.json({ content: localContent });
+        if (!isDbReady() && process.env.MONGODB_URI) {
+            await waitForDb(2500);
         }
 
-        const resume = await Resume.findOne({ userId, type: 'builder' }).sort({ updatedAt: -1 });
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(userId);
+        if (global.isMongoConnected && isValidObjectId) {
+            const resume = await Resume.findOne({ userId, type: 'builder' }).sort({ updatedAt: -1 });
+            return res.json(resume || { content: null });
+        }
 
-        res.json(resume || { content: null });
+        if (process.env.NODE_ENV === 'production' && process.env.MONGODB_URI && !global.isMongoConnected) {
+            res.set('Retry-After', '3');
+            return res.status(503).json({
+                error: 'Database is currently connecting. Please retry in a few moments.',
+                code: 'DATABASE_UNAVAILABLE',
+                retryAfter: 3
+            });
+        }
+
+        // Guest / Local Dev fallback
+        const localContent = await getLocalResume(userId);
+        res.json({ content: localContent });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("Failed to load latest resume:", err.message);
+        res.status(500).json({ error: 'Failed to load resume session' });
     }
 });
 
