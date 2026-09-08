@@ -65,16 +65,59 @@ const AnalysisView = ({
                 {loading ? (
                     <ProgressiveLoader active={loading} />
                 ) : error ? (
-                    <div className="text-rose-700 dark:text-rose-400 text-center p-12 max-w-xl">
-                        <div className="w-20 h-20 bg-rose-50 dark:bg-rose-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-rose-100 shadow-xl shadow-rose-200/50">
-                            <AlertTriangle size={40} />
-                        </div>
-                        <h2 className="text-3xl font-black text-[var(--text-primary)] mb-4 tracking-tight">Analysis Interrupted</h2>
-                        <div className="bg-[var(--bg-surface)] p-6 rounded-3xl border border-rose-100 shadow-sm mb-8 text-sm font-bold text-[var(--text-secondary)] leading-relaxed italic">
-                            "{error}"
-                        </div>
-                        <button onClick={() => setActiveTab('home')} className="btn-primary !py-4 !px-10 !rounded-2xl shadow-xl shadow-cyan-200 active:scale-95 transition-all">Re-initialize Session</button>
-                    </div>
+                    (() => {
+                        const isScannedError = error.toLowerCase().includes('image') ||
+                            error.toLowerCase().includes('scanned') ||
+                            error.toLowerCase().includes('selectable text');
+
+                        if (isScannedError) {
+                            return (
+                                <div className="text-center p-8 md:p-12 max-w-2xl mx-auto">
+                                    <div className="w-20 h-20 bg-amber-50 dark:bg-amber-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-amber-200 dark:border-amber-500/20 shadow-xl shadow-amber-200/40">
+                                        <FileText size={40} className="text-amber-600 dark:text-amber-400" />
+                                    </div>
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-black uppercase tracking-wider mb-3">
+                                        ATS Compatibility Notice
+                                    </div>
+                                    <h2 className="text-3xl font-black text-[var(--text-primary)] mb-3 tracking-tight">
+                                        Image-Based PDF Detected
+                                    </h2>
+                                    <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-6">
+                                        This resume was saved as a flat image or graphic (common with Canva, Figma, or phone scans). Real-world <strong>Applicant Tracking Systems (ATS)</strong> cannot read text from image files and will automatically reject them.
+                                    </p>
+                                    <div className="bg-[var(--bg-surface)] p-6 rounded-3xl border border-[var(--border-secondary)] shadow-sm text-left space-y-3 mb-8 text-sm">
+                                        <div className="font-bold text-[var(--text-primary)] flex items-center gap-2">
+                                            <Sparkles size={16} className="text-cyan-600 dark:text-cyan-400" /> How to fix it:
+                                        </div>
+                                        <ul className="text-[var(--text-secondary)] space-y-2 list-disc list-inside text-xs leading-relaxed">
+                                            <li>Export from Word or Google Docs using <strong>Save As &gt; PDF</strong> (preserves selectable text).</li>
+                                            <li>If using Canva, export using <strong>PDF Standard</strong> with selectable text enabled.</li>
+                                            <li>Or directly upload your <strong>.DOCX</strong> document.</li>
+                                        </ul>
+                                    </div>
+                                    <button 
+                                        onClick={() => setActiveTab('home')} 
+                                        className="btn-primary !py-4 !px-8 !rounded-2xl shadow-xl shadow-cyan-200 active:scale-95 transition-all inline-flex items-center gap-2"
+                                    >
+                                        Upload Text-Based Resume <ArrowRight size={18} />
+                                    </button>
+                                </div>
+                            );
+                        }
+
+                        return (
+                            <div className="text-rose-700 dark:text-rose-400 text-center p-12 max-w-xl">
+                                <div className="w-20 h-20 bg-rose-50 dark:bg-rose-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-rose-100 shadow-xl shadow-rose-200/50">
+                                    <AlertTriangle size={40} />
+                                </div>
+                                <h2 className="text-3xl font-black text-[var(--text-primary)] mb-4 tracking-tight">Analysis Interrupted</h2>
+                                <div className="bg-[var(--bg-surface)] p-6 rounded-3xl border border-rose-100 shadow-sm mb-8 text-sm font-bold text-[var(--text-secondary)] leading-relaxed italic">
+                                    "{error}"
+                                </div>
+                                <button onClick={() => setActiveTab('home')} className="btn-primary !py-4 !px-10 !rounded-2xl shadow-xl shadow-cyan-200 active:scale-95 transition-all">Re-initialize Session</button>
+                            </div>
+                        );
+                    })()
                 ) : (
                     <button onClick={() => setActiveTab('home')} className="group flex items-center gap-3 text-cyan-600 font-black text-lg hover:gap-5 transition-all">
                         Return to Control Center <ArrowRight />

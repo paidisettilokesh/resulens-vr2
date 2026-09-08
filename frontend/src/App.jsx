@@ -53,6 +53,7 @@ function App() {
     const [authInitialMode, setAuthInitialMode] = useState('login');
     const [resetToken, setResetToken] = useState(null);
     const [pendingResumeFile, setPendingResumeFile] = useState(null);
+    const pendingAnalysisKey = useRef(null);
 
     // Parse URL parameters on load
     useEffect(() => {
@@ -147,8 +148,14 @@ function App() {
 
     // Auto-consume pending file and run analysis when user logs in
     useEffect(() => {
-        if (user && pendingResumeFile) {
+        // This is the post-signup path. Wait for a persisted JWT-backed user
+        // session, and consume each pending upload exactly once. This avoids a
+        // duplicate or unauthenticated analysis request during auth re-renders.
+        if (user?.token && pendingResumeFile) {
             const uploaded = pendingResumeFile;
+            const analysisKey = `${user.id}:${uploaded.name}:${uploaded.size}:${uploaded.lastModified}`;
+            if (pendingAnalysisKey.current === analysisKey) return;
+            pendingAnalysisKey.current = analysisKey;
             setFile(uploaded);
             setPendingResumeFile(null);
             setActiveTab('analyzer');
@@ -173,11 +180,28 @@ function App() {
                 fd.append('jobRole', targetRole);
                 try {
                     const data = await callApi('analyze', fd);
+
+                    // Guard: detect empty AI responses (HTTP 200 but no meaningful content)
+                    const hasContent = data?.atsScore > 0
+                        || data?.jobMatchScore > 0
+                        || (data?.candidateName && data.candidateName !== 'Candidate')
+                        || (data?.summary && data.summary.length > 50);
+
+                    if (!hasContent) {
+                        pendingAnalysisKey.current = null;
+                        setError(
+                            'Analysis returned empty results. ' +
+                            'Please try again, or re-upload as a DOCX file for best compatibility.'
+                        );
+                        setActiveTab('home');
+                        return;
+                    }
+
                     setAnalysis(data);
                 } catch (err) {
+                    pendingAnalysisKey.current = null;
                     console.error('Auto analysis failed:', err);
-                    // Surface the error so the user sees feedback instead of a stuck loader
-                    setError('Analysis failed. Please try again — upload your resume and select a role below.');
+                    // Error message is already set in context — just navigate home
                     setActiveTab('home');
                 }
             };
@@ -225,8 +249,24 @@ function App() {
 
         try {
             const data = await callApi('analyze', fd);
+
+            // Guard: if the AI returned HTTP 200 but produced no meaningful content,
+            // show a clear error instead of a blank results screen.
+            const hasContent = data?.atsScore > 0
+                || data?.jobMatchScore > 0
+                || (data?.candidateName && data.candidateName !== 'Candidate')
+                || (data?.summary && data.summary.length > 50);
+
+            if (!hasContent) {
+                setError(
+                    'Analysis returned empty results. ' +
+                    'Please try again, or re-upload your resume as a DOCX file for best compatibility.'
+                );
+                return;
+            }
+
             setAnalysis(data);
-        } catch (err) { /* Error handled in context */ }
+        } catch (err) { /* Error message already set in context */ }
     };
 
     const runFeature = async (feature) => {
@@ -492,4 +532,3 @@ function App() {
 }
 
 export default App;
-

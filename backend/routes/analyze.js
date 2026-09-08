@@ -5,9 +5,116 @@ import { saveHistory } from "../utils/historyManager.js";
 
 const router = express.Router();
 
+// ── Resume Text Limit ─────────────────────────────────────────────────────────
+// Configurable via MAX_RESUME_CHARACTERS env var. Default 50,000 characters
+// (~35,000 tokens) — well within Gemini/Groq context windows.
+// Never remove this limit entirely: very large files increase latency,
+// token cost, and open the server to resource-exhaustion attacks.
+const MAX_RESUME_CHARS = parseInt(process.env.MAX_RESUME_CHARACTERS || '50000', 10);
+
+/**
+ * Section-aware resume truncation.
+ *
+ * When a resume exceeds MAX_RESUME_CHARS, this function identifies section
+ * boundaries and preserves the most important sections in full (Summary,
+ * Skills, Education, Certifications) before truncating lower-priority sections
+ * (Experience bullets, Publications) to fill the remaining budget.
+ *
+ * This prevents long academic CVs and experienced-professional resumes from
+ * losing their skills or education sections just because the experience section
+ * was long.
+ *
+ * Priority (highest → lowest):
+ *   Header/Contact info  → 11
+ *   Summary / Objective  → 10
+ *   Skills               → 9
+ *   Education            → 8
+ *   Certifications       → 8
+ *   Projects             → 7
+ *   Experience           → 6  ← truncated first when space is tight
+ *   Awards / Achievements→ 6
+ *   Publications         → 5
+ *   Languages            → 5
+ *   Volunteer / Other    → 4
+ *   Interests / Hobbies  → 3
+ *   References           → 1  ← lowest priority
+ */
+function sectionAwareTruncate(text, maxChars) {
+    if (!text || text.length <= maxChars) return text;
+
+    const SECTION_RULES = [
+        { pattern: /^(summary|professional summary|career summary|objective|career objective|profile|about me?|personal statement)\s*:?\s*$/im, priority: 10 },
+        { pattern: /^(skills|technical skills|core competencies|key skills|competencies|technologies|tech stack|tools & technologies|tools)\s*:?\s*$/im, priority: 9 },
+        { pattern: /^(education|academic background|academic qualifications|qualifications)\s*:?\s*$/im, priority: 8 },
+        { pattern: /^(certifications?|certificates?|professional certifications?|licenses?|credentials)\s*:?\s*$/im, priority: 8 },
+        { pattern: /^(projects?|personal projects?|academic projects?|notable projects?|portfolio|key projects?)\s*:?\s*$/im, priority: 7 },
+        { pattern: /^(experience|work experience|professional experience|employment history|work history|career history|employment)\s*:?\s*$/im, priority: 6 },
+        { pattern: /^(achievements?|accomplishments?|awards?|honors?|recognition|key achievements?)\s*:?\s*$/im, priority: 6 },
+        { pattern: /^(publications?|research|papers?|conference papers?|journal articles?)\s*:?\s*$/im, priority: 5 },
+        { pattern: /^(languages?|language proficiency)\s*:?\s*$/im, priority: 5 },
+        { pattern: /^(volunteer|volunteering|community service|community involvement|extra.?curricular)\s*:?\s*$/im, priority: 4 },
+        { pattern: /^(interests?|hobbies|activities|personal interests?)\s*:?\s*$/im, priority: 3 },
+        { pattern: /^(references?|references available)\s*:?\s*$/im, priority: 1 },
+    ];
+
+    // Split text into lines and detect section boundaries
+    const lines = text.split('\n');
+    const sections = [];
+    let currentSection = { name: 'contact_header', priority: 11, content: [] };
+
+    for (const line of lines) {
+        let matched = false;
+        for (const rule of SECTION_RULES) {
+            if (rule.pattern.test(line.trim())) {
+                sections.push(currentSection);
+                currentSection = { name: line.trim(), priority: rule.priority, content: [line] };
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) {
+            currentSection.content.push(line);
+        }
+    }
+    sections.push(currentSection); // Push the last section
+
+    // Sort sections: high priority first (stable sort preserves order within same priority)
+    const headerSection = sections.find(s => s.name === 'contact_header');
+    const otherSections = sections
+        .filter(s => s.name !== 'contact_header')
+        .sort((a, b) => b.priority - a.priority);
+
+    let result = headerSection ? headerSection.content.join('\n') : '';
+    let charsUsed = result.length;
+
+    for (const section of otherSections) {
+        const sectionText = (result.length > 0 ? '\n' : '') + section.content.join('\n');
+
+        if (charsUsed + sectionText.length <= maxChars) {
+            // Section fits entirely — include it in full
+            result += sectionText;
+            charsUsed += sectionText.length;
+        } else {
+            // Section doesn't fit — include what we can
+            const remaining = maxChars - charsUsed - 80; // 80-char buffer for the truncation notice
+            if (remaining > 300) {
+                // Find a clean line break within the remaining budget
+                const truncatable = sectionText.slice(0, remaining);
+                const lastNewline = truncatable.lastIndexOf('\n');
+                const cutPoint = (lastNewline > remaining * 0.7) ? lastNewline : remaining;
+                result += sectionText.slice(0, cutPoint);
+                result += '\n[...section truncated — resume exceeds character limit...]';
+            }
+            break; // No room for any more sections
+        }
+    }
+
+    return result.trim();
+}
+
 router.post("/", upload.single("resume"), (req, res) => {
    handleResumeRequest(req, res, ({ resumeText, jobRole, jobDescription, companyName, location }) => {
-      const cleanResume = (resumeText || "").slice(0, 14000);
+      const cleanResume = sectionAwareTruncate(resumeText || "", MAX_RESUME_CHARS);
       const roleContext = jobRole || req.body.jobRole || "Professional";
       const jdContext = (jobDescription || req.body.jobDescription || "").trim();
       const compContext = (companyName || req.body.companyName || "").trim();

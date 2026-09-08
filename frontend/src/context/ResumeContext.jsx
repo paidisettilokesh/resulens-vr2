@@ -57,12 +57,37 @@ export const ResumeProvider = ({ children }) => {
 
             return data;
         } catch (err) {
-            const msg = err.response?.data?.error || err.message || "Operation failed";
-            if (err.response?.status === 401) {
-                console.warn("Unauthorized API call, logging out:", msg);
+            const status = err.response?.status;
+            const serverMsg = err.response?.data?.error || '';
+
+            let userMsg;
+            if (status === 429) {
+                userMsg = 'AI service rate limit reached. Please wait a moment and try again.';
+            } else if (status === 408 || err.code === 'ECONNABORTED') {
+                userMsg = 'Request timed out — the AI service may be busy. Please try again.';
+            } else if (status === 413) {
+                userMsg = 'File too large. Please upload a resume under 5MB.';
+            } else if (status === 400 && serverMsg) {
+                // 400 errors carry specific, safe user-facing messages (e.g. scanned PDF)
+                userMsg = serverMsg;
+            } else if (status === 401) {
+                console.warn('Unauthorized API call, logging out:', serverMsg);
                 logout();
+                userMsg = 'Your session has expired. Please log in again.';
+            } else if (status === 403) {
+                userMsg = 'Access denied. Please check your account permissions.';
+            } else if (status === 502 || status === 503) {
+                userMsg = 'Analysis service temporarily unavailable. Please try again in a moment.';
+            } else if (status >= 500) {
+                // Show server message only if it is safe (no internal paths / stack traces)
+                userMsg = serverMsg && serverMsg.length < 300 && !serverMsg.includes('at ')
+                    ? serverMsg
+                    : 'Analysis failed. Please try again.';
+            } else {
+                userMsg = serverMsg || err.message || 'Operation failed. Please try again.';
             }
-            setError(msg);
+
+            setError(userMsg);
             throw err;
         } finally {
             setLoading(false);

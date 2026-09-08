@@ -11,10 +11,19 @@ import rateLimit from 'express-rate-limit';
 dotenv.config();
 
 // ── Environment Guard ─────────────────────────────────────────────────────────
-const REQUIRED_ENV = ['JWT_SECRET', 'GROQ_API_KEY', 'OPENROUTER_API_KEY'];
-const missingEnv = REQUIRED_ENV.filter(key => !process.env[key]);
-if (missingEnv.length > 0) {
-    console.error(`❌ CRITICAL CONFIG ERROR: Missing required environment variables: ${missingEnv.join(', ')}`);
+// JWT_SECRET is always required (authentication).
+// At least ONE AI provider key is required for analysis to work.
+// The system gracefully falls back across providers — you don't need all three.
+const missingJwt = !process.env.JWT_SECRET;
+const hasAnyAiKey = !!(process.env.GEMINI_API_KEY || process.env.GROQ_API_KEY || process.env.OPENROUTER_API_KEY);
+
+if (missingJwt) {
+    console.error('❌ CRITICAL CONFIG ERROR: JWT_SECRET is required but not set.');
+    process.exit(1);
+}
+if (!hasAnyAiKey) {
+    console.error('❌ CRITICAL CONFIG ERROR: At least one AI provider key is required.');
+    console.error('   Set GEMINI_API_KEY, GROQ_API_KEY, or OPENROUTER_API_KEY in your .env file.');
     process.exit(1);
 }
 
@@ -102,7 +111,7 @@ app.use(helmet.contentSecurityPolicy({
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        connectSrc: ["'self'", "https://api.groq.com", "https://openrouter.ai", "http://localhost:5000", "ws://localhost:5173", "http://localhost:5173"],
+        connectSrc: ["'self'", "https://api.groq.com", "https://openrouter.ai", "https://generativelanguage.googleapis.com", "http://localhost:5000", "ws://localhost:5173", "http://localhost:5173"],
         imgSrc: ["'self'", "data:", "blob:", "https://*"],
         objectSrc: ["'none'"]
     }
@@ -181,6 +190,7 @@ app.use('/api/salary', aiLimiter);
 
 // ── Health Check ──────────────────────────────────────────────────────────────
 const healthHandler = (req, res) => {
+    const providerOrder = (process.env.AI_PROVIDER_ORDER || 'gemini,groq,openrouter').split(',').map(p => p.trim());
     res.json({
         status: 'operational',
         service: 'ResuLens API',
@@ -190,9 +200,11 @@ const healthHandler = (req, res) => {
         databaseConnected: !!global.isMongoConnected,
         databaseError: global.mongoError || null,
         providers: {
-            groq: !!process.env.GROQ_API_KEY,
-            openRouter: !!process.env.OPENROUTER_API_KEY
-        }
+            gemini:      { configured: !!process.env.GEMINI_API_KEY,      model: process.env.GEMINI_MODEL      || 'gemini-2.0-flash' },
+            groq:        { configured: !!process.env.GROQ_API_KEY,        model: process.env.GROQ_MODEL        || 'llama-3.3-70b-versatile (auto)' },
+            openRouter:  { configured: !!process.env.OPENROUTER_API_KEY,  model: process.env.OPENROUTER_MODEL  || 'google/gemma-4-31b-it:free (auto)' }
+        },
+        providerOrder
     });
 };
 
@@ -210,7 +222,11 @@ if (hasFrontendBuild) {
 }
 
 // ── API Routes ────────────────────────────────────────────────────────────────
-const aiTimeout = timeoutMiddleware(120); // 120 seconds for AI endpoints
+// File extraction alone is permitted to take up to 180 seconds.  The former
+// 120-second API timeout therefore cut off cache-miss analyses before the AI
+// response could be returned.  Keep this below the frontend's 300-second
+// request timeout, so the server can return a useful error first.
+const aiTimeout = timeoutMiddleware(parseInt(process.env.AI_REQUEST_TIMEOUT_SECONDS || '270', 10));
 
 app.use('/api/auth', authRoute);
 app.use('/api/admin', requireAuth, adminRoute);
@@ -289,8 +305,10 @@ app.use((err, req, res, next) => {
 // ── Server Bootstrap ──────────────────────────────────────────────────────────
 const server = app.listen(PORT, () => {
     logger.info(`🔍 ResuLens API running on Port ${PORT}`);
-    logger.info(`Groq (Primary):        ${process.env.GROQ_API_KEY ? '✅ Active' : '❌ Missing'}`);
-    logger.info(`OpenRouter (Fallback): ${process.env.OPENROUTER_API_KEY ? '✅ Active' : '❌ Missing'}`);
+    logger.info(`Provider order:        ${process.env.AI_PROVIDER_ORDER || 'gemini,groq,openrouter'} (configurable via AI_PROVIDER_ORDER)`);
+    logger.info(`Gemini (Primary):      ${process.env.GEMINI_API_KEY      ? '✅ Active' : '⚠️  Not configured'}`);
+    logger.info(`Groq (Fallback 1):     ${process.env.GROQ_API_KEY        ? '✅ Active' : '⚠️  Not configured'}`);
+    logger.info(`OpenRouter (Fallback): ${process.env.OPENROUTER_API_KEY  ? '✅ Active' : '⚠️  Not configured'}`);
 });
 
 server.keepAliveTimeout = 300000;

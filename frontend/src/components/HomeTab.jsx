@@ -129,10 +129,10 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                                                     ))}
                                                 </div>
 
-                                                {/* Scanned PDF warning */}
+                                                {/* Scanned PDF note */}
                                                 <p className="text-xs text-amber-700 dark:text-amber-500 font-bold flex items-center justify-center gap-1 mt-1">
                                                     <AlertTriangle size={11} aria-hidden="true" />
-                                                    Scanned / image-only PDFs cannot be parsed
+                                                    Scanned PDFs: OCR attempted — DOCX recommended for best results
                                                 </p>
                                             </div>
                                         </>

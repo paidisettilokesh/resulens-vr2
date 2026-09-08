@@ -14,7 +14,7 @@ export function normalizeText(text) {
     if (!text) return "";
     return text
         .replace(/[\r\n]+/g, '\n')              // Standardize newlines
-        .replace(/[^\x20-\x7E\n\t]/g, ' ')       // Keep printable ASCII, tabs, and newlines only
+        .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, ' ')  // Strip control chars only; preserve unicode (names, bullets, em-dashes, etc.)
         .replace(/[ \t]+/g, ' ')                // Collapse multiple spaces/tabs on a single line
         .trim();
 }
