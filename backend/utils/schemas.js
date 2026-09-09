@@ -58,7 +58,15 @@ export const analyzeSchema = z.object({
         }).optional(),
         experienceAlignment: z.string().optional(),
         experienceQuality: z.string().optional(),
-        recruiterVerdict: z.string().optional()
+        recruiterVerdict: z.string().optional(),
+        matchedRoles: z.array(z.object({
+            role: z.string().optional(),
+            category: z.string().optional(),
+            matchScore: z.number().optional(),
+            supportingSkills: z.array(z.string()).optional(),
+            missingSkills: z.array(z.string()).optional(),
+            explanation: z.string().optional()
+        })).optional()
     }).optional(),
     mobileAnalysis: z.object({
         superpowers: z.array(z.string()).optional(),

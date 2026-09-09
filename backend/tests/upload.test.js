@@ -29,6 +29,15 @@ describe('Upload Utility', () => {
             expect(cb).toHaveBeenCalledWith(null, true);
         });
 
+        it('should allow valid TXT files', () => {
+            const file = {
+                originalname: 'resume.txt',
+                mimetype: 'text/plain'
+            };
+            fileFilter(req, file, cb);
+            expect(cb).toHaveBeenCalledWith(null, true);
+        });
+
         it('should reject invalid extensions (e.g. .doc)', () => {
             const file = {
                 originalname: 'resume.doc',
@@ -36,7 +45,8 @@ describe('Upload Utility', () => {
             };
             fileFilter(req, file, cb);
             expect(cb).toHaveBeenCalledWith(expect.any(Error), false);
-            expect(cb.mock.calls[0][0].message).toBe('Invalid file type. Only PDF and DOCX files are allowed.');
+            expect(cb.mock.calls[0][0].message).toContain('Only PDF, DOCX, and TXT resumes are allowed');
+            expect(cb.mock.calls[0][0].code).toBe('UNSUPPORTED_FILE_TYPE');
         });
 
         it('should reject invalid mime types with valid extensions', () => {
@@ -48,10 +58,10 @@ describe('Upload Utility', () => {
             expect(cb).toHaveBeenCalledWith(expect.any(Error), false);
         });
 
-        it('should reject case-insensitive invalid extensions', () => {
+        it('should reject unallowed executable or script extensions', () => {
             const file = {
-                originalname: 'resume.TXT',
-                mimetype: 'text/plain'
+                originalname: 'payload.sh',
+                mimetype: 'application/x-sh'
             };
             fileFilter(req, file, cb);
             expect(cb).toHaveBeenCalledWith(expect.any(Error), false);

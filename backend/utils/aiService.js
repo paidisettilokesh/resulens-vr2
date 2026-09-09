@@ -436,7 +436,15 @@ const normalizeAnalysis = (data) => {
             skillMatch: data.jobMatchAnalysis?.skillMatch || { matched: [], missing: [] },
             experienceAlignment: data.jobMatchAnalysis?.experienceAlignment || "Aligned with target role benchmarks.",
             experienceQuality: data.jobMatchAnalysis?.experienceQuality || "High-caliber impact density.",
-            recruiterVerdict: data.jobMatchAnalysis?.recruiterVerdict || "Exceptional Match"
+            recruiterVerdict: data.jobMatchAnalysis?.recruiterVerdict || "Exceptional Match",
+            matchedRoles: ensureArray(data.jobMatchAnalysis?.matchedRoles).map(r => ({
+                role: r.role || "Specialist",
+                category: r.category || "Technology",
+                matchScore: parseScore(r.matchScore ?? 75),
+                supportingSkills: ensureArray(r.supportingSkills),
+                missingSkills: ensureArray(r.missingSkills),
+                explanation: r.explanation || "Demonstrated proficiency based on resume background."
+            }))
         },
         mobileAnalysis: {
             superpowers: ensureArray(data.mobileAnalysis?.superpowers || data.strengths),
@@ -715,20 +723,48 @@ export const handleResumeRequest = async (req, res, promptBuilder, onSuccess) =>
             return;
         }
 
-        const isClientFileError = error.message && (
-            error.message.includes('PDF') ||
-            error.message.includes('image') ||
-            error.message.includes('scanned') ||
-            error.message.includes('readable text') ||
-            error.message.includes('empty') ||
-            error.message.includes('DOCX') ||
-            error.message.includes('Unsupported file')
-        );
+        // Map error to standardized error code taxonomy
+        let serverCode = error.code;
+        if (!serverCode) {
+            const msg = (error.message || '').toLowerCase();
+            if (msg.includes('password') || msg.includes('encrypted')) {
+                serverCode = 'DOCUMENT_PASSWORD_PROTECTED';
+            } else if (msg.includes('corrupted') || msg.includes('invalid file') || msg.includes('signature')) {
+                serverCode = 'DOCUMENT_CORRUPTED';
+            } else if (msg.includes('empty') || msg.includes('0 bytes')) {
+                serverCode = 'DOCUMENT_EMPTY';
+            } else if (msg.includes('no resume file')) {
+                serverCode = 'NO_FILE_PROVIDED';
+            } else if (msg.includes('scanned') || msg.includes('flat image')) {
+                serverCode = 'SCANNED_IMAGE_PDF';
+            } else if (msg.includes('unsupported file')) {
+                serverCode = 'UNSUPPORTED_FILE_TYPE';
+            } else if (msg.includes('quota')) {
+                serverCode = 'AI_QUOTA_EXHAUSTED';
+            } else if (msg.includes('timed out') || msg.includes('timeout')) {
+                serverCode = 'REQUEST_TIMEOUT';
+            } else {
+                serverCode = 'AI_PROCESSING_ERROR';
+            }
+        }
 
-        const httpStatus = isClientFileError ? 400 : 500;
+        const isClientFileError = [
+            'DOCUMENT_PASSWORD_PROTECTED',
+            'DOCUMENT_CORRUPTED',
+            'DOCUMENT_EMPTY',
+            'NO_FILE_PROVIDED',
+            'SCANNED_IMAGE_PDF',
+            'UNSUPPORTED_FILE_TYPE'
+        ].includes(serverCode);
+
+        const httpStatus = isClientFileError
+            ? 400
+            : (serverCode === 'AI_QUOTA_EXHAUSTED' ? 429 : 500);
+
         res.status(httpStatus).json({
+            success: false,
             error: error.message,
-            code: isClientFileError ? 'UNSUPPORTED_OR_SCANNED_FILE' : 'AI_PROCESSING_ERROR',
+            code: serverCode,
             requestId: requestLog.requestId
         });
     } finally {

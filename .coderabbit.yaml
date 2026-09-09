@@ -1,0 +1,63 @@
+# CodeRabbit Configuration for ResuLens
+# https://coderabbit.ai/docs/configure-coderabbit
+
+version: "2"
+language: "en-US"
+early_access: false
+
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - "main"
+      - "master"
+      - "fix/resulens-reliability"
+
+  tools:
+    ast-grep:
+      enabled: true
+    eslint:
+      enabled: true
+
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/dist/**"
+    - "!**/build/**"
+    - "!**/.gemini/**"
+    - "!package-lock.json"
+
+  path_instructions:
+    - path: "backend/utils/extractText.js"
+      instructions: |
+        Pay close attention to buffer signature validation (magic bytes: %PDF-, PK\x03\x04, text null-byte check),
+        worker thread lifecycle, timeouts, memory safety, and error code preservation. Ensure no raw buffer leaks.
+
+    - path: "backend/workers/parserWorker.js"
+      instructions: |
+        Scrutinize PDF/DOCX/TXT parsing logic. Ensure password-protected PDFs throw DOCUMENT_PASSWORD_PROTECTED,
+        corrupt files throw DOCUMENT_CORRUPTED, empty files throw DOCUMENT_EMPTY, and image-only PDFs throw SCANNED_IMAGE_PDF.
+        Never let worker crashes crash the main process uncaught.
+
+    - path: "backend/routes/analyze.js"
+      instructions: |
+        Enforce strict prompt injection resistance. Ensure untrusted resume content remains wrapped in
+        <untrusted_candidate_resume> delimiter tags and that system prompts clearly state to ignore user commands
+        inside resume text. Check that matchedRoles and intelligence metrics adhere to schema validation.
+
+    - path: "backend/utils/upload.js"
+      instructions: |
+        Verify filename sanitization against path traversal (../, null bytes, shell characters),
+        file size limits, and MIME type validation.
+
+    - path: "frontend/src/utils/apiClient.js"
+      instructions: |
+        Ensure Axios error handling maps server error codes accurately and does not falsely trigger
+        the scanned-image PDF modal on general API failures, timeouts, or network errors.
+
+chat:
+  auto_reply: true
