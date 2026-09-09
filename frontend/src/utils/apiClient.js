@@ -33,10 +33,7 @@ export const getApiBaseUrl = () => `${getBackendBaseUrl()}/api`;
 const rawClient = (axios && typeof axios.create === 'function')
     ? axios.create({
         baseURL: getApiBaseUrl(),
-        timeout: 90000, // 90 seconds timeout (bounded below reverse proxy 100s drops)
-        headers: {
-            'Content-Type': 'application/json'
-        }
+        timeout: 90000 // 90 seconds timeout (bounded below reverse proxy 100s drops)
     })
     : {
         interceptors: {
@@ -54,6 +51,14 @@ export const apiClient = rawClient;
 // Attach correlation ID and authorization token dynamically before every request
 if (apiClient?.interceptors?.request?.use) {
     apiClient.interceptors.request.use((config) => {
+    // If request payload is FormData, remove Content-Type so browser can set multipart/form-data boundary
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+        if (config.headers) {
+            delete config.headers['Content-Type'];
+            delete config.headers['content-type'];
+        }
+    }
+
     // Generate or attach request correlation ID
     if (!config.headers['X-Request-Id']) {
         const reqId = (typeof crypto !== 'undefined' && crypto.randomUUID)

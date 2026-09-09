@@ -577,6 +577,11 @@ export const handleResumeRequest = async (req, res, promptBuilder, onSuccess) =>
 
         requestLog.extractedCharCount = resumeText?.length || 0;
 
+        // Guard: check if file or text was provided
+        if (!file && (!resumeText || resumeText.trim().length === 0)) {
+            throw new Error('No resume file or resume content was received by the server. Please select a resume file (PDF or DOCX) to upload.');
+        }
+
         // Guard: reject if extracted text is too short to be a real resume
         if (!resumeText || resumeText.trim().length < 80) {
             throw new Error('Could not extract readable text from your file. Please upload a text-based PDF or DOCX (not a scanned image).');
