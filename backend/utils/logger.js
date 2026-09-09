@@ -33,12 +33,19 @@ export const logger = winston.createLogger({
     ]
 });
 
-// If we are not in production, log to console as well with simpler format
+// Always enable console logging so cloud platforms (Render, Docker) capture logs in stdout
 if (process.env.NODE_ENV !== 'production') {
     logger.add(new winston.transports.Console({
         format: winston.format.combine(
             winston.format.colorize(),
             winston.format.simple()
+        )
+    }));
+} else {
+    logger.add(new winston.transports.Console({
+        format: winston.format.combine(
+            winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+            winston.format.json()
         )
     }));
 }

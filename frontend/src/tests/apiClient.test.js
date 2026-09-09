@@ -88,4 +88,32 @@ describe('🌐 API Client Error Classification & Resilience', () => {
         expect(classified.retryable).toBe(true);
         expect(classified.type).toBe('NETWORK_ERROR');
     });
+
+    it('identifies duplicate account conflict error (409)', () => {
+        const error409 = {
+            response: {
+                status: 409,
+                data: { code: 'EMAIL_ALREADY_EXISTS', error: 'An account with this email already exists.' }
+            }
+        };
+        const classified = classifyApiError(error409);
+
+        expect(classified.type).toBe('CONFLICT');
+        expect(classified.retryable).toBe(false);
+        expect(classified.message).toMatch(/already exists/i);
+    });
+
+    it('identifies database unconfigured error (503 with DATABASE_CONFIG_ERROR)', () => {
+        const error503Config = {
+            response: {
+                status: 503,
+                data: { code: 'DATABASE_CONFIG_ERROR', error: 'Database service is unconfigured.' }
+            }
+        };
+        const classified = classifyApiError(error503Config);
+
+        expect(classified.type).toBe('BACKEND_UNAVAILABLE');
+        expect(classified.canRetry).toBe(false);
+        expect(classified.title).toBe('Database Unconfigured');
+    });
 });

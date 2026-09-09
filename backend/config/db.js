@@ -50,13 +50,21 @@ const scheduleReconnect = (attempt = 0) => {
     if (retryTimeout) clearTimeout(retryTimeout);
     if (!process.env.MONGODB_URI) return;
 
+    // Guard: Do not trigger reconnect if already connected or connecting
+    if (mongoose.connection.readyState === 1 || mongoose.connection.readyState === 2) return;
+
     const delay = Math.min(MAX_DELAY_MS, RETRY_DELAY_MS * Math.pow(1.5, attempt));
     retryTimeout = setTimeout(async () => {
-        if (mongoose.connection.readyState === 1) return;
+        if (mongoose.connection.readyState === 1 || mongoose.connection.readyState === 2) return;
         try {
             console.log(`🔁 Reconnecting to MongoDB... (Attempt ${attempt + 1})`);
+            global.mongoConnectionState = 'connecting';
             await mongoose.connect(process.env.MONGODB_URI, {
-                serverSelectionTimeoutMS: 5000,
+                maxPoolSize: 10,
+                minPoolSize: 2,
+                serverSelectionTimeoutMS: 10000,
+                connectTimeoutMS: 10000,
+                socketTimeoutMS: 45000,
             });
         } catch (e) {
             scheduleReconnect(attempt + 1);
@@ -71,20 +79,25 @@ export const isDbReady = () => {
 export const getDbState = () => {
     const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
     const readyState = states[mongoose.connection.readyState] || 'unknown';
+    const isConfigured = !!process.env.MONGODB_URI;
     return {
         state: readyState,
         connected: readyState === 'connected' && !!global.isMongoConnected,
+        configured: isConfigured,
         error: global.mongoError || null
     };
 };
 
 /**
- * Wait for DB connection if it is currently in 'connecting' state.
- * Prevents dropping requests that arrive during the first 1-3 seconds of startup.
+ * Wait for DB connection if it is currently in 'connecting' state or awaiting initial handshake.
+ * Prevents dropping requests that arrive during cloud cold-start handshake (Render + Atlas)
+ * without waiting unnecessarily when the database is already disconnected or in error.
  */
 export const waitForDb = (timeoutMs = 5000) => {
     if (isDbReady()) return Promise.resolve(true);
-    if (mongoose.connection.readyState === 0 && !process.env.MONGODB_URI) {
+
+    const isConnecting = mongoose.connection.readyState === 2 || global.mongoConnectionState === 'connecting';
+    if (!isConnecting) {
         return Promise.resolve(false);
     }
 
@@ -94,9 +107,9 @@ export const waitForDb = (timeoutMs = 5000) => {
             if (isDbReady()) {
                 clearInterval(check);
                 resolve(true);
-            } else if (Date.now() - start > timeoutMs) {
+            } else if (Date.now() - start > timeoutMs || (mongoose.connection.readyState !== 2 && !isDbReady())) {
                 clearInterval(check);
-                resolve(false);
+                resolve(isDbReady());
             }
         }, 150);
     });
@@ -120,7 +133,11 @@ const connectDB = async (retryCount = 0) => {
     try {
         global.mongoConnectionState = 'connecting';
         const conn = await mongoose.connect(process.env.MONGODB_URI, {
-            serverSelectionTimeoutMS: 8000,
+            maxPoolSize: 10,
+            minPoolSize: 2,
+            serverSelectionTimeoutMS: 10000,
+            connectTimeoutMS: 10000,
+            socketTimeoutMS: 45000,
         });
         global.isMongoConnected = true;
         global.mongoConnectionState = 'connected';

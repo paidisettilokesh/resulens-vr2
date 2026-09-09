@@ -55,8 +55,30 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
     const isForgot = mode === 'forgot-password';
     const isReset = mode === 'reset-password';
     const passwordStrength = getPasswordStrength(password);
-    const clientID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '301466670902-h42rg1ghcnhoo109dam60hjkd4020gq5.apps.googleusercontent.com';
-    const hasGoogleClientId = clientID.trim() !== '' && clientID !== 'your_google_client_id_here';
+    
+    // Resolve Client ID: prefer build-time env var, or dynamically discover from backend auth config
+    const envClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim();
+    const [resolvedClientId, setResolvedClientId] = useState(envClientId);
+
+    useEffect(() => {
+        if (!resolvedClientId && isOpen) {
+            apiClient.get('/auth/config')
+                .then(res => {
+                    if (res.data?.googleAuthEnabled && res.data?.googleClientId) {
+                        setResolvedClientId(res.data.googleClientId);
+                    }
+                })
+                .catch(() => {});
+        }
+    }, [isOpen, resolvedClientId]);
+
+    const clientID = resolvedClientId;
+    const hasGoogleClientId = Boolean(
+        clientID &&
+        clientID.trim() !== '' &&
+        clientID !== 'your_google_client_id_here' &&
+        clientID.includes('.apps.googleusercontent.com')
+    );
 
     // Synchronize initial mode changes
     useEffect(() => {
@@ -102,6 +124,12 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
             window.google.accounts.id.initialize({
                 client_id: clientID,
                 callback: handleGoogleResponse,
+                error_callback: (err) => {
+                    console.warn('[Google Identity Services event]:', err);
+                    if (err?.type === 'origin_mismatch' || String(err?.message || '').includes('origin')) {
+                        setError('Google Sign-in origin mismatch: Please register this origin in Google Cloud Console.');
+                    }
+                },
                 auto_select: false,
                 cancel_on_tap_outside: true,
             });

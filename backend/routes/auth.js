@@ -12,9 +12,11 @@ import { sendEmail, sendPasswordResetEmail, sendPasswordChangedEmail } from '../
 import { logAudit } from '../utils/auditLogger.js';
 import { waitForDb, isDbReady } from '../config/db.js';
 import { requireAuth } from '../middleware/auth.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '301466670902-h42rg1ghcnhoo109dam60hjkd4020gq5.apps.googleusercontent.com');
+const googleClientId = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID || '263972740055-de0q62jndudggibosluc3m5e6jbqs06b.apps.googleusercontent.com';
+const client = new OAuth2Client(googleClientId);
 
 // ── Fallback Storage Helpers (Development Only) ───────────────────────────────
 const FALLBACK_DIR = path.join(getSecureStorageDir(), 'talentsync-v2-data');
@@ -47,23 +49,51 @@ const saveLocalUsers = async (users) => {
 };
 
 /**
- * Ensures MongoDB is ready or returns a 503 response in production.
+ * Ensures MongoDB is ready or returns a classified 503 response in production.
  * Prevents creation of ghost/ephemeral local user accounts on Render.
  */
-const ensureDatabaseReady = async (res) => {
+const ensureDatabaseReady = async (res, req = null) => {
     if (isDbReady()) return true;
 
     if (process.env.MONGODB_URI) {
-        const connected = await waitForDb(3000);
+        const connected = await waitForDb(7000);
         if (connected) return true;
     }
 
-    if (process.env.NODE_ENV === 'production' || process.env.MONGODB_URI) {
-        res.set('Retry-After', '3');
+    const reqId = req?.id || req?.headers?.['x-request-id'] || 'no-id';
+    const isProd = process.env.NODE_ENV === 'production';
+
+    if (isProd && !process.env.MONGODB_URI) {
+        logger.error(`[DATABASE_CONFIG_ERROR] [${reqId}] MONGODB_URI is unconfigured in production`);
+        if (typeof res.set === 'function') res.set('Retry-After', '30');
         res.status(503).json({
-            error: 'Database service is initializing. Please retry in a few seconds.',
-            code: 'DATABASE_UNAVAILABLE',
-            retryAfter: 3
+            error: 'Database service is unconfigured. Please configure database credentials in server environment.',
+            code: 'DATABASE_CONFIG_ERROR',
+            retryAfter: 30,
+            requestId: reqId
+        });
+        return false;
+    }
+
+    if (isProd || process.env.MONGODB_URI) {
+        const isConnecting = global.mongoConnectionState === 'connecting';
+        const code = isConnecting ? 'DATABASE_TIMEOUT' : 'DATABASE_UNAVAILABLE';
+        const errorMsg = isConnecting
+            ? 'Database is currently connecting. Please retry in a few seconds.'
+            : 'Database service is temporarily unavailable. Please retry in a few moments.';
+
+        if (isConnecting) {
+            logger.warn(`[DATABASE_TIMEOUT] [${reqId}] MongoDB handshake in-flight exceeded wait window`);
+        } else {
+            logger.error(`[DATABASE_UNAVAILABLE] [${reqId}] MongoDB unavailable. State: ${global.mongoConnectionState}, Reason: ${global.mongoError || 'Unknown'}`);
+        }
+
+        if (typeof res.set === 'function') res.set('Retry-After', '5');
+        res.status(503).json({
+            error: errorMsg,
+            code,
+            retryAfter: 5,
+            requestId: reqId
         });
         return false;
     }
@@ -88,6 +118,20 @@ const generateToken = (userId, email, name, role = 'user', tokenVersion = 0) => 
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const validatePassword = (pw) => typeof pw === 'string' && pw.length >= 8;
 const escapeRegex = (string) => string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+
+// ── GET /api/auth/config (Public Authentication Capability Configuration) ─────
+router.get('/config', (req, res) => {
+    const rawGoogleId = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID || '';
+    const isConfigured = Boolean(
+        rawGoogleId &&
+        rawGoogleId.trim() !== '' &&
+        rawGoogleId !== 'your_google_client_id_here'
+    );
+    res.json({
+        googleAuthEnabled: isConfigured,
+        googleClientId: isConfigured ? rawGoogleId.trim() : ''
+    });
+});
 
 // ── GET /api/auth/me (Session Verification) ──────────────────────────────────
 router.get('/me', requireAuth, async (req, res) => {
@@ -127,21 +171,30 @@ router.get('/me', requireAuth, async (req, res) => {
 
 // ── POST /api/auth/signup ─────────────────────────────────────────────────────
 router.post('/signup', async (req, res) => {
+    const reqId = req.id || req.headers?.['x-request-id'] || 'no-id';
+    logger.info(`[AUTH_SIGNUP_STARTED] [${reqId}] Signup request initiated`);
+
     try {
-        const dbReady = await ensureDatabaseReady(res);
-        if (!dbReady) return;
+        const dbReady = await ensureDatabaseReady(res, req);
+        if (!dbReady) {
+            logger.warn(`[AUTH_SIGNUP_DATABASE_BLOCKED] [${reqId}] Database not ready during signup attempt`);
+            return;
+        }
 
         // Input validation
         const { email, password, name } = req.body;
 
         if (!email || !validateEmail(email)) {
-            return res.status(400).json({ error: 'A valid email address is required.' });
+            logger.warn(`[AUTH_SIGNUP_VALIDATION_FAILED] [${reqId}] Invalid email format provided`);
+            return res.status(400).json({ error: 'A valid email address is required.', code: 'INVALID_REQUEST' });
         }
         if (!name || String(name).trim().length < 2) {
-            return res.status(400).json({ error: 'Full name must be at least 2 characters.' });
+            logger.warn(`[AUTH_SIGNUP_VALIDATION_FAILED] [${reqId}] Full name is shorter than 2 characters`);
+            return res.status(400).json({ error: 'Full name must be at least 2 characters.', code: 'INVALID_REQUEST' });
         }
         if (!validatePassword(password)) {
-            return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+            logger.warn(`[AUTH_SIGNUP_VALIDATION_FAILED] [${reqId}] Password does not meet 8 character requirement`);
+            return res.status(400).json({ error: 'Password must be at least 8 characters long.', code: 'INVALID_REQUEST' });
         }
 
         const emailClean = email.toLowerCase().trim();
@@ -152,7 +205,8 @@ router.post('/signup', async (req, res) => {
             const emailRegex = new RegExp('^' + escapeRegex(emailClean) + '$', 'i');
             const existing = await User.findOne({ email: emailRegex });
             if (existing) {
-                return res.status(409).json({ error: 'An account with this email already exists.' });
+                logger.warn(`[AUTH_SIGNUP_DUPLICATE_EMAIL] [${reqId}] Account already exists for email`);
+                return res.status(409).json({ error: 'An account with this email already exists.', code: 'EMAIL_ALREADY_EXISTS' });
             }
 
             // Create user — password is hashed by the pre-save hook in User.js
@@ -178,6 +232,7 @@ router.post('/signup', async (req, res) => {
 
             const token = generateToken(user._id, user.email, user.name, user.role, user.tokenVersion || 0);
 
+            logger.info(`[AUTH_SIGNUP_SUCCESS] [${reqId}] User created successfully. userId=${user._id}`);
             return res.status(201).json({
                 token,
                 id: user._id,
@@ -191,7 +246,8 @@ router.post('/signup', async (req, res) => {
             const users = await getLocalUsers();
             const existing = users.find(u => u.email && u.email.toLowerCase().trim() === emailClean);
             if (existing) {
-                return res.status(409).json({ error: 'An account with this email already exists.' });
+                logger.warn(`[AUTH_SIGNUP_DUPLICATE_EMAIL] [${reqId}] Account already exists in local storage`);
+                return res.status(409).json({ error: 'An account with this email already exists.', code: 'EMAIL_ALREADY_EXISTS' });
             }
 
             const salt = await bcrypt.genSalt(10);
@@ -224,6 +280,7 @@ router.post('/signup', async (req, res) => {
 
             const token = generateToken(mockId, newUser.email, newUser.name, newUser.role, newUser.tokenVersion || 0);
 
+            logger.info(`[AUTH_SIGNUP_SUCCESS] [${reqId}] Local user created successfully. userId=${mockId}`);
             return res.status(201).json({
                 token,
                 id: mockId,
@@ -235,25 +292,53 @@ router.post('/signup', async (req, res) => {
         }
     } catch (error) {
         if (error.code === 11000) {
-            return res.status(409).json({ error: 'An account with this email already exists.' });
+            logger.warn(`[AUTH_SIGNUP_DUPLICATE_EMAIL] [${reqId}] Unique index duplicate key error (11000)`);
+            return res.status(409).json({ error: 'An account with this email already exists.', code: 'EMAIL_ALREADY_EXISTS' });
         }
-        res.status(400).json({ error: error.message });
+        if (error.name === 'ValidationError') {
+            logger.warn(`[AUTH_SIGNUP_VALIDATION_FAILED] [${reqId}] Schema validation error: ${error.message}`);
+            return res.status(400).json({ error: error.message, code: 'VALIDATION_FAILED' });
+        }
+
+        const isDbError = error.name === 'MongooseServerSelectionError' ||
+            error.name === 'MongoTimeoutError' ||
+            error.name === 'MongoNetworkError' ||
+            error.name === 'MongoTopologyClosedError';
+
+        if (isDbError) {
+            logger.error(`[AUTH_SIGNUP_DATABASE_FAILURE] [${reqId}] Database operation failed during signup: ${error.message}`);
+            if (typeof res.set === 'function') res.set('Retry-After', '5');
+            return res.status(503).json({
+                error: 'Database service is temporarily unavailable. Please retry in a few moments.',
+                code: 'DATABASE_UNAVAILABLE',
+                retryAfter: 5,
+                requestId: reqId
+            });
+        }
+
+        logger.error(`[AUTH_SIGNUP_ERROR] [${reqId}] Server error during signup: ${error.message}`);
+        res.status(500).json({ error: 'Account registration failed. Please try again later.', code: 'SERVER_ERROR', requestId: reqId });
     }
 });
 
 // ── POST /api/auth/login ──────────────────────────────────────────────────────
 router.post('/login', async (req, res) => {
+    const reqId = req.id || req.headers?.['x-request-id'] || 'no-id';
+    logger.info(`[AUTH_LOGIN_STARTED] [${reqId}] Login request initiated`);
+
     try {
-        const dbReady = await ensureDatabaseReady(res);
+        const dbReady = await ensureDatabaseReady(res, req);
         if (!dbReady) return;
 
         const { email, password } = req.body;
 
         if (!email || !validateEmail(email)) {
-            return res.status(400).json({ error: 'A valid email address is required.' });
+            logger.warn(`[AUTH_LOGIN_FAILED] [${reqId}] Invalid email format`);
+            return res.status(400).json({ error: 'A valid email address is required.', code: 'INVALID_REQUEST' });
         }
         if (!password || typeof password !== 'string') {
-            return res.status(400).json({ error: 'Password is required.' });
+            logger.warn(`[AUTH_LOGIN_FAILED] [${reqId}] Missing password`);
+            return res.status(400).json({ error: 'Password is required.', code: 'INVALID_REQUEST' });
         }
 
         const emailClean = email.toLowerCase().trim();
@@ -263,6 +348,7 @@ router.post('/login', async (req, res) => {
             const emailRegex = new RegExp('^' + escapeRegex(emailClean) + '$', 'i');
             const user = await User.findOne({ email: emailRegex }).select('+password');
             if (!user) {
+                logger.warn(`[AUTH_LOGIN_FAILED] [${reqId}] User not found`);
                 await logAudit({
                     userEmail: emailClean,
                     action: 'LOGIN_FAILED',
@@ -270,10 +356,11 @@ router.post('/login', async (req, res) => {
                     userAgent: req.headers['user-agent'],
                     details: { reason: 'User not found' }
                 });
-                return res.status(401).json({ error: 'Invalid email or password.' });
+                return res.status(401).json({ error: 'Invalid email or password.', code: 'AUTHENTICATION_FAILED' });
             }
 
             if (user.status === 'suspended') {
+                logger.warn(`[AUTH_LOGIN_FAILED] [${reqId}] Suspended account: userId=${user._id}`);
                 await logAudit({
                     userId: user._id,
                     userEmail: user.email,
@@ -281,9 +368,10 @@ router.post('/login', async (req, res) => {
                     ipAddress: req.ip,
                     userAgent: req.headers['user-agent']
                 });
-                return res.status(403).json({ error: 'Your account has been suspended. Please contact the administrator.' });
+                return res.status(403).json({ error: 'Your account has been suspended. Please contact the administrator.', code: 'ACCOUNT_SUSPENDED' });
             }
             if (user.status === 'inactive') {
+                logger.warn(`[AUTH_LOGIN_FAILED] [${reqId}] Inactive account: userId=${user._id}`);
                 await logAudit({
                     userId: user._id,
                     userEmail: user.email,
@@ -291,11 +379,12 @@ router.post('/login', async (req, res) => {
                     ipAddress: req.ip,
                     userAgent: req.headers['user-agent']
                 });
-                return res.status(403).json({ error: 'Your account is currently inactive.' });
+                return res.status(403).json({ error: 'Your account is currently inactive.', code: 'ACCOUNT_INACTIVE' });
             }
 
             const isMatch = await user.matchPassword(password);
             if (!isMatch) {
+                logger.warn(`[AUTH_LOGIN_FAILED] [${reqId}] Invalid password for user: userId=${user._id}`);
                 await logAudit({
                     userId: user._id,
                     userEmail: user.email,
@@ -304,7 +393,7 @@ router.post('/login', async (req, res) => {
                     userAgent: req.headers['user-agent'],
                     details: { reason: 'Invalid password' }
                 });
-                return res.status(401).json({ error: 'Invalid email or password.' });
+                return res.status(401).json({ error: 'Invalid email or password.', code: 'AUTHENTICATION_FAILED' });
             }
 
             const updateFields = {
@@ -333,6 +422,7 @@ router.post('/login', async (req, res) => {
 
             const token = generateToken(user._id, user.email, user.name, user.role, user.tokenVersion || 0);
 
+            logger.info(`[AUTH_LOGIN_SUCCESS] [${reqId}] User logged in successfully. userId=${user._id}`);
             return res.json({
                 token,
                 id: user._id,
@@ -347,6 +437,7 @@ router.post('/login', async (req, res) => {
             const users = await getLocalUsers();
             const user = users.find(u => u.email && u.email.toLowerCase().trim() === emailClean);
             if (!user) {
+                logger.warn(`[AUTH_LOGIN_FAILED] [${reqId}] Local user not found`);
                 await logAudit({
                     userEmail: emailClean,
                     action: 'LOGIN_FAILED',
@@ -354,18 +445,19 @@ router.post('/login', async (req, res) => {
                     userAgent: req.headers['user-agent'],
                     details: { reason: 'User not found' }
                 });
-                return res.status(401).json({ error: 'Invalid email or password.' });
+                return res.status(401).json({ error: 'Invalid email or password.', code: 'AUTHENTICATION_FAILED' });
             }
 
             if (user.status === 'suspended') {
-                return res.status(403).json({ error: 'Your account has been suspended.' });
+                return res.status(403).json({ error: 'Your account has been suspended.', code: 'ACCOUNT_SUSPENDED' });
             }
             if (user.status === 'inactive') {
-                return res.status(403).json({ error: 'Your account is currently inactive.' });
+                return res.status(403).json({ error: 'Your account is currently inactive.', code: 'ACCOUNT_INACTIVE' });
             }
 
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) {
+                logger.warn(`[AUTH_LOGIN_FAILED] [${reqId}] Local invalid password`);
                 await logAudit({
                     userId: user._id,
                     userEmail: user.email,
@@ -374,7 +466,7 @@ router.post('/login', async (req, res) => {
                     userAgent: req.headers['user-agent'],
                     details: { reason: 'Invalid password' }
                 });
-                return res.status(401).json({ error: 'Invalid email or password.' });
+                return res.status(401).json({ error: 'Invalid email or password.', code: 'AUTHENTICATION_FAILED' });
             }
 
             if (isFounder && user.role !== 'founder') {
@@ -395,6 +487,7 @@ router.post('/login', async (req, res) => {
 
             const token = generateToken(user._id, user.email, user.name, user.role || 'user', user.tokenVersion || 0);
 
+            logger.info(`[AUTH_LOGIN_SUCCESS] [${reqId}] Local user logged in successfully. userId=${user._id}`);
             return res.json({
                 token,
                 id: user._id,
@@ -406,25 +499,46 @@ router.post('/login', async (req, res) => {
             });
         }
     } catch (error) {
-        res.status(500).json({ error: 'Login failed. Please try again.' });
+        const isDbError = error.name === 'MongooseServerSelectionError' ||
+            error.name === 'MongoTimeoutError' ||
+            error.name === 'MongoNetworkError';
+
+        if (isDbError) {
+            logger.error(`[AUTH_LOGIN_DATABASE_FAILURE] [${reqId}] Database failure: ${error.message}`);
+            if (typeof res.set === 'function') res.set('Retry-After', '5');
+            return res.status(503).json({
+                error: 'Database service is temporarily unavailable. Please retry in a few moments.',
+                code: 'DATABASE_UNAVAILABLE',
+                retryAfter: 5,
+                requestId: reqId
+            });
+        }
+
+        logger.error(`[AUTH_LOGIN_ERROR] [${reqId}] Login failed: ${error.message}`);
+        res.status(500).json({ error: 'Login failed. Please try again.', code: 'SERVER_ERROR', requestId: reqId });
     }
 });
 
 // ── POST /api/auth/google ─────────────────────────────────────────────────────
 router.post('/google', async (req, res) => {
+    const reqId = req.id || req.headers?.['x-request-id'] || 'no-id';
+    logger.info(`[GOOGLE_OAUTH_STARTED] [${reqId}] Google OAuth authentication request received`);
+
     try {
-        const dbReady = await ensureDatabaseReady(res);
+        const dbReady = await ensureDatabaseReady(res, req);
         if (!dbReady) return;
 
         const { credential } = req.body;
         if (!credential) {
-            return res.status(400).json({ error: 'Google credential token is required.' });
+            logger.warn(`[GOOGLE_OAUTH_CALLBACK_FAILED] [${reqId}] Missing credential token`);
+            return res.status(400).json({ error: 'Google credential token is required.', code: 'INVALID_REQUEST' });
         }
 
         let payload;
+        const configuredClientId = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID;
         const allowedAudiences = [
-            process.env.GOOGLE_CLIENT_ID,
-            process.env.VITE_GOOGLE_CLIENT_ID,
+            configuredClientId,
+            '263972740055-de0q62jndudggibosluc3m5e6jbqs06b.apps.googleusercontent.com',
             '301466670902-h42rg1ghcnhoo109dam60hjkd4020gq5.apps.googleusercontent.com',
             '301466670902-kcegi1b9m80lknd4s4p45v3ofdctv56h.apps.googleusercontent.com'
         ].filter(Boolean);
@@ -436,25 +550,28 @@ router.post('/google', async (req, res) => {
             });
             payload = ticket.getPayload();
         } catch (err) {
-            console.error('❌ Google token verification error:', err.message);
+            logger.error(`[GOOGLE_OAUTH_CALLBACK_FAILED] [${reqId}] verifyIdToken error: ${err.message}`);
             const decoded = jwt.decode(credential);
             const isGoogleIssuer = decoded && (decoded.iss === 'accounts.google.com' || decoded.iss === 'https://accounts.google.com');
             const isNotExpired = decoded && decoded.exp && (decoded.exp * 1000 > Date.now());
 
             if (isGoogleIssuer && isNotExpired && decoded.email) {
+                logger.warn(`[GOOGLE_OAUTH] [${reqId}] Token accepted via verified Google issuer fallback`);
                 payload = decoded;
             } else {
-                return res.status(401).json({ error: 'Google authentication failed. Invalid or expired token.' });
+                return res.status(401).json({ error: 'Google authentication failed. Invalid or expired token.', code: 'AUTHENTICATION_FAILED' });
             }
         }
 
         if (!payload) {
-            return res.status(400).json({ error: 'Failed to parse Google profile information.' });
+            logger.warn(`[GOOGLE_OAUTH_CALLBACK_FAILED] [${reqId}] Failed to parse Google profile`);
+            return res.status(400).json({ error: 'Failed to parse Google profile information.', code: 'INVALID_REQUEST' });
         }
 
         const { sub: googleId, email, name, picture } = payload;
         if (!email) {
-            return res.status(400).json({ error: 'Google account must have a visible email address.' });
+            logger.warn(`[GOOGLE_OAUTH_CALLBACK_FAILED] [${reqId}] Google account has no visible email`);
+            return res.status(400).json({ error: 'Google account must have a visible email address.', code: 'INVALID_REQUEST' });
         }
 
         const emailClean = email.toLowerCase().trim();
@@ -466,10 +583,12 @@ router.post('/google', async (req, res) => {
 
             if (user) {
                 if (user.status === 'suspended') {
-                    return res.status(403).json({ error: 'Your account has been suspended. Please contact the administrator.' });
+                    logger.warn(`[GOOGLE_OAUTH_BLOCKED] [${reqId}] Suspended account: userId=${user._id}`);
+                    return res.status(403).json({ error: 'Your account has been suspended. Please contact the administrator.', code: 'ACCOUNT_SUSPENDED' });
                 }
                 if (user.status === 'inactive') {
-                    return res.status(403).json({ error: 'Your account is currently inactive.' });
+                    logger.warn(`[GOOGLE_OAUTH_BLOCKED] [${reqId}] Inactive account: userId=${user._id}`);
+                    return res.status(403).json({ error: 'Your account is currently inactive.', code: 'ACCOUNT_INACTIVE' });
                 }
 
                 user.lastLoginAt = new Date();
@@ -503,6 +622,7 @@ router.post('/google', async (req, res) => {
 
             const token = generateToken(user._id, user.email, user.name, user.role, user.tokenVersion || 0);
 
+            logger.info(`[GOOGLE_OAUTH_SUCCESS] [${reqId}] Google authentication successful. userId=${user._id}`);
             return res.json({
                 token,
                 id: user._id,
@@ -519,10 +639,10 @@ router.post('/google', async (req, res) => {
 
             if (user) {
                 if (user.status === 'suspended') {
-                    return res.status(403).json({ error: 'Your account has been suspended.' });
+                    return res.status(403).json({ error: 'Your account has been suspended.', code: 'ACCOUNT_SUSPENDED' });
                 }
                 if (user.status === 'inactive') {
-                    return res.status(403).json({ error: 'Your account is currently inactive.' });
+                    return res.status(403).json({ error: 'Your account is currently inactive.', code: 'ACCOUNT_INACTIVE' });
                 }
 
                 user.lastLoginAt = new Date().toISOString();
@@ -558,6 +678,7 @@ router.post('/google', async (req, res) => {
 
             const token = generateToken(user._id, user.email, user.name, user.role || 'user', user.tokenVersion || 0);
 
+            logger.info(`[GOOGLE_OAUTH_SUCCESS] [${reqId}] Local Google authentication successful. userId=${user._id}`);
             return res.json({
                 token,
                 id: user._id,
@@ -569,8 +690,23 @@ router.post('/google', async (req, res) => {
             });
         }
     } catch (error) {
-        console.error('Google auth route error:', error);
-        res.status(500).json({ error: 'Google authentication failed. Please try again.' });
+        const isDbError = error.name === 'MongooseServerSelectionError' ||
+            error.name === 'MongoTimeoutError' ||
+            error.name === 'MongoNetworkError';
+
+        if (isDbError) {
+            logger.error(`[GOOGLE_OAUTH_DATABASE_FAILURE] [${reqId}] Database error during Google auth: ${error.message}`);
+            if (typeof res.set === 'function') res.set('Retry-After', '5');
+            return res.status(503).json({
+                error: 'Database service is temporarily unavailable. Please retry in a few moments.',
+                code: 'DATABASE_UNAVAILABLE',
+                retryAfter: 5,
+                requestId: reqId
+            });
+        }
+
+        logger.error(`[GOOGLE_OAUTH_ERROR] [${reqId}] Google auth unexpected error: ${error.message}`);
+        res.status(500).json({ error: 'Google authentication failed. Please try again.', code: 'SERVER_ERROR', requestId: reqId });
     }
 });
 

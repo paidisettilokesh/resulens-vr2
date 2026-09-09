@@ -289,6 +289,28 @@ const healthHandler = (req, res) => {
 app.get('/health', healthHandler);
 app.get('/api/health', healthHandler);
 
+// ── Explicit Readiness Probes (For Container Orchestrators) ───────────────────
+const readinessHandler = (req, res) => {
+    const db = getDbState();
+    if (process.env.MONGODB_URI && !db.connected) {
+        return res.status(503).json({
+            status: 'degraded',
+            ready: false,
+            database: db,
+            message: 'Database service is not ready'
+        });
+    }
+    return res.json({
+        status: 'operational',
+        ready: true,
+        database: db,
+        message: 'All services ready'
+    });
+};
+
+app.get('/health/ready', readinessHandler);
+app.get('/api/health/ready', readinessHandler);
+
 // ── Serve Frontend Static Files (Single Host option) ──────────────────────────
 const frontendDist = path.join(__dirname, '../frontend/dist');
 const hasFrontendBuild = fs.existsSync(path.join(frontendDist, 'index.html'));
@@ -304,7 +326,7 @@ if (hasFrontendBuild) {
 // before reverse proxies (Render 100s timeout) terminate the idle TCP connection.
 const aiTimeout = timeoutMiddleware(parseInt(process.env.AI_REQUEST_TIMEOUT_SECONDS || '85', 10));
 
-app.use('/api/auth', requireDb, authRoute);
+app.use('/api/auth', authRoute);
 app.use('/api/admin', requireAuth, adminRoute);
 app.use('/api/analyze', requireAuth, aiTimeout, analyzeRoute);
 app.use('/api/rewrite', requireAuth, aiTimeout, rewriteRoute);

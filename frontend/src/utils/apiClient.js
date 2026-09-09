@@ -214,12 +214,24 @@ export const classifyApiError = (err) => {
         };
     }
 
+     // 6b. Resource Conflict / Duplicate Account (HTTP 409)
+    if (status === 409) {
+        return {
+            type: 'CONFLICT',
+            title: 'Account Already Exists',
+            message: serverMsg || 'An account with this email already exists. Please sign in instead.',
+            canRetry: false,
+            statusCode: 409,
+            technicalDetail: serverCode || 'EMAIL_ALREADY_EXISTS'
+        };
+    }
+
     // 7. Structured Document / Client File Errors (HTTP 400)
     if (status === 400) {
         if (serverCode === 'SCANNED_IMAGE_PDF') {
             return {
-                type: 'SCANNED_FILE',
-                title: 'Image-Based PDF Detected',
+                type: 'SCANNED_PDF',
+                title: 'Text Not Selectable',
                 message: serverMsg || 'This resume was saved as a flat image or graphic without selectable text. Real-world Applicant Tracking Systems (ATS) cannot parse text from image files. Please export from Word or Google Docs with selectable text, or upload as DOCX or TXT.',
                 canRetry: false,
                 statusCode: 400,
@@ -227,11 +239,22 @@ export const classifyApiError = (err) => {
             };
         }
 
+        if (serverCode === 'DOCX_INVALID_ZIP') {
+            return {
+                type: 'INVALID_DOCX',
+                title: 'Corrupted Word Document',
+                message: serverMsg || 'This DOCX file appears to be corrupted or saved in an older non-standard format. Please re-save as a modern Word document (.docx) or export as PDF.',
+                canRetry: false,
+                statusCode: 400,
+                technicalDetail: 'DOCX_INVALID_ZIP'
+            };
+        }
+
         if (serverCode === 'DOCUMENT_PASSWORD_PROTECTED') {
             return {
-                type: 'PASSWORD_PROTECTED',
-                title: 'Password-Protected PDF',
-                message: serverMsg || 'This PDF is encrypted or password-protected. Please remove password protection and re-upload.',
+                type: 'ENCRYPTED_FILE',
+                title: 'Document is Password-Protected',
+                message: serverMsg || 'This file is encrypted or password-protected. Please remove the password protection and re-upload.',
                 canRetry: false,
                 statusCode: 400,
                 technicalDetail: 'DOCUMENT_PASSWORD_PROTECTED'
@@ -284,8 +307,8 @@ export const classifyApiError = (err) => {
 
         return {
             type: 'BAD_REQUEST',
-            title: 'Unable to Process Resume',
-            message: serverMsg || 'The uploaded file could not be parsed. Please check the file and try again.',
+            title: 'Unable to Process Request',
+            message: serverMsg || 'The request could not be processed. Please check your information and try again.',
             canRetry: true,
             statusCode: 400,
             technicalDetail: serverCode || 'BAD_REQUEST'
@@ -294,12 +317,26 @@ export const classifyApiError = (err) => {
 
     // 8. Service Temporarily Unavailable / Database Initializing (503)
     if (status === 503) {
+        let title = 'Service Initializing';
+        let defaultMsg = 'The ResuLens database is currently connecting. Please wait a moment and retry.';
+
+        if (serverCode === 'DATABASE_CONFIG_ERROR') {
+            title = 'Database Unconfigured';
+            defaultMsg = 'The database service is not configured on the server. Please contact administrator.';
+        } else if (serverCode === 'DATABASE_TIMEOUT') {
+            title = 'Database Connecting';
+            defaultMsg = 'The database connection is initializing. Please retry in a few seconds.';
+        } else if (serverCode === 'DATABASE_UNAVAILABLE') {
+            title = 'Database Unavailable';
+            defaultMsg = 'The database service is temporarily unreachable. Please retry in a few moments.';
+        }
+
         return {
             type: 'BACKEND_UNAVAILABLE',
-            title: 'Service Initializing',
-            message: serverMsg || 'The ResuLens database is currently initializing or reconnecting. Please wait a moment and retry.',
-            canRetry: true,
-            retryAfter: parseInt(err.response?.headers?.['retry-after'] || '3', 10),
+            title,
+            message: serverMsg || defaultMsg,
+            canRetry: serverCode !== 'DATABASE_CONFIG_ERROR',
+            retryAfter: parseInt(err.response?.headers?.['retry-after'] || '5', 10),
             statusCode: 503,
             technicalDetail: serverCode || 'DATABASE_UNAVAILABLE'
         };
