@@ -1,13 +1,14 @@
 export const MAX_FILE_SIZE_MB = 5;
 export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-export const ALLOWED_EXTENSIONS = ['.pdf', '.docx'];
+export const ALLOWED_EXTENSIONS = ['.pdf', '.docx', '.txt'];
 export const ALLOWED_MIME_TYPES = [
     'application/pdf',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/msword',
     'application/zip',
     'application/x-zip-compressed',
-    'application/octet-stream'
+    'application/octet-stream',
+    'text/plain'
 ];
 
 export const validateResumeFile = (file) => {
@@ -28,7 +29,7 @@ export const validateResumeFile = (file) => {
     // Some browsers might not accurately report MIME type for DOCX, so we lean on extension if MIME is missing,
     // but we strictly enforce extension.
     if (!isExtensionAllowed) {
-        return { isValid: false, error: 'Invalid file type. Only PDF and DOCX files are allowed.' };
+        return { isValid: false, error: 'Invalid file type. Only PDF, DOCX, and TXT files are allowed.' };
     }
 
     if (file.type && !isMimeTypeAllowed && isExtensionAllowed && file.type !== '') {

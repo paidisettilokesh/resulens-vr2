@@ -214,20 +214,81 @@ export const classifyApiError = (err) => {
         };
     }
 
-    // 7. Scanned PDF or Bad Request with specific guidance
+    // 7. Structured Document / Client File Errors (HTTP 400)
     if (status === 400) {
-        const isScanned = serverMsg.toLowerCase().includes('scanned') ||
-                          serverMsg.toLowerCase().includes('image') ||
-                          serverMsg.toLowerCase().includes('readable text') ||
-                          serverMsg.toLowerCase().includes('selectable text');
+        if (serverCode === 'SCANNED_IMAGE_PDF') {
+            return {
+                type: 'SCANNED_FILE',
+                title: 'Image-Based PDF Detected',
+                message: serverMsg || 'This resume was saved as a flat image or graphic without selectable text. Real-world Applicant Tracking Systems (ATS) cannot parse text from image files. Please export from Word or Google Docs with selectable text, or upload as DOCX or TXT.',
+                canRetry: false,
+                statusCode: 400,
+                technicalDetail: 'SCANNED_IMAGE_PDF'
+            };
+        }
+
+        if (serverCode === 'DOCUMENT_PASSWORD_PROTECTED') {
+            return {
+                type: 'PASSWORD_PROTECTED',
+                title: 'Password-Protected PDF',
+                message: serverMsg || 'This PDF is encrypted or password-protected. Please remove password protection and re-upload.',
+                canRetry: false,
+                statusCode: 400,
+                technicalDetail: 'DOCUMENT_PASSWORD_PROTECTED'
+            };
+        }
+
+        if (serverCode === 'DOCUMENT_CORRUPTED') {
+            return {
+                type: 'CORRUPTED_FILE',
+                title: 'Corrupted File',
+                message: serverMsg || 'The uploaded file appears to be corrupted or does not match its expected file format signature.',
+                canRetry: false,
+                statusCode: 400,
+                technicalDetail: 'DOCUMENT_CORRUPTED'
+            };
+        }
+
+        if (serverCode === 'DOCUMENT_EMPTY') {
+            return {
+                type: 'EMPTY_FILE',
+                title: 'Empty Document',
+                message: serverMsg || 'The uploaded file contains no readable text or is empty (0 bytes).',
+                canRetry: false,
+                statusCode: 400,
+                technicalDetail: 'DOCUMENT_EMPTY'
+            };
+        }
+
+        if (serverCode === 'NO_FILE_PROVIDED') {
+            return {
+                type: 'NO_FILE',
+                title: 'No Resume File Received',
+                message: serverMsg || 'Please select a valid resume file (PDF, DOCX, or TXT) to upload.',
+                canRetry: true,
+                statusCode: 400,
+                technicalDetail: 'NO_FILE_PROVIDED'
+            };
+        }
+
+        if (serverCode === 'UNSUPPORTED_FILE_TYPE') {
+            return {
+                type: 'UNSUPPORTED_FILE',
+                title: 'Unsupported File Format',
+                message: serverMsg || 'Only PDF, DOCX, and TXT resumes are supported.',
+                canRetry: false,
+                statusCode: 400,
+                technicalDetail: 'UNSUPPORTED_FILE_TYPE'
+            };
+        }
 
         return {
-            type: isScanned ? 'SCANNED_FILE' : 'BAD_REQUEST',
-            title: isScanned ? 'Image-Based PDF Detected' : 'Unable to Process Resume',
-            message: serverMsg || 'The uploaded file could not be parsed. Please ensure it is a valid PDF or DOCX resume.',
-            canRetry: !isScanned,
+            type: 'BAD_REQUEST',
+            title: 'Unable to Process Resume',
+            message: serverMsg || 'The uploaded file could not be parsed. Please check the file and try again.',
+            canRetry: true,
             statusCode: 400,
-            technicalDetail: serverMsg
+            technicalDetail: serverCode || 'BAD_REQUEST'
         };
     }
 

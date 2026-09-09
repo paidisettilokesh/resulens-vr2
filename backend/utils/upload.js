@@ -9,25 +9,33 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+        // Sanitize original filename: strip path traversal, null bytes, and non-alphanumeric chars (except safe dots/dashes)
+        const safeExt = path.extname(file.originalname || '').toLowerCase().replace(/[^a-z0-9.]/g, '');
+        const baseField = (file.fieldname || 'resume').replace(/[^a-zA-Z0-9_-]/g, '');
+        cb(null, `${baseField}-${uniqueSuffix}${safeExt}`);
     }
 });
 
 export const fileFilter = (req, file, cb) => {
-    const allowedExtensions = ['.pdf', '.docx'];
+    const allowedExtensions = ['.pdf', '.docx', '.txt'];
     const allowedMimeTypes = [
         'application/pdf',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain',
+        'application/octet-stream' // Allowed during transport if extension is verified; validated via magic-bytes
     ];
 
-    const fileExtension = path.extname(file.originalname).toLowerCase();
+    const safeFilename = path.basename(file.originalname || '');
+    const fileExtension = path.extname(safeFilename).toLowerCase();
     const isExtensionAllowed = allowedExtensions.includes(fileExtension);
     const isMimeTypeAllowed = allowedMimeTypes.includes(file.mimetype);
 
     if (isExtensionAllowed && isMimeTypeAllowed) {
         cb(null, true);
     } else {
-        cb(new Error('Invalid file type. Only PDF and DOCX files are allowed.'), false);
+        const err = new Error('Invalid file type. Only PDF, DOCX, and TXT resumes are allowed.');
+        err.code = 'UNSUPPORTED_FILE_TYPE';
+        cb(err, false);
     }
 };
 

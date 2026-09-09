@@ -262,7 +262,11 @@ export const sendEmail = async ({ to, subject, html, text }) => {
         }
     }
 
-    // 3. Fallback when no production email provider (RESEND_API_KEY or SMTP) is configured
+    // 3. Fallback when running in automated test environment or no email provider configured
+    if (process.env.NODE_ENV === 'test') {
+        return { success: true, provider: 'test-mock' };
+    }
+
     console.warn('⚠️ No email provider configured (RESEND_API_KEY or SMTP_USER). Email dispatched to server logs:');
     console.log(`\n================== 📩 [RESULENS EMAIL LOG] ==================`);
     console.log(`To: ${to}`);

@@ -17,14 +17,32 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = import.meta.resolve('pdfjs-dist/legacy/
  */
 async function extractWithPdfjs(buffer) {
     const uint8Array = new Uint8Array(buffer);
-    const loadingTask = pdfjsLib.getDocument({
-        data: uint8Array,
-        useSystemFonts: true,
-        disableFontFace: true,
-        verbosity: 0 // Suppress internal PDF warnings
-    });
+    let loadingTask = null;
+    let doc = null;
 
-    const doc = await loadingTask.promise;
+    try {
+        loadingTask = pdfjsLib.getDocument({
+            data: uint8Array,
+            useSystemFonts: true,
+            disableFontFace: true,
+            verbosity: 0 // Suppress internal PDF warnings
+        });
+
+        doc = await loadingTask.promise;
+    } catch (err) {
+        if (err.name === 'PasswordException' || /password/i.test(err.message)) {
+            const passwordErr = new Error('This PDF is password-protected or encrypted. Please remove password protection and re-upload.');
+            passwordErr.code = 'DOCUMENT_PASSWORD_PROTECTED';
+            throw passwordErr;
+        }
+        if (err.name === 'InvalidPDFException' || /invalid pdf/i.test(err.message)) {
+            const corruptErr = new Error('The uploaded file is not a valid PDF or is corrupted.');
+            corruptErr.code = 'DOCUMENT_CORRUPTED';
+            throw corruptErr;
+        }
+        throw err;
+    }
+
     let fullText = '';
 
     for (let i = 1; i <= doc.numPages; i++) {
@@ -262,14 +280,23 @@ parentPort.on('message', async (message) => {
         const { filePath, mimetype } = message;
 
         if (!fs.existsSync(filePath)) {
-            throw new Error(`File not found: ${filePath}`);
+            const err = new Error(`File not found: ${filePath}`);
+            err.code = 'INVALID_FILE';
+            throw err;
         }
 
         const ext = path.extname(filePath).toLowerCase();
         const isPdf  = mimetype === 'application/pdf' || ext === '.pdf';
         const isDocx = mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || ext === '.docx';
+        const isTxt  = mimetype === 'text/plain' || ext === '.txt';
 
         const buffer = fs.readFileSync(filePath);
+        if (!buffer || buffer.length === 0) {
+            const emptyErr = new Error('The uploaded file is empty (0 bytes). Please upload a valid resume.');
+            emptyErr.code = 'DOCUMENT_EMPTY';
+            throw emptyErr;
+        }
+
         let text = '';
         let ocrUsed = false;
 
@@ -278,6 +305,10 @@ parentPort.on('message', async (message) => {
             try {
                 text = await extractWithPdfjs(buffer);
             } catch (err) {
+                // If the error was already classified (e.g. password-protected or corrupt), re-throw
+                if (err.code === 'DOCUMENT_PASSWORD_PROTECTED' || err.code === 'DOCUMENT_CORRUPTED') {
+                    throw err;
+                }
                 console.warn('[Parser] pdfjs-dist failed, falling back to pdf-parse:', err.message);
             }
 
@@ -288,7 +319,9 @@ parentPort.on('message', async (message) => {
                     if (countRealWords(fallbackText) > countRealWords(text)) {
                         text = fallbackText;
                     }
-                } catch { /* ignore fallback errors */ }
+                } catch (parseErr) {
+                    console.warn('[Parser] pdf-parse fallback failed:', parseErr.message);
+                }
             }
 
             // ── Stage 3: Vision / OCR fallback for scanned/image-only PDFs ──────────────
@@ -311,25 +344,15 @@ parentPort.on('message', async (message) => {
                         text = ocrResult.text;
                         ocrUsed = true;
                         console.log(`[OCR] Successfully extracted ${countRealWords(text)} words via Tesseract OCR`);
-                    } else if (!ocrResult.available && ocrResult.reason === 'canvas-not-installed' && !geminiResult.available) {
-                        // canvas not compiled and Gemini Vision not available — give clear, actionable error
-                        throw new Error(
-                            'This PDF appears to be scanned or image-based and cannot be parsed as text. ' +
-                            'For best results, please:\n' +
-                            '• Upload as DOCX (Microsoft Word format) — recommended\n' +
-                            '• Or use a PDF exported from Word/Google Docs with selectable text'
-                        );
-                    } else if (!ocrResult.available && !geminiResult.available) {
-                        throw new Error(
-                            'This PDF does not contain selectable text. ' +
-                            'Please upload as DOCX or a text-based PDF for accurate analysis.'
-                        );
                     } else {
-                        // Vision & OCR ran but still too little text — genuinely sparse document
-                        throw new Error(
-                            'This PDF appears to contain mostly images or decorative elements with very little readable text. ' +
-                            'Please upload as DOCX or a text-based PDF for accurate analysis.'
+                        // All extraction methods attempted and selectable text is genuinely missing
+                        const scanErr = new Error(
+                            'This resume was saved as a flat image or graphic without selectable text. ' +
+                            'Real-world Applicant Tracking Systems (ATS) cannot parse text from image files. ' +
+                            'Please export from Word or Google Docs using Save As > PDF (with selectable text enabled), or upload directly as DOCX or TXT.'
                         );
+                        scanErr.code = 'SCANNED_IMAGE_PDF';
+                        throw scanErr;
                     }
                 }
             }
@@ -338,19 +361,37 @@ parentPort.on('message', async (message) => {
             try {
                 text = await extractDocxText(buffer);
             } catch (err) {
-                throw new Error(`Could not read DOCX document: ${err.message}`);
+                const docxErr = new Error(`Could not read DOCX document: ${err.message}`);
+                docxErr.code = 'DOCUMENT_CORRUPTED';
+                throw docxErr;
             }
 
             if (countRealWords(text) < 20) {
-                throw new Error('This DOCX document appears to be empty or contains no readable text. Please check the file and try again.');
+                const emptyDocxErr = new Error('This DOCX document appears to be empty or contains no readable text. Please check the file and try again.');
+                emptyDocxErr.code = 'DOCUMENT_EMPTY';
+                throw emptyDocxErr;
+            }
+
+        } else if (isTxt) {
+            text = buffer.toString('utf8');
+            if (countRealWords(text) < 10) {
+                const emptyTxtErr = new Error('This text file appears to be empty or contains no readable resume content.');
+                emptyTxtErr.code = 'DOCUMENT_EMPTY';
+                throw emptyTxtErr;
             }
 
         } else {
-            throw new Error(`Unsupported file type (${ext || mimetype}). Please upload a .pdf or .docx resume.`);
+            const typeErr = new Error(`Unsupported file type (${ext || mimetype}). Please upload a .pdf, .docx, or .txt resume.`);
+            typeErr.code = 'UNSUPPORTED_FILE_TYPE';
+            throw typeErr;
         }
 
         parentPort.postMessage({ success: true, text, ocrUsed });
     } catch (error) {
-        parentPort.postMessage({ success: false, error: error.message || String(error) });
+        parentPort.postMessage({
+            success: false,
+            error: error.message || String(error),
+            code: error.code || 'TEXT_EXTRACTION_FAILED'
+        });
     }
 });

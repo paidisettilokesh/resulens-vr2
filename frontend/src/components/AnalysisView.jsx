@@ -572,6 +572,59 @@ const AnalysisView = ({
                         </div>
                     </div>
 
+                    {/* Multi-Role Market Alignment */}
+                    {analysis.jobMatchAnalysis?.matchedRoles && analysis.jobMatchAnalysis.matchedRoles.length > 0 && (
+                        <div className="surface-3d p-8 rounded-[2.5rem] space-y-5">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] flex items-center gap-2">
+                                    <Briefcase size={13} className="text-cyan-700 dark:text-cyan-400" /> Multi-Role Market Alignment
+                                </h3>
+                                <span className="text-[10px] font-bold text-cyan-600 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20">
+                                    {analysis.jobMatchAnalysis.matchedRoles.length} Roles Analyzed
+                                </span>
+                            </div>
+                            <div className="space-y-4">
+                                {analysis.jobMatchAnalysis.matchedRoles.map((roleItem, idx) => (
+                                    <div key={idx} className="p-4 bg-[var(--bg-surface-secondary)] rounded-2xl border border-[var(--border-secondary)] space-y-2.5">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <h4 className="text-sm font-black text-[var(--text-primary)]">{roleItem.role}</h4>
+                                                    {roleItem.category && (
+                                                        <span className="text-[9px] font-black uppercase tracking-wider text-[var(--text-muted)] bg-[var(--bg-surface)] px-2 py-0.5 rounded border border-[var(--border-secondary)]">
+                                                            {roleItem.category}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                {roleItem.explanation && (
+                                                    <p className="text-xs text-[var(--text-secondary)] mt-1 italic">{roleItem.explanation}</p>
+                                                )}
+                                            </div>
+                                            <div className="shrink-0 text-right">
+                                                <span className="text-lg font-black text-cyan-600">{roleItem.matchScore}%</span>
+                                                <span className="block text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Fit</span>
+                                            </div>
+                                        </div>
+                                        {(roleItem.supportingSkills?.length > 0 || roleItem.missingSkills?.length > 0) && (
+                                            <div className="flex flex-wrap gap-1.5 pt-2 border-t border-[var(--border-secondary)]">
+                                                {roleItem.supportingSkills?.map((s, si) => (
+                                                    <span key={si} className="text-[10px] font-bold px-2 py-0.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-md border border-emerald-500/20">
+                                                        ✓ {s}
+                                                    </span>
+                                                ))}
+                                                {roleItem.missingSkills?.map((m, mi) => (
+                                                    <span key={mi} className="text-[10px] font-bold px-2 py-0.5 bg-rose-500/10 text-rose-700 dark:text-rose-400 rounded-md border border-rose-500/20">
+                                                        + {m}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* ATS Improvement Roadmap */}
                     <div className="surface-3d p-8 rounded-[2.5rem] space-y-5">
                         <h3 className="text-[11px] font-black text-[var(--text-muted)] uppercase tracking-[0.25em] flex items-center gap-2">
