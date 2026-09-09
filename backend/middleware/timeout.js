@@ -12,7 +12,8 @@ export const timeoutMiddleware = (seconds = 90) => (req, res, next) => {
     req.isClientClosed = false;
 
     // Track client aborts (e.g. user closed tab or mobile carrier dropped socket)
-    req.on('close', () => {
+    // Listen on response 'close', because request 'close' fires as soon as multer finishes reading the body!
+    res.on('close', () => {
         if (!res.writableEnded) {
             req.isClientClosed = true;
         }
