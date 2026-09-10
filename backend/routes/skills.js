@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post("/", upload.single("resume"), (req, res) => {
   handleResumeRequest(req, res, ({ resumeText, jobRole }) => {
-    return `Resume: ${resumeText.substring(0, 1200)}
+    return `Resume: ${resumeText.substring(0, 7000)}
 Role: ${jobRole}
 
 Identify 5 missing/weak skills for this role. Return ONLY JSON:

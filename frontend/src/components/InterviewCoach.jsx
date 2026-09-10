@@ -30,8 +30,9 @@ const InterviewCoach = ({ runFeature, interviewPrep, loading, jobDescription, se
 
     // --- SPEECH RECOGNITION (STT) ---
     const startListening = () => {
+        setEvalError('');
         if (!('webkitSpeechRecognition' in window)) {
-            alert("Voice features require Chrome or Edge.");
+            setEvalError("Voice dictation requires browser speech recognition support (Chrome, Edge, or Safari).");
             return;
         }
         const SpeechRecognition = window.webkitSpeechRecognition;

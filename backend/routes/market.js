@@ -8,8 +8,9 @@ const router = express.Router();
 router.post("/", upload.single("resume"), (req, res) => {
   handleResumeRequest(req, res, ({ resumeText, jobRole, location }) => {
     return `Role: ${jobRole}, Location: ${location || 'Global'}
+Candidate Profile: ${resumeText ? resumeText.substring(0, 5000) : 'Not provided'}
 
-Provide 2026 job market insights. Return ONLY JSON:
+Provide 2026 job market insights and a personalized learning roadmap. Return ONLY JSON:
 {
   "marketInsights": {
     "demand": "High/Medium/Low",

@@ -45,7 +45,7 @@ const HistoryTab = ({ user, backendUrl, setActiveTab, setAnalysis, setCandidateN
             if (classified.isAuth) {
                 logout();
             }
-            alert(classified.message || 'Failed to clear history.');
+            setError(classified.message || 'Failed to clear history.');
         }
     };
 

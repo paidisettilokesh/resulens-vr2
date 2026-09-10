@@ -5,7 +5,8 @@ import {
     Loader2, Save, Trash, Plus,
     Briefcase, MapPin, Sparkles,
     Feather, ShieldCheck, Settings,
-    FileDown, Zap, Target, ArrowUp, ArrowDown, LayoutTemplate, Activity, ChevronDown, ChevronUp
+    FileDown, Zap, Target, ArrowUp, ArrowDown, LayoutTemplate, Activity, ChevronDown, ChevronUp,
+    AlertTriangle, Check
 } from 'lucide-react';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } from 'docx';
 import { saveAs } from 'file-saver';
@@ -36,6 +37,7 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
     
     const [targetJob, setTargetJob] = useState('');
     const [blueprintLoading, setBlueprintLoading] = useState(false);
+    const [blueprintStatus, setBlueprintStatus] = useState({ type: '', message: '' });
     
     const [healthScore, setHealthScore] = useState(null);
     const [healthLoading, setHealthLoading] = useState(false);
@@ -65,7 +67,11 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
     };
 
     const generateBlueprint = async () => {
-        if (!targetJob) return alert('Please enter a target job description.');
+        setBlueprintStatus({ type: '', message: '' });
+        if (!targetJob?.trim()) {
+            setBlueprintStatus({ type: 'error', message: 'Please enter a target job description.' });
+            return;
+        }
         setBlueprintLoading(true);
         try {
             const res = await apiClient.post('/builder/blueprint-generator', {
@@ -80,10 +86,10 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                     experience: res.data.experience?.map((e, i) => ({ ...e, id: Date.now() + i })) || prev.experience,
                     skills: res.data.skills || prev.skills
                 }));
-                alert("Blueprint generated successfully!");
+                setBlueprintStatus({ type: 'success', message: 'Blueprint generated successfully!' });
             }
         } catch (e) {
-            alert('AI generation failed. Check backend.');
+            setBlueprintStatus({ type: 'error', message: 'AI generation failed. Please check your connection and try again.' });
         } finally {
             setBlueprintLoading(false);
         }
@@ -234,6 +240,12 @@ const ResumeBuilder = ({ builderData, setBuilderData, saveResume, loading }) => 
                                             {blueprintLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                                             {blueprintLoading ? 'Generating Blueprint...' : 'Generate Blueprint Resume'}
                                         </button>
+                                        {blueprintStatus.message && (
+                                            <div className={`p-3 rounded-xl text-xs font-semibold flex items-center gap-2 ${blueprintStatus.type === 'error' ? 'bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400'}`}>
+                                                {blueprintStatus.type === 'error' ? <AlertTriangle size={14} /> : <Check size={14} />}
+                                                <span>{blueprintStatus.message}</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </motion.div>
                             )}

@@ -7,8 +7,8 @@ const router = express.Router();
 
 router.post("/", upload.single("resume"), (req, res) => {
   handleResumeRequest(req, res, ({ resumeText, jobDescription }) => {
-    return `JD: ${jobDescription?.substring(0, 800)}
-Resume: ${resumeText.substring(0, 1500)}
+    return `JD: ${jobDescription?.substring(0, 3000)}
+Resume: ${resumeText.substring(0, 7000)}
 
 Match resume to JD. CRITICAL: Never remove or invent truthful dates, companies, or metrics. Ground all suggestions strictly in evidence found within the resume. Return ONLY JSON:
 {

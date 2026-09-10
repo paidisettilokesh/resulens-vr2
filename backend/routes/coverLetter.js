@@ -11,8 +11,8 @@ router.post("/", upload.single("resume"), (req, res) => {
     const selectedTone = tones[Math.floor(Math.random() * tones.length)];
 
     return `Role: ${jobRole} at ${companyName || 'the company'}. Tone: ${selectedTone}.
-JD: ${jobDescription?.substring(0, 600) || 'N/A'}
-Resume: ${resumeText.substring(0, 1200)}
+JD: ${jobDescription?.substring(0, 3000) || 'N/A'}
+Resume: ${resumeText.substring(0, 7000)}
 
 Write a compelling cover letter. CRITICAL: Never remove or invent truthful dates, companies, or metrics. Ground all suggestions strictly in evidence found within the resume. Return ONLY JSON:
 {

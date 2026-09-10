@@ -44,11 +44,6 @@ const saveLocalUsers = async (users) => {
 // ── POST /api/admin/verify-password ───────────────────────────────────────────
 router.post('/verify-password', requireAdmin, async (req, res) => {
     try {
-        const { password } = req.body;
-        if (!password) {
-            return res.status(400).json({ error: "Password is required" });
-        }
-
         let userRecord;
         if (global.isMongoConnected) {
             userRecord = await User.findById(req.userId).select('+password');
@@ -57,7 +52,28 @@ router.post('/verify-password', requireAdmin, async (req, res) => {
             userRecord = users.find(u => u._id === req.userId);
         }
 
-        if (!userRecord || !userRecord.password) {
+        if (!userRecord) {
+            return res.status(401).json({ error: "User authentication record not found" });
+        }
+
+        // If user authenticated via Google SSO and has no local password, permit session confirmation
+        if (userRecord.googleId && !userRecord.password) {
+            await logAudit({
+                userId: req.userId,
+                userEmail: userRecord.email,
+                action: 'ADMIN_UNLOCKED',
+                ipAddress: req.ip,
+                userAgent: req.headers['user-agent'],
+                details: { authMethod: 'google_sso' }
+            });
+            return res.json({ success: true, sso: true });
+        }
+
+        if (!password) {
+            return res.status(400).json({ error: "Password is required" });
+        }
+
+        if (!userRecord.password) {
             return res.status(401).json({ error: "User authentication record not found" });
         }
 

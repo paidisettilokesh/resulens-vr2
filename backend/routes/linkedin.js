@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post('/', upload.single('resume'), (req, res) => {
     handleResumeRequest(req, res, ({ resumeText }) => {
-        return `Resume: ${resumeText.substring(0, 1200)}
+        return `Resume: ${resumeText.substring(0, 7000)}
 
 Optimize for LinkedIn. CRITICAL: Never remove or invent truthful dates, companies, or metrics. Ground all suggestions strictly in evidence found within the resume. Return ONLY JSON:
 {

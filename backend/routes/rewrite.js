@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post("/", upload.single("resume"), (req, res) => {
   handleResumeRequest(req, res, ({ resumeText, jobRole }) => {
-    return `Resume: ${resumeText.substring(0, 1500)}
+    return `Resume: ${resumeText.substring(0, 7000)}
 Role: ${jobRole}
 
 Rewrite resume for ATS and ${jobRole}. CRITICAL: Never remove or invent truthful dates, companies, or metrics. Ground all suggestions strictly in evidence found within the resume. Return ONLY JSON:
