@@ -66,6 +66,12 @@ export default function AdminDashboard({ user, backendUrl }) {
     
     const [activeDaysConfig, setActiveDaysConfig] = useState(30); // 7 | 30 | 90 days active
     const [actionLoading, setActionLoading] = useState(null); // stores userId or actionId during async execution
+    const [actionBanner, setActionBanner] = useState({ type: '', message: '' });
+
+    const showBanner = (type, message) => {
+        setActionBanner({ type, message });
+        setTimeout(() => setActionBanner({ type: '', message: '' }), 5000);
+    };
 
     const fetchAdminData = async () => {
         if (!isUnlocked) return;
@@ -128,12 +134,12 @@ export default function AdminDashboard({ user, backendUrl }) {
         setActionLoading(targetUserId);
         try {
             await apiClient.put(`/admin/users/${targetUserId}/role`, { role: newRole });
-            
+            showBanner('success', `User role successfully updated to ${newRole}.`);
             // Reload logs and tables
             fetchAdminData();
         } catch (err) {
             const classified = classifyApiError(err);
-            alert(classified.message || err.response?.data?.error || "Failed to update role.");
+            showBanner('error', classified.message || err.response?.data?.error || "Failed to update role.");
         } finally {
             setActionLoading(null);
         }
@@ -143,12 +149,12 @@ export default function AdminDashboard({ user, backendUrl }) {
         setActionLoading(`${targetUserId}-status`);
         try {
             await apiClient.put(`/admin/users/${targetUserId}/status`, { status: newStatus });
-            
+            showBanner('success', `User account status updated to ${newStatus}.`);
             // Reload logs and tables
             fetchAdminData();
         } catch (err) {
             const classified = classifyApiError(err);
-            alert(classified.message || err.response?.data?.error || "Failed to update account status.");
+            showBanner('error', classified.message || err.response?.data?.error || "Failed to update account status.");
         } finally {
             setActionLoading(null);
         }
@@ -161,12 +167,12 @@ export default function AdminDashboard({ user, backendUrl }) {
         setActionLoading(`${targetUserId}-delete`);
         try {
             await apiClient.delete(`/admin/users/${targetUserId}`);
-            
+            showBanner('success', "User account permanently deleted.");
             // Reload logs and tables
             fetchAdminData();
         } catch (err) {
             const classified = classifyApiError(err);
-            alert(classified.message || err.response?.data?.error || "Failed to delete user account.");
+            showBanner('error', classified.message || err.response?.data?.error || "Failed to delete user account.");
         } finally {
             setActionLoading(null);
         }
@@ -338,6 +344,14 @@ export default function AdminDashboard({ user, backendUrl }) {
                     <Lock size={12} /> Lock Admin Panel
                 </button>
             </div>
+
+            {/* Notification Banner */}
+            {actionBanner.message && (
+                <div className={`p-4 rounded-2xl border text-xs font-bold flex items-center gap-2 transition-all ${actionBanner.type === 'error' ? 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'}`}>
+                    {actionBanner.type === 'error' ? <AlertTriangle size={16} /> : <CheckCircle size={16} />}
+                    <span>{actionBanner.message}</span>
+                </div>
+            )}
 
             {/* Header & Sub-tab Bar */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[var(--border-primary)] pb-6 pt-4">

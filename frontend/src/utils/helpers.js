@@ -1,8 +1,5 @@
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-
 /**
- * Exports an HTML element as a downloadable PDF.
+ * Exports an HTML element as a downloadable PDF with dynamic lazy loading of PDF libraries.
  * @param {string} elementId - The element's ID to capture.
  * @param {string} filename - Filename without extension.
  */
@@ -13,6 +10,10 @@ export const downloadPDF = async (elementId, filename) => {
         return;
     }
     try {
+        const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+            import('html2canvas'),
+            import('jspdf')
+        ]);
         const canvas = await html2canvas(element, {
             scale: 2,
             useCORS: true,

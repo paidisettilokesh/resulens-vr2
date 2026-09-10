@@ -9,8 +9,8 @@ const router = express.Router();
 router.post("/generate", upload.single("resume"), (req, res) => {
   handleResumeRequest(req, res, ({ resumeText, jobRole, jobDescription }) => {
     return `Role: ${jobRole}
-JD: ${jobDescription?.substring(0, 1000) || jobRole}
-Resume: ${resumeText.substring(0, 1200)}
+JD: ${jobDescription?.substring(0, 3000) || jobRole}
+Resume: ${resumeText.substring(0, 7000)}
 
 Generate 15 interview questions (5 each: Technical, Behavioral, Scenario). Return ONLY JSON:
 {
