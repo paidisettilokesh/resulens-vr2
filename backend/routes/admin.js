@@ -56,6 +56,8 @@ router.post('/verify-password', requireAdmin, async (req, res) => {
             return res.status(401).json({ error: "User authentication record not found" });
         }
 
+        const { password } = req.body;
+
         // If user authenticated via Google SSO and has no local password, permit session confirmation
         if (userRecord.googleId && !userRecord.password) {
             await logAudit({
