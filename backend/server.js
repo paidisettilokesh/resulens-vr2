@@ -91,7 +91,7 @@ const envAllowedOrigins = process.env.ALLOWED_ORIGINS
 const allowedOrigins = Array.from(new Set([...defaultAllowedOrigins, ...envAllowedOrigins]));
 
 // Specific regex matching official project preview deployments on Vercel
-const vercelPreviewRegex = /^https:\/\/resulens-vr2-[a-z0-9-]+(-paidisettilokeshs-projects)?\.vercel\.app$/i;
+const vercelPreviewRegex = /^https:\/\/resulens-vr2(-[a-z0-9-]+)?-paidisettilokeshs-projects\.vercel\.app$/i;
 const localDevRegex = /^http:\/\/(localhost|127\.0\.0\.1):\d+$/;
 
 app.use(cors({
@@ -393,11 +393,14 @@ app.use((err, req, res, next) => {
 
     const isClientError = (err.status >= 400 && err.status < 500) ||
                           err.name === 'MulterError' ||
-                          (err.message && err.message.includes('Only PDF and DOCX files are allowed'));
+                          err.code === 'UNSUPPORTED_FILE_TYPE' ||
+                          (err.message && /Only PDF|unsupported file|Invalid file/i.test(err.message));
 
     let errorMessage = err.message;
     if (err.name === 'MulterError' && err.code === 'LIMIT_FILE_SIZE') {
         errorMessage = 'File size exceeds the 5MB limit.';
+    } else if (err.code === 'UNSUPPORTED_FILE_TYPE') {
+        errorMessage = err.message || 'Only PDF, DOCX, and TXT files are allowed.';
     }
 
     const statusCode = err.status || (isClientError ? 400 : 500);

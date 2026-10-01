@@ -255,16 +255,12 @@ export default function LandingPage({ onOpenAuth }) {
                                                 : 'border-[var(--border-secondary)] hover:border-cyan-500 hover:bg-cyan-500/5'
                                             }`}
                                         >
-                                            <input id="resume-upload-landing" type="file" onChange={handleFileInput} accept=".pdf,.docx" className="hidden" />
-                                            <div className="flex flex-col items-center gap-4">
-                                                <div className="w-16 h-16 bg-cyan-700 dark:bg-cyan-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/10" aria-hidden="true">
-                                                    <Upload size={28} />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <span className="text-lg font-bold text-[var(--text-primary)] block">Drop manuscript here</span>
-                                                    <span className="text-xs text-[var(--text-muted)] block">PDF, DOCX, or DOC formats supported (Max 10MB)</span>
-                                                </div>
+                                            <input id="resume-upload-landing" type="file" onChange={handleFileInput} accept=".pdf,.docx,.txt" className="hidden" />
+                                            <div className="w-14 h-14 bg-cyan-700 dark:bg-cyan-600 rounded-2xl flex items-center justify-center text-white mx-auto shadow-lg shadow-cyan-100 dark:shadow-none group-hover:scale-110 transition-transform">
+                                                <Upload size={24} />
                                             </div>
+                                            <span className="text-base font-bold text-[var(--text-primary)] block">Drop your resume here or browse</span>
+                                            <span className="text-xs text-[var(--text-muted)] block">PDF, DOCX, or TXT formats supported (Max 5MB)</span>
                                         </label>
                                         {error && <p className="text-center text-rose-700 dark:text-rose-400 text-sm font-bold pt-2">{error}</p>}
                                     </motion.div>

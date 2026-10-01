@@ -365,7 +365,7 @@ function App() {
 
     return (
         <div className="app-container min-h-screen">
-            <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".pdf,.docx" className="hidden" />
+            <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".pdf,.docx,.txt" className="hidden" />
 
             <MainLayout
                 user={user}

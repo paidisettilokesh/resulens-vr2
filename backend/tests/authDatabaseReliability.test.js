@@ -320,8 +320,8 @@ describe('🔒 Authentication & Database Reliability Test Suite', () => {
             expect(data.code).toBe('AUTHENTICATION_FAILED');
         }, 10000);
 
-        test('should accept valid verified Google token payload fallback', async () => {
-            // Generate a token signed with valid Google issuer claims
+        test('should reject forged/unverified Google token signature with 401', async () => {
+            // Generate a forged token signed with mock key that Google servers will not verify
             const googlePayload = {
                 iss: 'https://accounts.google.com',
                 sub: 'google_sub_id_12345678',
@@ -339,11 +339,9 @@ describe('🔒 Authentication & Database Reliability Test Suite', () => {
                 body: JSON.stringify({ credential: mockGoogleToken })
             });
 
-            expect(res.status).toBe(200);
+            expect(res.status).toBe(401);
             const data = await res.json();
-            expect(data).toHaveProperty('token');
-            expect(data.email).toBe('google_verified_user@gmail.com');
-            expect(data.name).toBe('Google Verified User');
+            expect(data.code).toBe('AUTHENTICATION_FAILED');
         });
     });
 

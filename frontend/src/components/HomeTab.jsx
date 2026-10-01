@@ -91,7 +91,7 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                                 <label htmlFor="resume-upload" className="cursor-pointer">Professional Manuscript</label>
                             </div>
                             <label htmlFor="resume-upload" className={`block w-full border-2 border-dashed rounded-[3rem] p-12 text-center cursor-pointer transition-all surface-3d-inset ${file ? 'border-emerald-500 !bg-emerald-500/10' : 'border-[var(--border-secondary)] hover:border-cyan-500 hover:bg-cyan-500/5'}`}>
-                                <input id="resume-upload" type="file" onChange={handleFileUpload} accept=".pdf,.docx" className="hidden" />
+                                <input id="resume-upload" type="file" onChange={handleFileUpload} accept=".pdf,.docx,.txt" className="hidden" />
                                 <div className="flex flex-col items-center gap-4">
                                     {file ? (
                                         <>
@@ -117,7 +117,7 @@ const HomeTab = ({ commonRoles, analyzeResume, setActiveTab, onOpenOnboarding })
                                                     {[
                                                         { ext: 'PDF', tip: 'Text-based PDFs only', color: 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-500/30' },
                                                         { ext: 'DOCX', tip: 'Best format — recommended', color: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30' },
-                                                        { ext: 'DOC', tip: 'Legacy Word format', color: 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/30' },
+                                                        { ext: 'TXT', tip: 'Plain text resume', color: 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/30' },
                                                     ].map(({ ext, tip, color }) => (
                                                         <span
                                                             key={ext}

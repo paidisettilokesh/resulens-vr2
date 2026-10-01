@@ -551,16 +551,7 @@ router.post('/google', async (req, res) => {
             payload = ticket.getPayload();
         } catch (err) {
             logger.error(`[GOOGLE_OAUTH_CALLBACK_FAILED] [${reqId}] verifyIdToken error: ${err.message}`);
-            const decoded = jwt.decode(credential);
-            const isGoogleIssuer = decoded && (decoded.iss === 'accounts.google.com' || decoded.iss === 'https://accounts.google.com');
-            const isNotExpired = decoded && decoded.exp && (decoded.exp * 1000 > Date.now());
-
-            if (isGoogleIssuer && isNotExpired && decoded.email) {
-                logger.warn(`[GOOGLE_OAUTH] [${reqId}] Token accepted via verified Google issuer fallback`);
-                payload = decoded;
-            } else {
-                return res.status(401).json({ error: 'Google authentication failed. Invalid or expired token.', code: 'AUTHENTICATION_FAILED' });
-            }
+            return res.status(401).json({ error: 'Google authentication failed. Invalid or expired token.', code: 'AUTHENTICATION_FAILED' });
         }
 
         if (!payload) {
@@ -783,8 +774,10 @@ router.post('/forgot-password', async (req, res) => {
                 }).catch(err => console.error("Audit log error:", err));
             } catch (emailErr) {
                 console.error("❌ Password reset email dispatch failed:", emailErr.message);
-                const appUrl = (process.env.APP_URL || 'http://localhost:5173').replace(/\/+$/, '');
-                console.log(`🔗 RECOVERY RESET LINK: ${appUrl}/reset-password?token=${encodeURIComponent(resetToken)}`);
+                if (process.env.NODE_ENV !== 'production') {
+                    const appUrl = (process.env.APP_URL || 'http://localhost:5173').replace(/\/+$/, '');
+                    console.log(`🔗 [DEV ONLY] RECOVERY RESET LINK: ${appUrl}/reset-password?token=${encodeURIComponent(resetToken)}`);
+                }
             }
 
             return res.status(200).json(GENERIC_RESPONSE);

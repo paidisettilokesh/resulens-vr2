@@ -9,7 +9,9 @@ import { isDbReady, waitForDb } from '../config/db.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const historyCache = new Map();
+export const historyCache = new Map();
+const MAX_CACHE_ENTRIES = 100;
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
 // Fallback directory for local development
 const FALLBACK_DIR = path.join(getSecureStorageDir(), 'talentsync-v2-data');
@@ -74,8 +76,12 @@ export const saveHistory = async (data, userId = 'guest') => {
 
 export const getHistory = async (userId = 'guest') => {
     try {
-        if (historyCache.has(userId)) {
-            return historyCache.get(userId);
+        const cached = historyCache.get(userId);
+        if (cached) {
+            if (Date.now() - cached.timestamp < CACHE_TTL_MS) {
+                return cached.data;
+            }
+            historyCache.delete(userId);
         }
 
         if (!isDbReady() && process.env.MONGODB_URI) {
@@ -94,7 +100,13 @@ export const getHistory = async (userId = 'guest') => {
             } catch (e) { result = []; }
         }
 
-        historyCache.set(userId, result);
+        // Evict oldest entry if cache exceeds limit
+        if (historyCache.size >= MAX_CACHE_ENTRIES) {
+            const oldestKey = historyCache.keys().next().value;
+            if (oldestKey) historyCache.delete(oldestKey);
+        }
+
+        historyCache.set(userId, { data: result, timestamp: Date.now() });
         return result;
     } catch (e) {
         console.error("Failed to fetch history:", e.message);
