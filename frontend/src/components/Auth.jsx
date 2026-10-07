@@ -56,8 +56,11 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
     const isReset = mode === 'reset-password';
     const passwordStrength = getPasswordStrength(password);
     
-    // Resolve Client ID: prefer build-time env var, or dynamically discover from backend auth config
-    const envClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim();
+    // Default fallback client ID matching backend production configuration
+    const DEFAULT_GOOGLE_CLIENT_ID = '263972740055-de0q62jndudggibosluc3m5e6jbqs06b.apps.googleusercontent.com';
+
+    // Resolve Client ID: prefer build-time env var, fallback to production client ID, or dynamically discover from backend auth config
+    const envClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || DEFAULT_GOOGLE_CLIENT_ID).trim();
     const [resolvedClientId, setResolvedClientId] = useState(envClientId);
 
     useEffect(() => {
@@ -108,22 +111,24 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
         }
     }, [onLogin, onClose]);
 
-    // Initialize / re-render the Google Sign-In button whenever the modal opens,
-    // the active tab (mode) changes, or the theme toggles between light and dark.
+    const initializedClientIdRef = useRef(null);
+    const handleGoogleResponseRef = useRef(handleGoogleResponse);
+
+    useEffect(() => {
+        handleGoogleResponseRef.current = handleGoogleResponse;
+    }, [handleGoogleResponse]);
+
+    // 1. Initialize Google Identity Services SDK once per client ID session
     useEffect(() => {
         if (!isOpen || !hasGoogleClientId) return;
 
-        // Choose the Google button color scheme to match the ResuLens theme.
-        // 'filled_black' satisfies Google brand guidelines for dark surfaces;
-        // 'outline' works for light surfaces.
-        const googleTheme = theme === 'dark' ? 'filled_black' : 'outline';
-
-        const renderGoogleButton = () => {
+        const initGsi = () => {
             if (!window.google?.accounts?.id) return;
+            if (initializedClientIdRef.current === clientID) return;
 
             window.google.accounts.id.initialize({
                 client_id: clientID,
-                callback: handleGoogleResponse,
+                callback: (res) => handleGoogleResponseRef.current?.(res),
                 error_callback: (err) => {
                     console.warn('[Google Identity Services event]:', err);
                     if (err?.type === 'origin_mismatch' || String(err?.message || '').includes('origin')) {
@@ -134,43 +139,67 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
                 cancel_on_tap_outside: true,
             });
 
-            // Use requestAnimationFrame to guarantee the ref container is mounted
-            // in the DOM before calling renderButton — prevents the button from
-            // silently disappearing after a login ↔ signup tab switch.
-            requestAnimationFrame(() => {
-                if (googleBtnRef.current) {
-                    // Clear any previously rendered button iframe first
-                    googleBtnRef.current.innerHTML = '';
-                    window.google.accounts.id.renderButton(googleBtnRef.current, {
-                        theme: googleTheme,
-                        size: 'large',
-                        width: '380',
-                        text: 'continue_with',
-                        shape: 'pill',
-                        logo_alignment: 'left',
-                    });
-                }
-            });
+            initializedClientIdRef.current = clientID;
         };
 
         if (window.google?.accounts?.id) {
-            renderGoogleButton();
+            initGsi();
         } else {
-            // Load the GSI script once; subsequent calls will find it already loaded.
             const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
             if (existingScript) {
-                // Script tag exists but may still be loading — wait for it
-                existingScript.addEventListener('load', renderGoogleButton, { once: true });
+                existingScript.addEventListener('load', initGsi, { once: true });
             } else {
                 const script = document.createElement('script');
                 script.src = 'https://accounts.google.com/gsi/client';
                 script.async = true;
                 script.defer = true;
-                script.onload = renderGoogleButton;
+                script.onload = initGsi;
                 document.body.appendChild(script);
             }
         }
-    }, [isOpen, mode, hasGoogleClientId, clientID, theme, handleGoogleResponse]);
+    }, [isOpen, hasGoogleClientId, clientID]);
+
+    // 2. Render / update the Google Sign-In button whenever the modal opens,
+    // active tab (mode) changes, or theme toggles — WITHOUT re-calling initialize().
+    useEffect(() => {
+        if (!isOpen || !hasGoogleClientId || (!isLogin && !isSignup)) return;
+
+        const googleTheme = theme === 'dark' ? 'filled_black' : 'outline';
+
+        const renderBtn = () => {
+            if (!window.google?.accounts?.id || !googleBtnRef.current) return;
+            try {
+                googleBtnRef.current.innerHTML = '';
+                window.google.accounts.id.renderButton(googleBtnRef.current, {
+                    theme: googleTheme,
+                    size: 'large',
+                    width: 320,
+                    text: 'continue_with',
+                    shape: 'pill',
+                    logo_alignment: 'left',
+                });
+            } catch (err) {
+                console.warn('[Google Identity Services render error]:', err);
+            }
+        };
+
+        if (window.google?.accounts?.id && initializedClientIdRef.current === clientID) {
+            const rafId = requestAnimationFrame(renderBtn);
+            return () => cancelAnimationFrame(rafId);
+        } else {
+            const interval = setInterval(() => {
+                if (window.google?.accounts?.id && initializedClientIdRef.current === clientID) {
+                    clearInterval(interval);
+                    renderBtn();
+                }
+            }, 50);
+            const timeout = setTimeout(() => clearInterval(interval), 3000);
+            return () => {
+                clearInterval(interval);
+                clearTimeout(timeout);
+            };
+        }
+    }, [isOpen, mode, isLogin, isSignup, hasGoogleClientId, clientID, theme]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -549,7 +578,7 @@ export default function Auth({ isOpen, onClose, onLogin, backendUrl, initialMode
 
                         <div className="space-y-3">
                             <div ref={googleBtnRef} id="google-signin-btn"
-                                className="w-full flex justify-center overflow-hidden rounded-full" />
+                                className="w-full flex justify-center items-center overflow-hidden rounded-full min-h-[44px]" />
                         </div>
                     </>
                 )}

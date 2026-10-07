@@ -4,23 +4,34 @@ const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
     const [theme, setTheme] = useState(() => {
-        // Check local storage or system preference
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) return savedTheme;
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        try {
+            const savedTheme = typeof localStorage !== 'undefined' ? localStorage.getItem('theme') : null;
+            if (savedTheme) return savedTheme;
+        } catch (e) {}
+        try {
+            if (typeof window !== 'undefined' && window.matchMedia) {
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+        } catch (e) {}
+        return 'light';
     });
 
     useEffect(() => {
-        // Apply theme to document element
-        const root = window.document.documentElement;
-        if (theme === 'dark') {
-            root.classList.add('dark');
-            root.style.colorScheme = 'dark';
-        } else {
-            root.classList.remove('dark');
-            root.style.colorScheme = 'light';
-        }
-        localStorage.setItem('theme', theme);
+        try {
+            const root = window?.document?.documentElement;
+            if (root) {
+                if (theme === 'dark') {
+                    root.classList.add('dark');
+                    root.style.colorScheme = 'dark';
+                } else {
+                    root.classList.remove('dark');
+                    root.style.colorScheme = 'light';
+                }
+            }
+            if (typeof localStorage !== 'undefined') {
+                localStorage.setItem('theme', theme);
+            }
+        } catch (e) {}
     }, [theme]);
 
     const toggleTheme = () => {

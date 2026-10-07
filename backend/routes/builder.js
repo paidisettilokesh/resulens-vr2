@@ -52,6 +52,18 @@ Return JSON:
       "details": "Bullet points targeted to the JD. (Use quantifiable metrics)"
     }
   ],
+  "education": [
+    {
+      "school": "Institution Name",
+      "degree": "Degree / Course Name",
+      "fieldOfStudy": "Major / Field of Study",
+      "startDate": "Start Date",
+      "endDate": "End Date or Present",
+      "grade": "CGPA or Percentage",
+      "coursework": "Relevant Coursework",
+      "achievements": "Academic Achievements or Honors"
+    }
+  ],
   "skills": "List of comma separated core competencies mapped directly from the JD"
 }`;
     });
@@ -67,10 +79,10 @@ Provide a strict, professional evaluation.
 
 Return JSON with strictly evaluated numeric scores (0-100) reflecting the real fullness of the data:
 {
-  "atsScore": <integer 0-100 based on standard section presence and ATS readability>,
+  "atsScore": <integer 0-100 based on standard section presence including education and ATS readability>,
   "readabilityScore": <integer 0-100 based on grammar and structure>,
   "keywordScore": <integer 0-100 based on action verbs and industry competencies>,
-  "completenessScore": <integer 0-100 based on whether bio, experience, and skills are filled out>,
+  "completenessScore": <integer 0-100 based on whether bio, experience, education, and skills are filled out>,
   "feedback": ["Critical improvement suggestion 1", "Critical improvement suggestion 2"]
 }`;
     });

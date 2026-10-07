@@ -64,4 +64,37 @@ describe('Auth Component', () => {
             expect(mockOnClose).toHaveBeenCalled();
         });
     });
+
+    it('renders Google Sign-in container and initializes GSI exactly once without duplicate calls on tab switch', async () => {
+        const mockInitialize = vi.fn();
+        const mockRenderButton = vi.fn();
+
+        window.google = {
+            accounts: {
+                id: {
+                    initialize: mockInitialize,
+                    renderButton: mockRenderButton
+                }
+            }
+        };
+
+        const { container } = render(<Auth isOpen={true} onClose={mockOnClose} onLogin={mockOnLogin} backendUrl="http://localhost:5000/api" />);
+
+        await waitFor(() => {
+            const googleContainer = container.querySelector('#google-signin-btn');
+            expect(googleContainer).toBeInTheDocument();
+            expect(mockInitialize).toHaveBeenCalledTimes(1);
+        });
+
+        // Switch to signup tab
+        const signupTab = screen.getByRole('button', { name: /Create Account/i });
+        fireEvent.click(signupTab);
+
+        // Verify initialize is NOT called again
+        await waitFor(() => {
+            expect(mockInitialize).toHaveBeenCalledTimes(1);
+        });
+
+        delete window.google;
+    });
 });

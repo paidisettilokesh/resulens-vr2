@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, Suspense } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import apiClient from './utils/apiClient';
 import './index.css';
@@ -55,6 +55,11 @@ function App() {
     const [pendingResumeFile, setPendingResumeFile] = useState(null);
     const pendingAnalysisKey = useRef(null);
 
+    const handleCloseAuth = useCallback(() => {
+        setAuthModalOpen(false);
+        setResetToken(null);
+    }, []);
+
     // Parse URL parameters on load
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -72,7 +77,17 @@ function App() {
     const [builderData, setBuilderData] = useState({
         personal: { fullName: '', email: '', phone: '', location: '', website: '', bio: '' },
         experience: [{ id: 1, company: '', role: '', period: '', details: '' }],
-        education: [{ id: 1, school: '', degree: '', year: '' }],
+        education: [{
+            id: 1,
+            school: '',
+            degree: '',
+            fieldOfStudy: '',
+            startDate: '',
+            endDate: '',
+            grade: '',
+            coursework: '',
+            achievements: ''
+        }],
         skills: '',
         projects: []
     });
@@ -95,7 +110,14 @@ function App() {
             try {
                 const { data } = await apiClient.get('/user-resumes/latest');
                 if (data && data.content) {
-                    setBuilderData(data.content);
+                    const content = data.content;
+                    setBuilderData({
+                        personal: { fullName: '', email: '', phone: '', location: '', website: '', bio: '', ...(content.personal || {}) },
+                        experience: Array.isArray(content.experience) ? content.experience : [],
+                        education: Array.isArray(content.education) ? content.education : [],
+                        skills: content.skills || '',
+                        projects: Array.isArray(content.projects) ? content.projects : []
+                    });
                 }
             } catch (err) {
                 console.warn("Failed to load latest resume:", err.message);
@@ -350,7 +372,7 @@ function App() {
                 />
                 <Auth
                     isOpen={authModalOpen}
-                    onClose={() => { setAuthModalOpen(false); setResetToken(null); }}
+                    onClose={handleCloseAuth}
                     onLogin={handleLogin}
                     backendUrl={backendUrl}
                     initialMode={authInitialMode}

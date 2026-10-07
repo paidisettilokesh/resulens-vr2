@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import apiClient from '../utils/apiClient';
 
-const UserContext = createContext(null);
+export const UserContext = createContext(null);
 
 /**
  * Safely decodes a JWT payload to check expiry without external dependencies
@@ -29,7 +29,7 @@ export const UserProvider = ({ children }) => {
     const logout = useCallback(() => {
         setUser(null);
         try {
-            localStorage.removeItem('user');
+            if (typeof localStorage !== 'undefined') localStorage.removeItem('user');
         } catch (e) {}
     }, []);
 
@@ -37,7 +37,7 @@ export const UserProvider = ({ children }) => {
         if (!userData || !userData.token) return;
         setUser(userData);
         try {
-            localStorage.setItem('user', JSON.stringify(userData));
+            if (typeof localStorage !== 'undefined') localStorage.setItem('user', JSON.stringify(userData));
         } catch (e) {}
     }, []);
 
@@ -45,25 +45,25 @@ export const UserProvider = ({ children }) => {
     useEffect(() => {
         const restoreSession = () => {
             try {
-                const savedUser = localStorage.getItem('user');
+                const savedUser = typeof localStorage !== 'undefined' ? localStorage.getItem('user') : null;
                 if (savedUser) {
                     const parsedUser = JSON.parse(savedUser);
                     if (parsedUser && parsedUser.token) {
                         if (isTokenExpired(parsedUser.token)) {
                             console.warn("Stored session token is expired. Clearing local session.");
-                            localStorage.removeItem('user');
+                            if (typeof localStorage !== 'undefined') localStorage.removeItem('user');
                             setUser(null);
                         } else {
                             setUser(parsedUser);
                         }
                     } else {
-                        localStorage.removeItem('user');
+                        if (typeof localStorage !== 'undefined') localStorage.removeItem('user');
                         setUser(null);
                     }
                 }
             } catch (err) {
                 console.error("Auth Restore Error:", err);
-                try { localStorage.removeItem('user'); } catch (e) {}
+                try { if (typeof localStorage !== 'undefined') localStorage.removeItem('user'); } catch (e) {}
                 setUser(null);
             } finally {
                 setLoading(false);

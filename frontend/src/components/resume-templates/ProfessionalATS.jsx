@@ -1,62 +1,157 @@
 import React from 'react';
 
 const ProfessionalATS = ({ data }) => {
+    const personal = data?.personal || {};
+    const experience = Array.isArray(data?.experience) ? data.experience : [];
+    const education = Array.isArray(data?.education) ? data.education : [];
+    const skills = data?.skills || '';
+
+    const contactItems = [
+        personal.email,
+        personal.phone,
+        personal.location,
+        personal.website || personal.linkedin
+    ].filter(Boolean);
+
     return (
-        <div className="resume-sheet font-sans text-slate-900 leading-normal text-[12px] bg-white p-12 mx-auto shadow-sm w-full max-w-[850px] min-h-[1100px]">
-            <div className="text-center pb-4 mb-4 border-b-2 border-slate-900">
-                <h1 className="text-3xl font-bold uppercase tracking-wide text-slate-900">{data.personal.fullName || 'Your Name'}</h1>
-                <p className="text-xs text-slate-700 mt-2 font-medium">
-                    {[data.personal.email, data.personal.phone, data.personal.location, data.personal.linkedin].filter(Boolean).join(' | ')}
-                </p>
-            </div>
-            
-            {data.personal.bio && (
-                <div className="mb-4">
-                    <h4 className="text-xs font-bold uppercase border-b border-slate-300 pb-1 mb-2 text-slate-900 tracking-wider">Professional Summary</h4>
-                    <p className="text-[11px] leading-relaxed text-slate-800 text-justify">{data.personal.bio}</p>
-                </div>
+        <div className="resume-sheet font-sans text-slate-900 bg-white p-10 md:p-12 mx-auto shadow-sm w-full max-w-[850px] min-h-[1100px] leading-normal box-border">
+            {/* Header */}
+            <header className="text-center pb-3 mb-5 border-b-2 border-slate-900">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-wide uppercase text-slate-900">
+                    {personal.fullName || 'YOUR NAME'}
+                </h1>
+                {contactItems.length > 0 && (
+                    <p className="text-[11px] text-slate-700 mt-1.5 font-medium tracking-normal">
+                        {contactItems.join('  |  ')}
+                    </p>
+                )}
+            </header>
+
+            {/* Professional Summary */}
+            {personal.bio && personal.bio.trim() && (
+                <section className="mb-4">
+                    <h2 className="text-[12px] font-bold uppercase tracking-wider text-slate-900 border-b border-slate-400 pb-0.5 mb-1.5">
+                        Professional Summary
+                    </h2>
+                    <p className="text-[11px] text-slate-800 leading-relaxed text-justify">
+                        {personal.bio}
+                    </p>
+                </section>
             )}
 
-            <div className="mb-4">
-                <h4 className="text-xs font-bold uppercase border-b border-slate-300 pb-1 mb-3 text-slate-900 tracking-wider">Work Experience</h4>
-                <div className="space-y-4">
-                    {data.experience.map(exp => (
-                        <div key={exp.id}>
-                            <div className="flex justify-between items-end">
-                                <span className="font-bold text-sm text-slate-900">{exp.role}</span>
-                                <span className="text-xs text-slate-700 font-medium">{exp.period}</span>
-                            </div>
-                            <p className="text-xs font-semibold text-slate-800 mb-1">{exp.company}</p>
-                            <div className="text-[11px] leading-relaxed text-slate-800 pl-3">
-                                {exp.details.split('\n').map((bullet, i) => {
-                                    if(!bullet.trim()) return null;
-                                    return <p key={i} className="mb-1 text-slate-800">• {bullet.replace(/^•\s*/, '')}</p>
-                                })}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            {/* Work Experience */}
+            {experience.some(exp => exp.company || exp.role || exp.details) && (
+                <section className="mb-4">
+                    <h2 className="text-[12px] font-bold uppercase tracking-wider text-slate-900 border-b border-slate-400 pb-0.5 mb-2">
+                        Work Experience
+                    </h2>
+                    <div className="space-y-3.5">
+                        {experience.map(exp => {
+                            if (!exp.company && !exp.role && !exp.details) return null;
+                            const bullets = (exp.details || '')
+                                .split('\n')
+                                .map(b => b.trim())
+                                .filter(Boolean);
 
-            <div className="mb-4">
-                <h4 className="text-xs font-bold uppercase border-b border-slate-300 pb-1 mb-3 text-slate-900 tracking-wider">Education</h4>
-                {data.education.map(edu => (
-                    <div key={edu.id} className="flex justify-between mb-2">
-                        <div>
-                            <p className="font-bold text-xs text-slate-900">{edu.school}</p>
-                            <p className="text-xs text-slate-700">{edu.degree}</p>
-                        </div>
-                        <span className="text-xs text-slate-700 font-medium">{edu.year}</span>
+                            return (
+                                <div key={exp.id || `${exp.company}-${exp.role}`}>
+                                    <div className="flex justify-between items-baseline">
+                                        <h3 className="font-bold text-[12px] text-slate-900">
+                                            {exp.role || 'Role'}
+                                        </h3>
+                                        <span className="text-[11px] font-medium text-slate-700 text-right">
+                                            {exp.period || ''}
+                                        </span>
+                                    </div>
+                                    <div className="text-[11px] font-semibold text-slate-800 italic mb-1">
+                                        {exp.company || ''}
+                                    </div>
+                                    {bullets.length > 0 && (
+                                        <ul className="text-[11px] text-slate-800 leading-relaxed space-y-0.5 pl-4 list-disc marker:text-slate-700">
+                                            {bullets.map((bullet, i) => (
+                                                <li key={i} className="pl-0.5">
+                                                    {bullet.replace(/^[•\-\*]\s*/, '')}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
-                ))}
-            </div>
+                </section>
+            )}
 
-            <div>
-                <h4 className="text-xs font-bold uppercase border-b border-slate-300 pb-1 mb-2 text-slate-900 tracking-wider">Core Skills</h4>
-                <p className="text-[11px] text-slate-800 leading-relaxed">
-                    {data.skills || ''}
-                </p>
-            </div>
+            {/* Education */}
+            {education.some(edu => edu.school || edu.institution || edu.degree) && (
+                <section className="mb-4">
+                    <h2 className="text-[12px] font-bold uppercase tracking-wider text-slate-900 border-b border-slate-400 pb-0.5 mb-2">
+                        Education
+                    </h2>
+                    <div className="space-y-3">
+                        {education.map(edu => {
+                            const institution = edu.school || edu.institution;
+                            if (!institution && !edu.degree) return null;
+
+                            const dates = edu.startDate && (edu.endDate || edu.year)
+                                ? `${edu.startDate} – ${edu.endDate || edu.year}`
+                                : (edu.endDate || edu.year || edu.startDate || '');
+
+                            const degreeAndMajor = [
+                                edu.degree,
+                                edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : null
+                            ].filter(Boolean).join(' ');
+
+                            return (
+                                <div key={edu.id || institution}>
+                                    <div className="flex justify-between items-baseline">
+                                        <h3 className="font-bold text-[12px] text-slate-900">
+                                            {institution || 'Institution'}
+                                        </h3>
+                                        {dates && (
+                                            <span className="text-[11px] font-medium text-slate-700 text-right">
+                                                {dates}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {degreeAndMajor && (
+                                        <div className="text-[11px] font-medium text-slate-800">
+                                            {degreeAndMajor}
+                                            {edu.grade && (
+                                                <span className="text-slate-600 font-normal">
+                                                    {'  ·  '}Grade: {edu.grade}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+                                    {edu.coursework && (
+                                        <p className="text-[10.5px] text-slate-700 leading-tight mt-0.5">
+                                            <span className="font-semibold text-slate-800">Relevant Coursework:</span> {edu.coursework}
+                                        </p>
+                                    )}
+                                    {edu.achievements && (
+                                        <p className="text-[10.5px] text-slate-700 leading-tight mt-0.5">
+                                            <span className="font-semibold text-slate-800">Honors & Achievements:</span> {edu.achievements}
+                                        </p>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </section>
+            )}
+
+            {/* Core Competencies / Skills */}
+            {skills && skills.trim() && (
+                <section>
+                    <h2 className="text-[12px] font-bold uppercase tracking-wider text-slate-900 border-b border-slate-400 pb-0.5 mb-1.5">
+                        Technical & Professional Skills
+                    </h2>
+                    <p className="text-[11px] text-slate-800 leading-relaxed">
+                        {skills}
+                    </p>
+                </section>
+            )}
         </div>
     );
 };

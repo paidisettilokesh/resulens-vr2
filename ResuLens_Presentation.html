@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResuLens — AI Resume Intelligence | Presentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue-dark:   #0d1b2e;
+      --blue-mid:    #1a3558;
+      --blue-accent: #2563eb;
+      --blue-light:  #3b82f6;
+      --blue-glow:   #60a5fa;
+      --grey-dark:   #1e2a3a;
+      --grey-mid:    #374151;
+      --grey-light:  #9ca3af;
+      --white:       #ffffff;
+      --off-white:   #f1f5f9;
+      --cyan:        #06b6d4;
+      --emerald:     #10b981;
+      --amber:       #f59e0b;
+      --rose:        #f43f5e;
+      --card-bg:     rgba(255,255,255,0.05);
+      --card-border: rgba(255,255,255,0.1);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--blue-dark);
+      color: var(--white);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* PROGRESS BAR */
+    #progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--blue-accent), var(--cyan));
+      transition: width 0.5s ease;
+      z-index: 999;
+      box-shadow: 0 0 12px var(--blue-light);
+    }
+
+    /* SLIDE CONTAINER */
+    .slides-wrapper { width: 100vw; height: 100vh; position: relative; }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 80px;
+      opacity: 0;
+      transform: translateX(80px);
+      transition: opacity 0.55s cubic-bezier(.4,0,.2,1), transform 0.55s cubic-bezier(.4,0,.2,1);
+      pointer-events: none;
+    }
+    .slide.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+    .slide.exit   { opacity: 0; transform: translateX(-80px); }
+
+    .slide-header {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, var(--blue-accent), var(--cyan), var(--emerald));
+    }
+
+    .slide-footer {
+      position: absolute;
+      bottom: 18px; left: 80px; right: 80px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11px; color: var(--grey-light);
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .slide-footer .brand { color: var(--blue-glow); font-weight: 700; }
+    .slide-number { font-family: 'JetBrains Mono', monospace; }
+
+    /* ── SLIDE 1 ── */
+    #slide-1 {
+      background: radial-gradient(ellipse 80% 70% at 50% 50%, #0f2447 0%, #0d1b2e 100%);
+      text-align: center;
+    }
+    #slide-1 .bg-grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(37,99,235,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(37,99,235,0.08) 1px, transparent 1px);
+      background-size: 48px 48px; pointer-events: none;
+    }
+    #slide-1 .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(37,99,235,0.2); border: 1px solid rgba(96,165,250,0.3);
+      border-radius: 999px; padding: 6px 20px; font-size: 11px; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase; color: var(--blue-glow);
+      margin-bottom: 28px; animation: fadeUp 0.8s 0.2s both;
+    }
+    #slide-1 .badge .dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--emerald);
+      box-shadow: 0 0 6px var(--emerald); animation: pulse 2s infinite;
+    }
+    #slide-1 h1 {
+      font-size: clamp(52px, 7vw, 82px); font-weight: 900;
+      letter-spacing: -0.03em; line-height: 1; animation: fadeUp 0.8s 0.35s both;
+    }
+    #slide-1 h1 span { color: var(--blue-light); }
+    #slide-1 .tagline {
+      font-size: 18px; font-weight: 400; color: var(--grey-light);
+      margin-top: 16px; max-width: 600px; animation: fadeUp 0.8s 0.5s both;
+    }
+    #slide-1 .meta {
+      margin-top: 48px; display: flex; gap: 40px;
+      justify-content: center; animation: fadeUp 0.8s 0.65s both;
+    }
+    #slide-1 .meta-item { text-align: center; }
+    #slide-1 .meta-item .label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--grey-light); margin-bottom: 6px; }
+    #slide-1 .meta-item .value { font-size: 14px; font-weight: 600; }
+    #slide-1 .divider { width: 1px; background: var(--card-border); align-self: stretch; }
+    .tech-pills { margin-top: 28px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; animation: fadeUp 0.8s 0.8s both; }
+    .tech-pill { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 5px 14px; font-size: 12px; font-weight: 500; color: var(--grey-light); }
+
+    /* ── SLIDE 2 ── */
+    #slide-2 { background: linear-gradient(135deg, #0d1b2e 60%, #0f2a1a 100%); align-items: flex-start; }
+    .slide-title { font-size: 13px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue-glow); margin-bottom: 8px; }
+    .slide-heading { font-size: clamp(26px, 3.5vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 24px; }
+    .slide-heading em { font-style: normal; color: var(--cyan); }
+
+    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; }
+    .problem-card {
+      background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;
+      padding: 18px 20px; display: flex; gap: 14px; align-items: flex-start;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .problem-card:hover { border-color: rgba(96,165,250,0.3); transform: translateY(-2px); }
+    .problem-icon { font-size: 26px; flex-shrink: 0; line-height: 1; }
+    .problem-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .problem-card p { font-size: 12px; color: var(--grey-light); line-height: 1.5; }
+
+    .stat-band { width: 100%; margin-top: 16px; display: flex; gap: 14px; }
+    .stat-chip { flex: 1; background: rgba(37,99,235,0.15); border: 1px solid rgba(96,165,250,0.25); border-radius: 10px; padding: 12px 16px; text-align: center; }
+    .stat-chip .num { font-size: 24px; font-weight: 800; color: var(--blue-glow); font-family: 'JetBrains Mono', monospace; }
+    .stat-chip .desc { font-size: 10.5px; color: var(--grey-light); margin-top: 2px; }
+
+    /* ── SLIDE 3 ── */
+    #slide-3 { background: linear-gradient(135deg, #0d1b2e 40%, #1a1b2e 100%); align-items: flex-start; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; width: 100%; }
+    .solution-desc { font-size: 13.5px; color: var(--grey-light); line-height: 1.7; margin-bottom: 18px; }
+    .objective-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .objective-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.5; color: var(--off-white); }
+    .objective-list li .check { width: 18px; height: 18px; border-radius: 50%; background: rgba(16,185,129,0.2); border: 1px solid var(--emerald); display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; margin-top: 2px; color: var(--emerald); }
+    .flow-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 22px; height: 100%; }
+    .flow-box h4 { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue-glow); margin-bottom: 16px; font-weight: 700; }
+    .flow-steps { display: flex; flex-direction: column; gap: 0; }
+    .flow-step { display: flex; align-items: flex-start; gap: 12px; position: relative; }
+    .flow-step:not(:last-child)::after { content: ''; position: absolute; left: 14px; top: 32px; bottom: -12px; width: 2px; background: linear-gradient(to bottom, var(--blue-accent), transparent); }
+    .flow-step .num { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--blue-accent), var(--cyan)); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
+    .flow-step .text { padding-top: 4px; margin-bottom: 18px; }
+    .flow-step .text strong { font-size: 12.5px; }
+    .flow-step .text span { display: block; font-size: 11px; color: var(--grey-light); margin-top: 2px; }
+
+    /* ── SLIDE 4 ── */
+    #slide-4 { background: linear-gradient(135deg, #0a1628 0%, #0d1b2e 100%); align-items: flex-start; }
+    .arch-layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 28px; width: 100%; }
+    .arch-diagram { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+    .arch-layer { width: 100%; border-radius: 10px; padding: 12px 18px; display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 600; }
+    .arch-layer .layer-icon { font-size: 20px; }
+    .arch-layer .layer-text small { display: block; font-size: 10px; font-weight: 400; opacity: 0.75; margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+    .layer-frontend { background: rgba(37,99,235,0.2); border: 1px solid rgba(59,130,246,0.35); }
+    .layer-backend  { background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3); }
+    .layer-ai       { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); }
+    .layer-db       { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); }
+    .arch-arrow { font-size: 14px; color: var(--grey-light); }
+    .tech-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tech-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 12px 14px; }
+    .tech-card .tc-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--grey-light); margin-bottom: 7px; font-weight: 600; }
+    .tech-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+    .tech-tag { background: rgba(255,255,255,0.07); border-radius: 5px; padding: 3px 9px; font-size: 10.5px; font-weight: 500; color: var(--off-white); font-family: 'JetBrains Mono', monospace; }
+
+    /* ── SLIDE 5 ── */
+    #slide-5 { background: linear-gradient(135deg, #0d1b2e 0%, #0a1f1b 100%); align-items: flex-start; }
+    .features-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; width: 100%; }
+    .feature-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px 12px; text-align: center; transition: all 0.2s; }
+    .feature-card:hover { background: rgba(255,255,255,0.08); border-color: rgba(96,165,250,0.3); transform: translateY(-3px); }
+    .feature-card .fc-icon { font-size: 24px; margin-bottom: 6px; }
+    .feature-card h4 { font-size: 11.5px; font-weight: 700; margin-bottom: 4px; }
+    .feature-card p { font-size: 10px; color: var(--grey-light); line-height: 1.4; }
+    .feature-card .status-badge { display: inline-block; margin-top: 7px; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); border-radius: 999px; padding: 2px 7px; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--emerald); }
+    .metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; margin-top: 12px; }
+    .metric-box { background: rgba(37,99,235,0.1); border: 1px solid rgba(96,165,250,0.2); border-radius: 10px; padding: 12px; text-align: center; }
+    .metric-box .m-val { font-size: 22px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--blue-glow); }
+    .metric-box .m-label { font-size: 10px; color: var(--grey-light); margin-top: 2px; }
+
+    /* ── SLIDE 6 ── */
+    #slide-6 { background: radial-gradient(ellipse 80% 70% at 50% 50%, #0f2447 0%, #0d1b2e 100%); align-items: flex-start; }
+    #slide-6 .bg-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(37,99,235,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(37,99,235,0.06) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; }
+    .conclusion-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 28px; width: 100%; }
+    .summary-list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-bottom: 20px; }
+    .summary-list li { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--off-white); }
+    .summary-list li::before { content: '✓'; width: 20px; height: 20px; border-radius: 50%; background: rgba(16,185,129,0.2); border: 1px solid var(--emerald); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; color: var(--emerald); }
+    .future-card, .limit-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; }
+    .future-card h4, .limit-card h4 { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+    .future-card h4 { color: var(--cyan); }
+    .limit-card h4 { color: var(--amber); }
+    .future-card ul, .limit-card ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .future-card ul li, .limit-card ul li { font-size: 12px; color: var(--grey-light); padding-left: 14px; position: relative; }
+    .future-card ul li::before { content: '→'; position: absolute; left: 0; color: var(--cyan); }
+    .limit-card ul li::before { content: '·'; position: absolute; left: 4px; color: var(--amber); }
+    .thankyou-box { margin-top: 16px; text-align: center; padding: 16px; background: linear-gradient(135deg, rgba(37,99,235,0.15), rgba(6,182,212,0.1)); border: 1px solid rgba(96,165,250,0.25); border-radius: 14px; }
+    .thankyou-box .ty { font-size: 26px; font-weight: 900; }
+    .thankyou-box .ty span { color: var(--blue-light); }
+    .thankyou-box p { font-size: 11.5px; color: var(--grey-light); margin-top: 4px; }
+
+    /* NAV */
+    .nav-controls { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; z-index: 100; }
+    .nav-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 9px 20px; color: var(--white); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .nav-btn:hover { background: rgba(37,99,235,0.3); border-color: var(--blue-accent); }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .slide-dots { display: flex; gap: 6px; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.25); transition: all 0.3s; cursor: pointer; }
+    .dot.active { background: var(--blue-light); box-shadow: 0 0 8px var(--blue-light); width: 20px; border-radius: 3px; }
+
+    .kb-hint { position: fixed; top: 18px; right: 22px; font-size: 10px; color: var(--grey-light); letter-spacing: 0.08em; opacity: 0.6; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse  { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  </style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div class="kb-hint">← → keys or click arrows to navigate</div>
+<div class="slides-wrapper">
+
+  <!-- SLIDE 1 — TITLE -->
+  <div class="slide active" id="slide-1">
+    <div class="slide-header"></div>
+    <div class="bg-grid"></div>
+    <div class="badge"><span class="dot"></span>AI-Powered Career Intelligence Platform</div>
+    <h1>Resu<span>Lens</span></h1>
+    <p class="tagline">Upload your resume. Get an unfair advantage. Land the job.</p>
+    <div class="meta">
+      <div class="meta-item"><div class="label">Project Type</div><div class="value">Full-Stack Web Application</div></div>
+      <div class="divider"></div>
+      <div class="meta-item"><div class="label">Domain</div><div class="value">AI / Career Tech</div></div>
+      <div class="divider"></div>
+      <div class="meta-item"><div class="label">Audience</div><div class="value">Academic Evaluators</div></div>
+      <div class="divider"></div>
+      <div class="meta-item"><div class="label">Year</div><div class="value">2026</div></div>
+    </div>
+    <div class="tech-pills">
+      <span class="tech-pill">React 18</span>
+      <span class="tech-pill">Node.js + Express</span>
+      <span class="tech-pill">Groq AI (Llama 3.3 70B)</span>
+      <span class="tech-pill">MongoDB</span>
+      <span class="tech-pill">Framer Motion</span>
+      <span class="tech-pill">Vite</span>
+    </div>
+    <div class="slide-footer">
+      <span class="brand">ResuLens</span>
+      <span>AI Resume Intelligence</span>
+      <span class="slide-number">01 / 06</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 2 — PROBLEM -->
+  <div class="slide" id="slide-2">
+    <div class="slide-header"></div>
+    <div style="width:100%">
+      <div class="slide-title">The Problem</div>
+      <h2 class="slide-heading">Why Most Resumes <em>Never Get Seen</em></h2>
+      <div class="problem-grid">
+        <div class="problem-card">
+          <div class="problem-icon">🤖</div>
+          <div><h3>ATS Filtering</h3><p>Over 75% of resumes are rejected by Applicant Tracking Systems before a human reads them — wrong formatting, missing keywords, poor structure.</p></div>
+        </div>
+        <div class="problem-card">
+          <div class="problem-icon">🎯</div>
+          <div><h3>No Role Alignment</h3><p>Job seekers submit generic resumes without tailoring to specific job descriptions, resulting in low match scores and missed opportunities.</p></div>
+        </div>
+        <div class="problem-card">
+          <div class="problem-icon">📉</div>
+          <div><h3>Skill Gap Blindness</h3><p>Candidates lack visibility into in-demand skills for their target role, leading to poor preparation for resume writing and interviews alike.</p></div>
+        </div>
+        <div class="problem-card">
+          <div class="problem-icon">💬</div>
+          <div><h3>Interview Unpreparedness</h3><p>Professional coaching is expensive and inaccessible. Without targeted practice, candidates struggle to answer behavioral and technical questions.</p></div>
+        </div>
+      </div>
+      <div class="stat-band">
+        <div class="stat-chip"><div class="num">75%</div><div class="desc">Resumes auto-rejected by ATS</div></div>
+        <div class="stat-chip"><div class="num">6 sec</div><div class="desc">Average recruiter review time</div></div>
+        <div class="stat-chip"><div class="num">$200+</div><div class="desc">Cost of a professional review</div></div>
+        <div class="stat-chip"><div class="num">10x</div><div class="desc">Higher callbacks with optimization</div></div>
+      </div>
+    </div>
+    <div class="slide-footer"><span class="brand">ResuLens</span><span>Problem Statement</span><span class="slide-number">02 / 06</span></div>
+  </div>
+
+  <!-- SLIDE 3 — SOLUTION -->
+  <div class="slide" id="slide-3">
+    <div class="slide-header"></div>
+    <div style="width:100%">
+      <div class="slide-title">Our Solution</div>
+      <h2 class="slide-heading">An All-in-One <em>AI Career Intelligence</em> Platform</h2>
+      <div class="two-col">
+        <div>
+          <p class="solution-desc">ResuLens is a production-grade web platform that uses Large Language Models (LLMs) to deeply analyze a candidate's resume, provide actionable feedback, and generate career-ready content — all in seconds, completely free.</p>
+          <ul class="objective-list">
+            <li><span class="check">✓</span>Provide instant AI-driven ATS scoring and keyword matching for any job role</li>
+            <li><span class="check">✓</span>Automatically rewrite resume bullets with impact-driven, recruiter-preferred language</li>
+            <li><span class="check">✓</span>Generate tailored cover letters, LinkedIn rewrites, and JD-matched resume versions</li>
+            <li><span class="check">✓</span>Deliver personalized interview coaching with AI-scored STAR method answers</li>
+            <li><span class="check">✓</span>Reveal skill gaps and provide curated learning roadmaps with free course links</li>
+            <li><span class="check">✓</span>Persist session history and support multi-format upload (PDF / DOCX)</li>
+          </ul>
+        </div>
+        <div>
+          <div class="flow-box">
+            <h4>How It Works — User Flow</h4>
+            <div class="flow-steps">
+              <div class="flow-step"><div class="num">1</div><div class="text"><strong>Upload Resume</strong><span>PDF or DOCX — parsed with pdf-parse & mammoth</span></div></div>
+              <div class="flow-step"><div class="num">2</div><div class="text"><strong>Select Job Role</strong><span>16 pre-defined roles or custom text input</span></div></div>
+              <div class="flow-step"><div class="num">3</div><div class="text"><strong>AI Analysis</strong><span>Groq Llama 3.3 70B processes in 1–3 seconds</span></div></div>
+              <div class="flow-step"><div class="num">4</div><div class="text"><strong>Get Results</strong><span>ATS score, skill gaps, rewritten content, prep</span></div></div>
+              <div class="flow-step"><div class="num">5</div><div class="text"><strong>Iterate & Improve</strong><span>History vault saves all sessions for refinement</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer"><span class="brand">ResuLens</span><span>Solution & Objectives</span><span class="slide-number">03 / 06</span></div>
+  </div>
+
+  <!-- SLIDE 4 — ARCHITECTURE -->
+  <div class="slide" id="slide-4">
+    <div class="slide-header"></div>
+    <div style="width:100%">
+      <div class="slide-title">System Design</div>
+      <h2 class="slide-heading">Architecture & <em>Tech Stack</em></h2>
+      <div class="arch-layout">
+        <div>
+          <div class="arch-diagram">
+            <div class="arch-layer layer-frontend"><span class="layer-icon">🌐</span><div class="layer-text">Frontend Layer<small>React 18 + Vite · Framer Motion · Tailwind CSS · Context API</small></div></div>
+            <div class="arch-arrow">↕ REST API (HTTP/JSON)</div>
+            <div class="arch-layer layer-backend"><span class="layer-icon">⚙️</span><div class="layer-text">Backend Layer<small>Node.js + Express · Multer · pdf-parse · mammoth · JWT Auth</small></div></div>
+            <div class="arch-arrow">↕ Groq SDK / OpenRouter API</div>
+            <div class="arch-layer layer-ai"><span class="layer-icon">🧠</span><div class="layer-text">AI Engine<small>Groq: Llama 3.3 70B (Primary) → OpenRouter: Gemini Flash, Qwen (Fallback)</small></div></div>
+            <div class="arch-arrow">↕ Mongoose ODM</div>
+            <div class="arch-layer layer-db"><span class="layer-icon">🗄️</span><div class="layer-text">Data Layer<small>MongoDB Atlas · Mongoose Schemas · JSON fallback · Google OAuth</small></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="tech-grid">
+            <div class="tech-card"><div class="tc-label">🌐 Frontend</div><div class="tech-tags"><span class="tech-tag">React 18</span><span class="tech-tag">Vite</span><span class="tech-tag">Context API</span><span class="tech-tag">Framer Motion</span><span class="tech-tag">Lucide Icons</span></div></div>
+            <div class="tech-card"><div class="tc-label">⚙️ Backend</div><div class="tech-tags"><span class="tech-tag">Node.js</span><span class="tech-tag">Express</span><span class="tech-tag">Multer</span><span class="tech-tag">pdf-parse</span><span class="tech-tag">mammoth</span></div></div>
+            <div class="tech-card"><div class="tc-label">🧠 AI / LLM</div><div class="tech-tags"><span class="tech-tag">Groq API</span><span class="tech-tag">Llama 3.3 70B</span><span class="tech-tag">OpenRouter</span><span class="tech-tag">Gemini Flash</span></div></div>
+            <div class="tech-card"><div class="tc-label">🗄️ Data & Auth</div><div class="tech-tags"><span class="tech-tag">MongoDB</span><span class="tech-tag">Mongoose</span><span class="tech-tag">JWT</span><span class="tech-tag">Google OAuth</span></div></div>
+            <div class="tech-card" style="grid-column:1/-1"><div class="tc-label">🔌 API Endpoints (14 Routes)</div><div class="tech-tags"><span class="tech-tag">/analyze</span><span class="tech-tag">/rewrite</span><span class="tech-tag">/interview</span><span class="tech-tag">/cover-letter</span><span class="tech-tag">/tailor</span><span class="tech-tag">/skills</span><span class="tech-tag">/market</span><span class="tech-tag">/roast</span><span class="tech-tag">/linkedin</span><span class="tech-tag">/auth</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer"><span class="brand">ResuLens</span><span>System Architecture</span><span class="slide-number">04 / 06</span></div>
+  </div>
+
+  <!-- SLIDE 5 — FEATURES -->
+  <div class="slide" id="slide-5">
+    <div class="slide-header"></div>
+    <div style="width:100%">
+      <div class="slide-title">What We Built</div>
+      <h2 class="slide-heading">Key Features & <em>Live Modules</em></h2>
+      <div class="features-grid">
+        <div class="feature-card"><div class="fc-icon">📊</div><h4>ATS Analyzer</h4><p>Full ATS score, keyword matching & competency matrix</p><span class="status-badge">✓ Live</span></div>
+        <div class="feature-card"><div class="fc-icon">✍️</div><h4>Resume Rewriter</h4><p>Impact-driven bullet rewrites with before/after comparison</p><span class="status-badge">✓ Live</span></div>
+        <div class="feature-card"><div class="fc-icon">🎤</div><h4>Interview Coach</h4><p>15 categorized questions, voice input & AI STAR scoring</p><span class="status-badge">✓ Live</span></div>
+        <div class="feature-card"><div class="fc-icon">📄</div><h4>Cover Letter</h4><p>Tone-adaptive, job-specific AI-generated cover letters</p><span class="status-badge">✓ Live</span></div>
+        <div class="feature-card"><div class="fc-icon">🎯</div><h4>JD Tailoring</h4><p>Keyword gap analysis against any job posting</p><span class="status-badge">✓ Live</span></div>
+        <div class="feature-card"><div class="fc-icon">💼</div><h4>LinkedIn Optimizer</h4><p>Headline, About & experience rewrites for LinkedIn</p><span class="status-badge">✓ Live</span></div>
+        <div class="feature-card"><div class="fc-icon">📈</div><h4>Market Insights</h4><p>Skill radar, learning roadmap & ATS predictor</p><span class="status-badge">✓ Live</span></div>
+        <div class="feature-card"><div class="fc-icon">🔥</div><h4>Resume Roast</h4><p>Brutally honest recruiter-style critique</p><span class="status-badge">✓ Live</span></div>
+        <div class="feature-card"><div class="fc-icon">🛠️</div><h4>Resume Builder</h4><p>Structure-first resume builder from scratch</p><span class="status-badge">✓ Live</span></div>
+        <div class="feature-card"><div class="fc-icon">🗂️</div><h4>History Vault</h4><p>Persistent AI session history & resume versioning</p><span class="status-badge">✓ Live</span></div>
+      </div>
+      <div class="metrics-row">
+        <div class="metric-box"><div class="m-val">1–3s</div><div class="m-label">Avg AI response time (Groq)</div></div>
+        <div class="metric-box"><div class="m-val">10+</div><div class="m-label">AI-powered modules live</div></div>
+        <div class="metric-box"><div class="m-val">14</div><div class="m-label">REST API endpoints</div></div>
+        <div class="metric-box"><div class="m-val">100%</div><div class="m-label">Free — no paywalls</div></div>
+      </div>
+    </div>
+    <div class="slide-footer"><span class="brand">ResuLens</span><span>Features & Results</span><span class="slide-number">05 / 06</span></div>
+  </div>
+
+  <!-- SLIDE 6 — CONCLUSION -->
+  <div class="slide" id="slide-6">
+    <div class="slide-header"></div>
+    <div class="bg-grid"></div>
+    <div style="width:100%; position:relative; z-index:1">
+      <div class="slide-title">Conclusion</div>
+      <h2 class="slide-heading">What We <em>Achieved</em> & What's Next</h2>
+      <div class="conclusion-layout">
+        <div>
+          <ul class="summary-list">
+            <li>Built a full-stack, production-ready AI career platform from scratch</li>
+            <li>Integrated dual LLM providers with automatic failover for reliability</li>
+            <li>Implemented 10 live AI modules covering every stage of job hunting</li>
+            <li>Deployed with persistent auth, MongoDB, and Google OAuth integration</li>
+            <li>Achieved consistent 1–3 second response times for all AI operations</li>
+          </ul>
+          <div class="limit-card">
+            <h4>⚠️ Known Limitations</h4>
+            <ul>
+              <li>Free-tier AI rate limits under high concurrent traffic</li>
+              <li>PDF parsing may lose structure for heavily styled resumes</li>
+              <li>Voice interview feature requires Chrome or Edge browser</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="future-card">
+            <h4>🚀 Future Enhancements</h4>
+            <ul>
+              <li>Chrome Extension for one-click resume analysis</li>
+              <li>Job board scraping and auto-apply pipeline</li>
+              <li>Real-time salary benchmarking by location</li>
+              <li>Team / recruiter portal for bulk resume screening</li>
+              <li>Mobile app (React Native) for on-the-go access</li>
+              <li>Fine-tuned domain-specific resume analysis model</li>
+            </ul>
+          </div>
+          <div class="thankyou-box">
+            <div class="ty">Thank <span>You</span> 🙏</div>
+            <p>ResuLens — Empowering every job seeker with AI-grade career intelligence</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer"><span class="brand">ResuLens</span><span>Conclusion & Future Scope</span><span class="slide-number">06 / 06</span></div>
+  </div>
+
+</div>
+
+<!-- NAVIGATION -->
+<div class="nav-controls">
+  <button class="nav-btn" id="prev-btn" onclick="changeSlide(-1)" disabled>← Prev</button>
+  <div class="slide-dots" id="dots"></div>
+  <button class="nav-btn" id="next-btn" onclick="changeSlide(1)">Next →</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsContainer = document.getElementById('dots');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  const progressBar = document.getElementById('progress-bar');
+  let current = 0;
+
+  slides.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goTo(i);
+    dotsContainer.appendChild(dot);
+  });
+
+  function updateProgress() {
+    progressBar.style.width = ((current + 1) / slides.length * 100) + '%';
+  }
+
+  function goTo(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[current].classList.remove('active');
+    slides[current].classList.add('exit');
+    const prev = current;
+    current = n;
+    setTimeout(() => slides[prev].classList.remove('exit'), 600);
+    slides[current].classList.add('active');
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === slides.length - 1;
+    updateProgress();
+  }
+
+  function changeSlide(dir) { goTo(current + dir); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') changeSlide(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                     changeSlide(-1);
+  });
+
+  updateProgress();
+</script>
+</body>
+</html>

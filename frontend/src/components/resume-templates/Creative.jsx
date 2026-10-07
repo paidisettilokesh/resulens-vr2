@@ -1,84 +1,168 @@
 import React from 'react';
 
 const Creative = ({ data }) => {
+    const personal = data?.personal || {};
+    const experience = Array.isArray(data?.experience) ? data.experience : [];
+    const education = Array.isArray(data?.education) ? data.education : [];
+    const skills = data?.skills || '';
+
+    const contactItems = [
+        personal.email,
+        personal.phone,
+        personal.location,
+        personal.website || personal.linkedin
+    ].filter(Boolean);
+
     return (
-        <div className="resume-sheet font-sans bg-white p-0 mx-auto shadow-sm w-full max-w-[850px] min-h-[1100px] flex">
-            {/* Sidebar */}
-            <div className="w-1/3 bg-slate-900 text-white p-8">
-                <h1 className="text-3xl font-bold tracking-tight mb-2 text-white">
-                    {data.personal.fullName || 'Your Name'}
-                </h1>
-                <p className="text-xs font-semibold text-teal-400 uppercase tracking-wider mb-8">
-                    {data.experience?.[0]?.role || 'Creative Professional'}
-                </p>
-
-                <div className="space-y-8">
+        <div className="resume-sheet font-sans text-slate-900 bg-white p-10 md:p-12 mx-auto shadow-sm w-full max-w-[850px] min-h-[1100px] leading-normal box-border border-l-8 border-teal-700">
+            {/* Header */}
+            <header className="pb-4 mb-5 border-b border-slate-200">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-baseline gap-2">
                     <div>
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b border-slate-700 pb-2">Contact</h4>
-                        <div className="text-xs space-y-2 text-slate-200">
-                            {data.personal.email && <p className="text-slate-200">{data.personal.email}</p>}
-                            {data.personal.phone && <p className="text-slate-200">{data.personal.phone}</p>}
-                            {data.personal.location && <p className="text-slate-200">{data.personal.location}</p>}
+                        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
+                            {personal.fullName || 'YOUR NAME'}
+                        </h1>
+                        <p className="text-xs font-semibold text-teal-800 tracking-wider uppercase mt-0.5">
+                            {experience[0]?.role || 'Creative & Strategic Professional'}
+                        </p>
+                    </div>
+                    {contactItems.length > 0 && (
+                        <div className="text-[11px] text-slate-600 font-medium md:text-right leading-relaxed">
+                            {contactItems.join('  ·  ')}
                         </div>
-                    </div>
-
-                    <div>
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b border-slate-700 pb-2">Expertise</h4>
-                        <div className="flex flex-col gap-2">
-                            {(data.skills || '').split(',').filter(Boolean).map((s, i) => (
-                                <span key={i} className="text-xs font-medium text-teal-300">{s.trim()}</span>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 border-b border-slate-700 pb-2">Education</h4>
-                        {data.education.map(edu => (
-                            <div key={edu.id} className="mb-4">
-                                <h5 className="text-xs font-semibold text-white leading-tight">{edu.school}</h5>
-                                <p className="text-xs text-teal-400 mt-1">{edu.degree}</p>
-                                <p className="text-xs text-slate-400 mt-1">{edu.year}</p>
-                            </div>
-                        ))}
-                    </div>
+                    )}
                 </div>
-            </div>
+            </header>
 
-            {/* Main Content */}
-            <div className="w-2/3 p-10 bg-white text-slate-900">
-                {data.personal.bio && (
-                    <div className="mb-8">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-3 flex items-center gap-2">
-                            <span className="w-4 h-4 rounded-full bg-teal-500 inline-block"></span> Profile
-                        </h4>
-                        <p className="text-[11.5px] leading-relaxed text-slate-800">{data.personal.bio}</p>
-                    </div>
-                )}
+            {/* Profile / Creative Vision */}
+            {personal.bio && personal.bio.trim() && (
+                <section className="mb-5">
+                    <h2 className="text-[11.5px] font-bold uppercase tracking-wider text-teal-900 pb-0.5 mb-1.5 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-teal-700"></span>
+                        Creative Vision & Summary
+                    </h2>
+                    <p className="text-[11px] text-slate-700 leading-relaxed text-justify">
+                        {personal.bio}
+                    </p>
+                </section>
+            )}
 
-                <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-5 flex items-center gap-2">
-                        <span className="w-4 h-4 rounded-full bg-teal-500 inline-block"></span> Experience
-                    </h4>
-                    <div className="space-y-6">
-                        {data.experience.map(exp => (
-                            <div key={exp.id} className="relative">
-                                <div className="absolute left-[-28px] top-1 w-2 h-2 rounded-full bg-slate-400"></div>
-                                <div className="flex justify-between items-baseline mb-1">
-                                    <h5 className="font-bold text-sm text-slate-900">{exp.role}</h5>
-                                    <span className="text-xs font-medium text-slate-600">{exp.period}</span>
+            {/* Work Experience */}
+            {experience.some(exp => exp.company || exp.role || exp.details) && (
+                <section className="mb-5">
+                    <h2 className="text-[11.5px] font-bold uppercase tracking-wider text-teal-900 pb-0.5 mb-2.5 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-teal-700"></span>
+                        Experience & Impact
+                    </h2>
+                    <div className="space-y-4">
+                        {experience.map(exp => {
+                            if (!exp.company && !exp.role && !exp.details) return null;
+                            const bullets = (exp.details || '')
+                                .split('\n')
+                                .map(b => b.trim())
+                                .filter(Boolean);
+
+                            return (
+                                <div key={exp.id || `${exp.company}-${exp.role}`} className="relative pl-3 border-l-2 border-teal-200">
+                                    <div className="flex justify-between items-baseline">
+                                        <h3 className="font-bold text-[12px] text-slate-900">
+                                            {exp.role || 'Role'}
+                                        </h3>
+                                        <span className="text-[11px] font-semibold text-teal-800 text-right">
+                                            {exp.period || ''}
+                                        </span>
+                                    </div>
+                                    <div className="text-[11px] font-medium text-slate-700 mb-1">
+                                        {exp.company || ''}
+                                    </div>
+                                    {bullets.length > 0 && (
+                                        <ul className="text-[11px] text-slate-700 leading-relaxed space-y-0.5 list-disc pl-4 marker:text-teal-700">
+                                            {bullets.map((bullet, i) => (
+                                                <li key={i} className="pl-0.5">
+                                                    {bullet.replace(/^[•\-\*]\s*/, '')}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
                                 </div>
-                                <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-2">{exp.company}</p>
-                                <div className="text-[11px] leading-relaxed text-slate-800">
-                                    {exp.details.split('\n').map((bullet, i) => {
-                                        if(!bullet.trim()) return null;
-                                        return <p key={i} className="mb-1 text-slate-800">• {bullet.replace(/^•\s*/, '')}</p>
-                                    })}
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
-                </div>
-            </div>
+                </section>
+            )}
+
+            {/* Education */}
+            {education.some(edu => edu.school || edu.institution || edu.degree) && (
+                <section className="mb-5">
+                    <h2 className="text-[11.5px] font-bold uppercase tracking-wider text-teal-900 pb-0.5 mb-2.5 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-teal-700"></span>
+                        Education & Design Credentials
+                    </h2>
+                    <div className="space-y-3">
+                        {education.map(edu => {
+                            const institution = edu.school || edu.institution;
+                            if (!institution && !edu.degree) return null;
+
+                            const dates = edu.startDate && (edu.endDate || edu.year)
+                                ? `${edu.startDate} – ${edu.endDate || edu.year}`
+                                : (edu.endDate || edu.year || edu.startDate || '');
+
+                            const degreeAndMajor = [
+                                edu.degree,
+                                edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : null
+                            ].filter(Boolean).join(' ');
+
+                            return (
+                                <div key={edu.id || institution} className="relative pl-3 border-l-2 border-teal-200">
+                                    <div className="flex justify-between items-baseline">
+                                        <h3 className="font-bold text-[12px] text-slate-900">
+                                            {institution || 'Institution'}
+                                        </h3>
+                                        {dates && (
+                                            <span className="text-[11px] font-semibold text-teal-800 text-right">
+                                                {dates}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {degreeAndMajor && (
+                                        <div className="text-[11px] font-medium text-slate-800">
+                                            {degreeAndMajor}
+                                            {edu.grade && (
+                                                <span className="text-slate-600 font-normal">
+                                                    {'  ·  '}Grade: {edu.grade}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+                                    {edu.coursework && (
+                                        <p className="text-[10.5px] text-slate-600 leading-tight mt-0.5">
+                                            <span className="font-semibold text-slate-700">Coursework:</span> {edu.coursework}
+                                        </p>
+                                    )}
+                                    {edu.achievements && (
+                                        <p className="text-[10.5px] text-slate-600 leading-tight mt-0.5">
+                                            <span className="font-semibold text-slate-700">Achievements:</span> {edu.achievements}
+                                        </p>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </section>
+            )}
+
+            {/* Skills */}
+            {skills && skills.trim() && (
+                <section>
+                    <h2 className="text-[11.5px] font-bold uppercase tracking-wider text-teal-900 pb-0.5 mb-1.5 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-teal-700"></span>
+                        Design & Technical Toolkit
+                    </h2>
+                    <p className="text-[11px] text-slate-700 leading-relaxed pl-3 border-l-2 border-teal-200">
+                        {skills}
+                    </p>
+                </section>
+            )}
         </div>
     );
 };
